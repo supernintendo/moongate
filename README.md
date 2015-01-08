@@ -24,7 +24,7 @@ A barely working multiplayer game server written in Elixir.
 3. Run migrations.
 ...From the same directory run the migrations with `./util/reset_db.sh`.
 
-Run the server with `iex -S mix`. A test client is available in `./pkg/clients`. You can't do much yet.
+Run the server with `iex -S mix`. A test client in love2d is available in `./pkg/clients`. You can't do much yet.
 
 ### Why? ###
 
