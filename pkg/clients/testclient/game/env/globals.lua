@@ -19,6 +19,7 @@ Animation = require 'game.utility.animation'
 AnimatedOverlay = require 'game.ui.overlay.animated'
 TextOverlay = require 'game.ui.overlay.text'
 Input = require 'game.ui.menu.input'
+Scene = require 'game.scenes.scene'
 
 -- Environmental globals
 authToken = 'anon'

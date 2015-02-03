@@ -1,13 +1,14 @@
 local MouseRange = require 'game.ui.listener.mouserange'
 local Input = class('Input', Overlay)
 
-function Input:initialize(image, x, y, textOverlay)
+function Input:initialize(parentScene, image, x, y, textOverlay, submitEvent)
   Overlay.initialize(self, image, x, y) -- Superclass initializer 
+  self.parentScene = parentScene
   self.active = false
   self.disabled = false
-  self.submit = false
   self.textOverlay = textOverlay
   self.mouseRange = MouseRange:new(self, 'ibeam', 5, 0, 10, 5)
+  self.submitEvent = submitEvent
 end
 
 function Input:tick()
@@ -28,7 +29,7 @@ function Input:captureEntry()
   if entry == 'backspace' then
     self.textOverlay:backspace()
   elseif entry == 'return' then
-    self.submit = true
+    self.parentScene:captureInputEvent(self.submitEvent, self)
   elseif entry then
     self.textOverlay:append(entry)
   end

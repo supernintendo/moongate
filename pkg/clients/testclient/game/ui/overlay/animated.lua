@@ -12,11 +12,20 @@ function AnimatedOverlay:tick()
 end
 
 function AnimatedOverlay:draw()
-  love.graphics.setBlendMode("alpha")
+  love.graphics.setBlendMode('alpha')
   love.graphics.setColor(255, 255, 255, self.alpha)
   love.graphics.scale(self.scaleX, self.scaleY)
-  love.graphics.draw(self.image, self.animation:getCurrentFrame(), self.x, self.y)
+  love.graphics.draw(
+    self.image,
+    self.animation:getCurrentFrame(),
+    self:mutatePos('x', self.x),
+    self:mutatePos('y', self.y)
+  )
   self:tick()
+end
+
+function AnimatedOverlay:getWidth()
+  return self.animation:getWidth()
 end
 
 return AnimatedOverlay

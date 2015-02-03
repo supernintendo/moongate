@@ -14,35 +14,35 @@ defmodule Sockets.Listener do
   end
 
   def handle_cast({:init}, state) do
-    uuid = UUID.uuid4(:hex)
-
     Say.pretty("Listening on port #{state.port}...", :green)
     Socket.TCP.listen!(state.port, packet: 0)
-    |> accept(&handler(&1, &2, uuid), uuid)
+    |> accept
   end
 
   # Accept a socket message.
-  defp accept(listener, handler, id) do
-    socket = Socket.TCP.accept!(listener)
-    spawn(fn -> handle(socket, handler, id) end)
-    Say.pretty("Socket with id #{id} connected.", :blue)
+  defp accept(listener) do
+    uuid = UUID.uuid4(:hex)
 
-    GenServer.call(:tree, {:spawn, :events, id})
-    accept(listener, handler, id)
+    socket = Socket.TCP.accept!(listener)
+    {:ok, child} = GenServer.call(:tree, {:spawn, :events, uuid})
+    spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
+    Say.pretty("Socket with id #{uuid} connected.", :blue)
+    accept(listener)
   end
 
   # Receive messages from a socket connection.
-  defp handle(socket, handler, id) do
+  defp handle(socket, handler, id, pid) do
     packet = Socket.Stream.recv!(socket)
 
     if packet == nil do
       # Client disconnects.
       Say.pretty("Socket with id #{id} disconnected.", :magenta)
+      GenServer.call(:tree, {:kill, :events, pid})
       socket |> Socket.close
       :close
     else
       socket |> Socket.Stream.send!(handler.(packet, socket))
-      handle(socket, handler, id)
+      handle(socket, handler, id, pid)
       :ok
     end
   end

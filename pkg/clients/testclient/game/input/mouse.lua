@@ -5,8 +5,8 @@ function MouseState:initialize()
   mouseY = 0
 
   self.cursors = {
-    default = love.mouse.getSystemCursor("arrow"),
-    ibeam = love.mouse.getSystemCursor("ibeam")
+    default = love.mouse.getSystemCursor('arrow'),
+    ibeam = love.mouse.getSystemCursor('ibeam')
   }
   self.active = {
     ibeam = 0

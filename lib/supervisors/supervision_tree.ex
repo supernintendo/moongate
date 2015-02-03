@@ -49,6 +49,15 @@ defmodule SupervisionTree do
   end
 
   @doc """
+    Kill a new child process given its PID.
+  """
+  def handle_call({:kill, supervisor, pid}, _from, registry) do
+    :ok = Supervisor.terminate_child(registry[supervisor], pid)
+
+    {:reply, {:ok, nil}, registry}
+  end
+
+  @doc """
     Spawn a new child within the requested supervisor.
   """
   def handle_call({:spawn, supervisor, params}, _from, registry) do

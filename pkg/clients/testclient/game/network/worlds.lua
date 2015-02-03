@@ -6,7 +6,7 @@ function Worlds:initialize()
 end
 
 function Worlds:receive(packet)
-  if packet.cast == "info" then self:assignInfo(packet.value) end
+  if packet.cast == 'info' then self:assignInfo(packet.value) end
 end
 
 function Worlds:assignInfo(info)

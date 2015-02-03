@@ -9,9 +9,9 @@ function KeyState:enter(key)
 end
 
 function KeyState:keyPress(key)
-  if key == "backspace" then self:ready(key, true)
-  elseif key == "return" then self:ready(key, true)
-  elseif key == "tab" then self:ready(key, true) end
+  if key == 'backspace' then self:ready(key, true)
+  elseif key == 'return' then self:ready(key, true)
+  elseif key == 'tab' then self:ready(key, true) end
 end
 
 function KeyState:poll()

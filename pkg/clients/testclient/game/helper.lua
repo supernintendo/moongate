@@ -1,8 +1,8 @@
 local Helper = class('Helper')
 
 function Helper:readFile(filename)
-  local file = io.open(filename, "rb")
-  local content = file:read("*all")
+  local file = io.open(filename, 'rb')
+  local content = file:read('*all')
   file:close()
 
   return content

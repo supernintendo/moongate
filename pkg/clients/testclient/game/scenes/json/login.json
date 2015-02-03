@@ -1,0 +1,108 @@
+{
+    "_meta": {
+        "name": "Login",
+        "startingComp": "default"
+    },
+    "_comps": {
+        "default": [
+            ["overlays", "space"],
+            ["animatedOverlays", "moon"],
+            ["inputs", "username"],
+            ["inputs", "password"]
+        ],
+        "loggedIn": [
+            ["overlays", "space"],
+            ["animatedOverlays", "moon"]
+        ]
+    },
+    "animatedOverlays": {
+        "moon": {
+            "defaultState": "initial",
+            "src": "assets/moon.json",
+            "states": {
+                "initial": {
+                    "alpha": 0,
+                    "x": "center",
+                    "y": 100
+                },
+                "dark": {
+                    "alpha": 100
+                },
+                "out": {
+                    "alpha": 0
+                }
+            }
+        }
+    },
+    "inputs": {
+        "username": {
+            "defaultState": "initial",
+            "src": "assets/input.png",
+            "states": {
+                "initial": {
+                    "groupName": "login",
+                    "mask": false,
+                    "submitEvent": "login",
+                    "text": "Username",
+                    "textX": "center",
+                    "textY": 447,
+                    "x": "center",
+                    "y": 440
+                },
+                "out": {
+                    "disabled": true
+                }
+            }
+        },
+        "password": {
+            "defaultState": "initial",
+            "src": "assets/input.png",
+            "states": {
+                "initial": {
+                    "groupName": "login",
+                    "mask": true,
+                    "submitEvent": "login",
+                    "text": "Password",
+                    "textX": "center",
+                    "textY": 487,
+                    "x": "center",
+                    "y": 480
+                },
+                "out": {
+                    "disabled": true
+                }
+            }
+        }
+    },
+    "overlays": {
+        "space": {
+            "defaultState": "initial",
+            "src": "assets/space.png",
+            "states": {
+                "initial": {
+                    "alpha": 0,
+                    "x": 0,
+                    "y": 0
+                },
+                "dark": {
+                    "alpha": 50
+                },
+                "out": {
+                    "alpha": 10
+                }
+            }
+        }
+    },
+    "transitions": {
+        "fadeIn": [
+            ["overlays", "space", "dark", 0.1],
+            ["animatedOverlays", "moon", "dark", 0.4]
+        ],
+        "loggedIn": [
+            ["overlays", "space", "out", 1],
+            ["animatedOverlays", "moon", "out", 0.85],
+            ["inputs", "username", "out", 0],
+            ["inputs", "password", "out", 0]
+        ]
+    }
+}

@@ -17,11 +17,35 @@ function Overlay:initialize(image, x, y)
 end
 
 function Overlay:draw()
-  love.graphics.setBlendMode("alpha")
+  love.graphics.setBlendMode('alpha')
   love.graphics.setColor(255, 255, 255, self.alpha)
   love.graphics.scale(self.scaleX, self.scaleY)
-  love.graphics.draw(self.image, self.x, self.y)
+  love.graphics.draw(
+    self.image,
+    self:mutatePos('x', self.x),
+    self:mutatePos('y', self.y)
+  )
   self:tick()
+end
+
+function Overlay:mutatePos(type, pos)
+  if pos == 'center' then
+    if type == 'x' then
+      return (DIMENSIONS.w / 2) - (self:getWidth() / 2)
+    elseif type == 'y' then
+      return DIMENSIONS.h / 2 -- + (self.image:getHeight() / 2)
+    end
+  else
+    return pos
+  end
+end
+
+function Overlay:getHeight()
+  return self.image:getHeight()
+end
+
+function Overlay:getWidth()
+  return self.image:getWidth()
 end
 
 function Overlay:tick()

@@ -32,6 +32,14 @@ function Animation:getFrame(frame)
   return self.frames[frame]
 end
 
+function Animation:getHeight()
+  return self.hash.frames[self.currentFrame].frame.h
+end
+
+function Animation:getWidth()
+  return self.hash.frames[self.currentFrame].frame.w
+end
+
 function Animation:incrementFrame()
   if self.currentFrame >= self.frameCount then
     if self.loop then

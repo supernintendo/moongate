@@ -1,8 +1,10 @@
 require 'game.env.constants'
 require 'game.env.globals'
 
-local loginScreen = (require 'game.scenes.login'):new()
-local area = (require 'game.scenes.area'):new()
+local currentScene = 'loginScreen'
+local scenes = {
+  loginScreen = Scene:new('game/scenes/json/login.json', 'game.scenes.logic.login')
+}
 
 function love.load()
   -- Listen for new messages from the server
@@ -10,18 +12,8 @@ function love.load()
 end
 
 function love.draw()
-  loginScreen:draw()
-  MouseState:tick()
-  local s, status, partial = TCP.socket:receive()
-
-  if partial ~= "" then
-    NetworkEvents:receivePacket(partial)
-  end
-
-  if loginScreen.done and not area.started then
-    area:start()
-  end
-  if area.started then area:draw() end
+  scenes[currentScene]:tick()
+  tick()
 end
 
 function love.keypressed(key)
@@ -30,4 +22,16 @@ end
 
 function love.textinput(t)
   KeyState:enter(t)
+end
+
+function tick()
+  -- Non drawing related tick events.
+  MouseState:tick()
+  local s, status, partial = TCP.socket:receive()
+
+  if partial ~= '' then
+    NetworkEvents:receivePacket(partial)
+  end
+
+  love.window.setTitle('Moongate - testclient (' .. love.timer.getFPS() .. ' fps)')
 end

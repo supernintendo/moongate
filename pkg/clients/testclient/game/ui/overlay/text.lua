@@ -1,11 +1,11 @@
-local TextOverlay = class('TextOverlay')
+local TextOverlay = class('TextOverlay', Overlay)
 
 function TextOverlay:initialize(placeholder, x, y, mask)
-  self.font = love.graphics.newFont("assets/font.ttf", 12)
+  self.font = love.graphics.newFont('assets/font.ttf', 12)
   self.active = false
   self.disabled = false
   self.hovered = false
-  self.value = ""
+  self.value = ''
 
   self.placeholder = placeholder
   self.mask = mask
@@ -38,7 +38,7 @@ end
 function TextOverlay:draw()
   love.graphics.setFont(self.font)
   love.graphics.setColor(self:getColorForState())
-  love.graphics.print(self.text, self.x, self.y)
+  love.graphics.print(self.text, self:mutatePos('x', self.x), self:mutatePos('y', self.y))
 end
 
 function TextOverlay:entry()
@@ -57,6 +57,14 @@ function TextOverlay:getColorForState()
   else return 125, 125, 125, 125 end
 end
 
+function TextOverlay:getHeight()
+  return self.font:getHeight(self.text)
+end
+
+function TextOverlay:getWidth()
+  return self.font:getWidth(self.text)
+end
+
 function TextOverlay:hover(state)
   if self.active then
     self.hovered = false
@@ -66,7 +74,7 @@ function TextOverlay:hover(state)
 end
 
 function TextOverlay:stopEntry()
-  if self.text == "" then
+  if self.text == '' then
     self.text = self.placeholder
     self.clearFirst = true
   end
@@ -81,7 +89,7 @@ end
 
 function TextOverlay:updateText()
   if self.mask then
-    self.text = string.rep("*", string.len(self.value))
+    self.text = string.rep('*', string.len(self.value))
   else
     self.text = self.value
   end

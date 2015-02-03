@@ -3,10 +3,10 @@ local MouseRange = class('MouseRange')
 function MouseRange:initialize(parent, cursor, padLeft, padTop, padRight, padBottom)
   self.disabled = false
   self.hover = false
-  self.left = parent.x + padLeft
-  self.right = parent.x + parent.width - padRight
-  self.top = parent.y + padTop
-  self.bottom = parent.y + parent.height - padBottom
+  self.left = parent:mutatePos('x', parent.x) + padLeft
+  self.right = parent:mutatePos('x', parent.x) + parent.width - padRight
+  self.top = parent:mutatePos('y', parent.y) + padTop
+  self.bottom = parent:mutatePos('y', parent.y) + parent.height - padBottom
   self.cursor = cursor
   self.parent = parent
 end
