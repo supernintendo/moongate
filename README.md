@@ -11,13 +11,13 @@ A work-in-progress multiplayer game server and client implementation.
 ### Server Setup ###
 
 1. Create the database
-...Make sure PostgreSQL is setup and running. Run `./util/setup_db.sql` in `psql`.
+... Make sure PostgreSQL is setup and running. Run `./util/setup_db.sql` in `psql`.
 
 2. Fetch dependencies.
-...Run `mix deps.get` in the main directory.
+... Run `mix deps.get` in the main directory.
 
 3. Run migrations.
-...Run `./util/reset_db.sh` from the main directory to run migrations.
+... Run `./util/reset_db.sh` from the main directory to run migrations.
 
 Run the server with `iex -S mix`.
 
