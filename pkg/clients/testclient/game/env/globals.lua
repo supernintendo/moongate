@@ -1,7 +1,7 @@
 -- External dependencies
-inspect = require 'lib.inspect'
-JSON = require 'lib.JSON'
-class = require 'lib.middleclass'
+inspect = require 'inspect'
+JSON = require 'dkjson'
+class = require 'middleclass'
 socket = require 'socket'
 
 -- Singleton modules
@@ -23,3 +23,4 @@ Scene = require 'game.scenes.scene'
 
 -- Environmental globals
 authToken = 'anon'
+currentScene = 'login'

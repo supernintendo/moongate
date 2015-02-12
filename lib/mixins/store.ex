@@ -32,7 +32,9 @@ defmodule Mixins.Store do
       # Set key value in a state map.
       defp set_in(map, key_of_map, key_of_attribute, value) do
         {:ok, prior} = Map.fetch(map, key_of_map)
-        Map.merge(prior, Map.put(%{}, key_of_map, value))
+        updated = Map.merge(prior, Map.put(%{}, key_of_attribute, value))
+        IO.inspect(updated)
+        Map.put(map, key_of_map, updated)
       end
     end
   end

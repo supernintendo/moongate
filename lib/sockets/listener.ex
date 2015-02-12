@@ -1,7 +1,3 @@
-defmodule Props.SocketListener do
-  defstruct port: nil
-end
-
 defmodule Sockets.Listener do
   use GenServer
   use Mixins.Packets
@@ -10,7 +6,7 @@ defmodule Sockets.Listener do
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    GenServer.start_link(__MODULE__, %Props.SocketListener{port: port}, [name: String.to_atom("socket_#{port}")])
+    GenServer.start_link(__MODULE__, %SocketListener{port: port}, [name: String.to_atom("socket_#{port}")])
   end
 
   def handle_cast({:init}, state) do

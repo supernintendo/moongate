@@ -1,9 +1,9 @@
 require 'game.env.constants'
 require 'game.env.globals'
 
-local currentScene = 'loginScreen'
 local scenes = {
-  loginScreen = Scene:new('game/scenes/json/login.json', 'game.scenes.logic.login')
+  login = Scene:new('game/scenes/json/login.json', 'game.scenes.logic.login'),
+  game = Scene:new('game/scenes/json/game.json', 'game.scenes.logic.game')
 }
 
 function love.load()

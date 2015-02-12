@@ -1,9 +1,3 @@
-defmodule Server.AuthToken do
-  defstruct email: nil,
-            identity: UUID.uuid4(:hex),
-            source: nil
-end
-
 # The Auth module manages login and new account creation.
 defmodule Auth do
   use GenServer
@@ -19,7 +13,7 @@ defmodule Auth do
     case authenticate(event.contents) do
       {:ok, message} ->
         client_id = "client_" <> UUID.uuid4(:hex)
-        token = %Server.AuthToken{email: event.contents[:email], source: event.origin}
+        token = %AuthToken{email: event.contents[:email], source: event.origin}
         state_mod = Map.put(state, String.to_atom(client_id), token)
         write_to(event.origin, %{
           cast: :set_token,
@@ -27,7 +21,7 @@ defmodule Auth do
           value: "#{token.identity}"
         })
         GenServer.cast(from, {:auth, token.identity})
-        Say.pretty("#{client_id} logged in", :green)
+        Say.pretty("#{client_id} logged in.", :green)
         {:noreply, state_mod}
       {_, message} ->
         Say.pretty("Failed log in attempt from anonymous #{Port.info(event.origin)[:name]} connection.", :red)

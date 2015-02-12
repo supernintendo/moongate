@@ -10,13 +10,19 @@ function Scene:initialize(json, module)
   -- Logic is assigned to a Lua module that will be used for
   -- the scene's behavior.
   self.logic = (require(module)):new(self)
-  
+  self:addComponents()
+end
+
+-- Prepare everything we need for a scene.
+function Scene:addComponents()
   -- Create a table to store layer groups
   self.layers = {
     animatedOverlays = {},
+    buttons = {},
     inputs = {},
     overlays = {}
   }
+  self.iterators = {}
 
   -- Store transitions
   self.currentTransition = nil
@@ -28,7 +34,7 @@ function Scene:initialize(json, module)
   self:assignFromJSON('inputs')
 end
 
--- Given a layer and a state, apply that layers state as it
+-- Given a layer and a state, apply that layer's state as it
 -- is defined in JSON to the layer instance.
 function Scene:applyState(layer, state)
   for key, value in pairs(layer.states[state]) do
@@ -42,15 +48,15 @@ function Scene:applyTransition(name)
   self.currentTransition = self.transitions[name]
 end
 
--- Given a key, JSON value and layer group, assign a new layer
--- to that layer group by the key, using the JSON value to
+-- Given a key, JSON node and layer group, assign a new layer
+-- to that layer group by the key, using the JSON node to
 -- create the layer instance.
-function Scene:assign(key, value, layerGroup)
+function Scene:assign(key, node, layerGroup)
   self.layers[layerGroup][key] = {}
-  self.layers[layerGroup][key].defaultState = value.defaultState
-  self.layers[layerGroup][key].states = value.states
-  self.layers[layerGroup][key].instance = self:newLayer(value, layerGroup)
-  self:applyState(self.layers[layerGroup][key], value.defaultState)
+  self.layers[layerGroup][key].defaultState = node.defaultState
+  self.layers[layerGroup][key].states = node.states
+  self.layers[layerGroup][key].instance = self:newLayer(node, layerGroup)
+  self:applyState(self.layers[layerGroup][key], node.defaultState)
 end
 
 -- Given a layer group, iterate over the associated JSON,
@@ -110,13 +116,15 @@ end
 -- event.
 function Scene:tick()
   for index, value in ipairs(self.json._comps[self.activeComp]) do
-    self.layers[value[1]][value[2]].instance:draw()
+    if value[1] and value[2] then self.layers[value[1]][value[2]].instance:draw() end
     self.logic:tick()
 
     if self.currentTransition then self:transition() end
   end
 end
 
+-- Apply the current transition, removing it once the all instances
+-- have been tweened.
 function Scene:transition()
   for index, value in ipairs(self.currentTransition) do
     local layer = self.layers[value[1]][value[2]]
@@ -130,6 +138,10 @@ function Scene:transition()
   end
 end
 
+-- Given a layer instance, a state to tween to and an increment
+-- amount, add or subtract the amount to each state attribute
+-- on the instance until it reaches the state attribute. Non
+-- numerical state attributes will be applied immediately.
 function Scene:tweenAttributes(instance, state, amount)
   for key, value in pairs(state) do
     local instanceAttribute = instance[key]

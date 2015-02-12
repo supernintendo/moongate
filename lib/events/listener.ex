@@ -1,12 +1,3 @@
-defmodule Props.EventListener do
-  defstruct auth: nil,
-            id: nil
-end
-
-defmodule Server.Event do
-  defstruct cast: nil, contents: nil, error: nil, origin: nil, to: nil
-end
-
 defmodule Events.Listener do
   use GenServer
   use Mixins.Packets
@@ -14,7 +5,7 @@ defmodule Events.Listener do
   use Mixins.Store
 
   def start_link(id) do
-    GenServer.start_link(__MODULE__, %Props.EventListener{id: id}, [name: String.to_atom("events_#{id}")])
+    GenServer.start_link(__MODULE__, %EventListener{id: id}, [name: String.to_atom("events_#{id}")])
   end
 
   def handle_cast({:init}, state) do
@@ -32,8 +23,8 @@ defmodule Events.Listener do
   @doc """
     Deliver a parsed socket message to the appropriate server.
   """
-  def handle_cast({:event, message, token, origin}, state) do
-    event = from_list(message, origin)
+  def handle_cast({:event, message, token, socket}, state) do
+    event = from_list(message, socket, state.id)
 
     case event do
       %{ cast: :login, to: :auth } ->
@@ -43,6 +34,9 @@ defmodule Events.Listener do
       %{ cast: :register, to: :auth } ->
         p = expect_from(event, {:email, :password})
         GenServer.cast(:auth, {:register, p})
+
+      %{ cast: :key, to: :game } ->
+        authenticated_action(event, token, state)
 
       %{ to: :world } ->
         authenticated_action(event, token, state)
@@ -59,16 +53,15 @@ defmodule Events.Listener do
 
   # Handle a socket message from an authenticated client.
   defp authenticated_action(event, token, state) do
-    can_pass = authenticated?(event.origin, state, token)
+    can_pass = authenticated?(state, token)
 
     if can_pass do
       case event do
+        %{ cast: :key, to: :game } ->
+          IO.inspect(event.origin)
         %{ cast: :join, to: :world } ->
           p = expect_from(event, {:world_id})
           GenServer.cast(String.to_atom("world_#{p.contents.world_id}"), {:join, p})
-        %{ cast: :move, to: :world } ->
-          p = expect_from(event, {:world_id, :direction})
-          GenServer.cast(String.to_atom("world_#{p.contents.world_id}"), {:move, p})
         %{ cast: :get, to: :worlds } ->
           GenServer.cast(:tree, {:get, :worlds, event})
       end
@@ -81,7 +74,7 @@ defmodule Events.Listener do
     end
   end
 
-  defp authenticated?(source, state, token) do
+  defp authenticated?(state, token) do
     state.auth == token
   end
 

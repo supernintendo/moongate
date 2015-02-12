@@ -9,7 +9,7 @@ function Helper:readFile(filename)
 end
 
 function Helper:readJSON(filename)
-  return JSON:decode(Helper:readFile(filename))
+  return JSON.decode(Helper:readFile(filename))
 end
 
 return Helper

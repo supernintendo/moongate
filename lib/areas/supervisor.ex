@@ -9,7 +9,8 @@ defmodule Areas.Supervisor do
     Prepare the worlds supervisor.
   """
   def init(params) do
-    children = [worker(Area, [], [])]
+    _ = params
+    children = [worker(Area.Process, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end
 end

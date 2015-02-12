@@ -12,37 +12,52 @@ defmodule Mixins.Packets do
       end
 
       # Parse a packet list into an events list.
-      defp from_list(list, origin) do
+      defp from_list(list, socket, id) do
         case length(list) do
           1 ->
-            %Server.Event{
+            %ClientEvent{
               contents: hd(list),
-              origin: origin
+              origin: %SocketOrigin{
+                id: id,
+                port: socket
+              }
             }
           2 ->
-            %Server.Event{
+            %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: origin
+              origin: %SocketOrigin{
+                id: id,
+                port: socket
+              }
             }
           3 ->
-            %Server.Event{
+            %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: origin
+              origin: %SocketOrigin{
+                id: id,
+                port: socket
+              }
             }
           _ when length(list) > 3 ->
-            %Server.Event{
+            %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: origin
+              origin: %SocketOrigin{
+                id: id,
+                port: socket
+              }
             }
           _ ->
-            %Server.Event{
+            %ClientEvent{
               error: :list_too_small,
-              origin: origin
+              origin: %SocketOrigin{
+                id: id,
+                port: socket
+              }
             }
         end
       end

@@ -1,8 +1,3 @@
-defmodule Sockets.ClientMap do
-  defstruct origin: nil,
-            signature: UUID.uuid4(:hex)
-end
-
 defmodule Sockets.Client do
   use Mixins.Packets
   use GenServer

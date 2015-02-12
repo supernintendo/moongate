@@ -10,6 +10,11 @@
             ["inputs", "username"],
             ["inputs", "password"]
         ],
+        "displayWorldList": [
+            ["overlays", "space"],
+            ["animatedOverlays", "moon"],
+            ["iterators", "worldSelect"]
+        ],
         "loggedIn": [
             ["overlays", "space"],
             ["animatedOverlays", "moon"]
@@ -32,6 +37,18 @@
                     "alpha": 0
                 }
             }
+        }
+    },
+    "lists": {
+        "worldlist": {
+            "defaultState": "initial",
+            "checked": "assets/checked.png",
+            "states": {
+                "initial": {
+                    "unique": true
+                }
+            },
+            "unchecked": "assets/unchecked.png"
         }
     },
     "inputs": {
@@ -88,19 +105,20 @@
                     "alpha": 50
                 },
                 "out": {
-                    "alpha": 10
+                    "alpha": 0
                 }
-            }
+            },
+            "virtual": true
         }
     },
     "transitions": {
         "fadeIn": [
             ["overlays", "space", "dark", 0.1],
-            ["animatedOverlays", "moon", "dark", 0.4]
+            ["animatedOverlays", "moon", "dark", 1.3]
         ],
         "loggedIn": [
             ["overlays", "space", "out", 1],
-            ["animatedOverlays", "moon", "out", 0.85],
+            ["animatedOverlays", "moon", "out", 1.25],
             ["inputs", "username", "out", 0],
             ["inputs", "password", "out", 0]
         ]

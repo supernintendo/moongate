@@ -1,4 +1,4 @@
-defmodule Entity.State do
+defmodule Entity do
   defstruct controller: nil,
             x: nil,
             y: nil
