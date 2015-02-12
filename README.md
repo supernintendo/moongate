@@ -1,31 +1,27 @@
 # Moongate #
 
-A barely working multiplayer game server written in Elixir.
-
-### Features ###
-
-* Newbie code.
-* Doesn't work.
-* Not ready for production.
+A work-in-progress multiplayer game server and client implementation.
 
 ### Dependencies ###
 
 * Elixir 1.0.0+
 * PostgreSQL 9.3.5+
+* LÖVE 0.9.1
 
-### Setup ###
+### Server Setup ###
 
 1. Create the database
-...Make sure PostgreSQL is setup and running. Pull in `./util/setup_db.sql` (use `\i` in `psql` for now).
+...Make sure PostgreSQL is setup and running. Run `./util/setup_db.sql` in `psql`.
 
 2. Fetch dependencies.
-...`cd` to the main directory and run `mix deps.get`.
+...Run `mix deps.get` in the main directory.
 
 3. Run migrations.
-...From the same directory run the migrations with `./util/reset_db.sh`.
+...Run `./util/reset_db.sh` from the main directory to run migrations.
 
-Run the server with `iex -S mix`. A test client in love2d is available in `./pkg/clients`. You can't do much yet.
+Run the server with `iex -S mix`.
 
-### Why? ###
+### Client Setup ###
 
-I'm using this to play around and learn Elixir, this is not intended as a serious project.
+1. Install dependencies using luarocks.
+... Run `./deps.sh` from the `pkg/clients/testclient` directory (this requires a luarocks install configured for Lua 5.1 - the script will handle this for you if one is not found).

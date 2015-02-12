@@ -24,3 +24,4 @@ Scene = require 'game.scenes.scene'
 -- Environmental globals
 authToken = 'anon'
 currentScene = 'login'
+currentWorld = nil

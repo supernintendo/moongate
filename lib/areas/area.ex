@@ -14,9 +14,7 @@ defmodule Area.Process do
   end
 
   def handle_cast({:join, origin}, state) do
-    id = String.to_atom("entity_" <> UUID.uuid4(:hex))
-    updated = set_in(state, :entities, id, new_entity(origin))
-    Say.pretty("Entity with id #{id} joined area.", :green)
+    updated = set_in(state, :entities, String.to_atom(":entity_#{origin.id}"), new_entity(origin))
     {:noreply, updated}
   end
 
@@ -26,11 +24,8 @@ defmodule Area.Process do
     {:noreply, state}
   end
 
-  defp new_entity(controller) do
-    %Entity{
-      controller: controller,
-      x: 0,
-      y: 0
-    }
+  defp new_entity(origin) do
+    {:ok, entity} = GenServer.call(:tree, {:spawn, :entities, origin})
+    entity
   end
 end
