@@ -1,5 +1,6 @@
 defmodule Entity.Process do
   use GenServer
+  use Mixins.SocketWriter
 
   def start_link(origin) do
     process_name = String.to_atom("entity_#{origin.id}")
@@ -15,7 +16,7 @@ defmodule Entity.Process do
     key = event.contents.key
 
     if state.area_id do
-      if key == "up" or key == "down" or key == "left" or key == "right" do
+      if key == "w" or key == "a" or key == "s" or key == "d" do
         GenServer.cast(String.to_atom("area_" <> state.area_id), {:move, key, state.origin.id})
       end
     end
@@ -30,5 +31,14 @@ defmodule Entity.Process do
 
     GenServer.cast(String.to_atom("area_" <> area_id), {:enter, state.origin.id})
     {:noreply, Map.put(state, :area_id, area_id)}
+  end
+
+  def handle_cast({:tell_origin, cast, namespace, message}, state) do
+    write_to(state.origin, %{
+      cast: cast,
+      namespace: namespace,
+      value: message
+    })
+    {:noreply, state}
   end
 end

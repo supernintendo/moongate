@@ -5,9 +5,9 @@ function NetworkEvents:initialize() end
 -- Given a packet, parse the packet and relay it.
 function NetworkEvents:receivePacket(packet)
   local parsed = self:parsePacket(packet)
-  -- print("Receiving message:" .. inspect(parsed))
 
   if parsed.namespace == 'auth' then Auth:receive(parsed) end
+  if parsed.namespace == 'grid' then GridState:receive(parsed) end
   if parsed.namespace == 'worlds' then Worlds:receive(parsed) end
 end
 

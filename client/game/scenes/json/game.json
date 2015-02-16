@@ -5,7 +5,15 @@
     },
     "_comps": {
         "default": [
-            []
+            ["grids", "map"]
         ]
+    },
+    "grids": {
+      "map": {
+        "space_x": 64,
+        "space_y": 64,
+        "height": 16,
+        "width": 16
+      }
     }
 }

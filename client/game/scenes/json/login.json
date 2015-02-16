@@ -23,7 +23,7 @@
     "animatedOverlays": {
         "moon": {
             "defaultState": "initial",
-            "src": "assets/moon.json",
+            "src": "assets/gumps/moon.json",
             "states": {
                 "initial": {
                     "alpha": 0,
@@ -39,22 +39,10 @@
             }
         }
     },
-    "lists": {
-        "worldlist": {
-            "defaultState": "initial",
-            "checked": "assets/checked.png",
-            "states": {
-                "initial": {
-                    "unique": true
-                }
-            },
-            "unchecked": "assets/unchecked.png"
-        }
-    },
     "inputs": {
         "username": {
             "defaultState": "initial",
-            "src": "assets/input.png",
+            "src": "assets/gumps/input.png",
             "states": {
                 "initial": {
                     "groupName": "login",
@@ -73,7 +61,7 @@
         },
         "password": {
             "defaultState": "initial",
-            "src": "assets/input.png",
+            "src": "assets/gumps/input.png",
             "states": {
                 "initial": {
                     "groupName": "login",
@@ -94,7 +82,7 @@
     "overlays": {
         "space": {
             "defaultState": "initial",
-            "src": "assets/space.png",
+            "src": "assets/gumps/space.png",
             "states": {
                 "initial": {
                     "alpha": 0,
@@ -107,8 +95,7 @@
                 "out": {
                     "alpha": 0
                 }
-            },
-            "virtual": true
+            }
         }
     },
     "transitions": {

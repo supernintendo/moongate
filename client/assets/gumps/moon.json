@@ -38,7 +38,7 @@
         }
     ],
     "meta": {
-        "image": "moon.png",
+        "image": "gumps/moon.png",
         "loop": true,
         "size": {"w": 233,"h": 1035},
         "speed": 5

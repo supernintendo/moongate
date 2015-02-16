@@ -11,6 +11,7 @@ MouseState = (require 'game.input.mouse'):new()
 NetworkEvents = (require 'game.network.events'):new()
 TCP = (require 'game.network.tcp'):new()
 Auth = (require 'game.network.auth'):new()
+GridState = (require 'game.network.grid'):new()
 Worlds = (require 'game.network.worlds'):new()
 
 -- Global classes
@@ -19,6 +20,8 @@ Animation = require 'game.utility.animation'
 AnimatedOverlay = require 'game.ui.overlay.animated'
 TextOverlay = require 'game.ui.overlay.text'
 Input = require 'game.ui.menu.input'
+Grid = require 'game.game.grid'
+Tile = require 'game.game.tile'
 Scene = require 'game.scenes.scene'
 
 -- Environmental globals

@@ -1,9 +1,11 @@
 defmodule Area.Process do
   use GenServer
+  use Mixins.Random
   use Mixins.SocketWriter
   use Mixins.Store
 
   def start_link(params) do
+    seed_random
     process_name = String.to_atom("area_#{params.id}")
     GenServer.start_link(__MODULE__, Map.merge(%Area{}, params), [name: process_name])
   end
@@ -15,9 +17,10 @@ defmodule Area.Process do
 
   def handle_cast({:enter, entity_id}, state) do
     updated = set_in(state, :entities, String.to_atom(entity_id), %{
-      x: 0,
-      y: 0
+      x: random_of(15),
+      y: random_of(15)
     })
+    broadcast_tiles_to(entity_id, updated)
     {:noreply, updated}
   end
 
@@ -40,6 +43,7 @@ defmodule Area.Process do
           y: y_to_check
         })
       end
+      broadcast_tiles_to(entity_id, state)
     end
     {:noreply, updated}
   end
@@ -55,12 +59,25 @@ defmodule Area.Process do
     entity
   end
 
+  defp broadcast_tiles_to(entity_id, state) do
+    GenServer.cast(String.to_atom("entity_" <> entity_id), {
+      :tell_origin,
+      :update,
+      :grid,
+      Enum.reduce(state.tiles, "", &serialize_tile(&1, &2))
+    })
+  end
+
+  def serialize_tile(tile, acc) do
+    acc <> "#{tile.x};#{tile.y};#{tile.tile}|"
+  end
+
   defp resolve_move(entity, direction) do
     case direction do
-      "up" -> {entity.x, entity.y - 1}
-      "down" -> {entity.x, entity.y + 1}
-      "left" -> {entity.x - 1, entity.y}
-      "right" -> {entity.x + 1, entity.y}
+      "w" -> {entity.x, entity.y - 1}
+      "a" -> {entity.x - 1, entity.y}
+      "s" -> {entity.x, entity.y + 1}
+      "d" -> {entity.x + 1, entity.y}
     end
   end
 

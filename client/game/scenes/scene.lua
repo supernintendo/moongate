@@ -18,11 +18,10 @@ function Scene:addComponents()
   -- Create a table to store layer groups
   self.layers = {
     animatedOverlays = {},
-    buttons = {},
+    grids = {},
     inputs = {},
     overlays = {}
   }
-  self.iterators = {}
 
   -- Store transitions
   self.currentTransition = nil
@@ -32,6 +31,7 @@ function Scene:addComponents()
   self:assignFromJSON('overlays')
   self:assignFromJSON('animatedOverlays')
   self:assignFromJSON('inputs')
+  self:assignGrids()
 end
 
 -- Given a layer and a state, apply that layer's state as it
@@ -69,6 +69,17 @@ function Scene:assignFromJSON(layerGroup)
   end
 end
 
+-- Create new Grid instances.
+function Scene:assignGrids()
+  if self.json["grids"] then
+    for key, grid in pairs(self.json["grids"]) do
+      self.layers.grids[key] = {
+        instance = Grid:new(grid.height, grid.width, grid.space_x, grid.space_y)
+      }
+    end
+  end
+end
+
 -- Redirect an event from a child input.
 function Scene:captureInputEvent(event, instance)
   local group = {}
@@ -98,7 +109,7 @@ function Scene:newLayer(value, layerGroup)
   elseif layerGroup == 'inputs' then
     return Input:new(
       self,
-      'assets/input.png',
+      'assets/gumps/input.png',
       value.states[value.defaultState].x,
       value.states[value.defaultState].y,
       TextOverlay:new(
