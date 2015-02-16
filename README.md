@@ -24,4 +24,4 @@ Run the server with `iex -S mix`.
 ### Client Setup ###
 
 1. Install dependencies using luarocks.
-... Run `./deps.sh` from the `pkg/clients/testclient` directory (this requires a luarocks install configured for Lua 5.1 - the script will handle this for you if one is not found).
+... Run `./deps.sh` from the `client` directory (this requires a luarocks install configured for Lua 5.1 - the script will handle this for you if one is not found).
