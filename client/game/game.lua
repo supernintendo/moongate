@@ -1,5 +1,6 @@
 require 'game.env.constants'
 require 'game.env.globals'
+require 'game.env.images'
 
 local scenes = {
   login = Scene:new('game/scenes/json/login.json', 'game.scenes.logic.login'),

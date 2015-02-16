@@ -1,8 +1,8 @@
 local Grid = class('Grid')
 
 function Grid:initialize(height, width, spaceX, spaceY)
-  self.offset_x = 0
-  self.offset_y = 0
+  self.offsetX = 0
+  self.offsetY = 0
   self.spaceX = spaceX
   self.spaceY = spaceY
   self.height = height
@@ -41,10 +41,10 @@ end
 function Grid:updateFromContents(contents)
   for row = 0, self.height - 1 do
     for column = 0, self.width - 1 do
-      local tile = contents['tile_' .. (column + self.offset_x) .. '_' .. (row + self.offset_y)]
+      local tile = contents['tile_' .. (column + self.offsetX) .. '_' .. (row + self.offsetY)]
 
       if tile then
-        self.tiles['tile_' .. column .. '_' .. row].image = love.graphics.newImage('assets/tiles/' .. tile .. '.png')
+        self.tiles['tile_' .. column .. '_' .. row].image = IMAGES[tile]
       end
     end
   end
