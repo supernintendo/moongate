@@ -58,13 +58,15 @@ defmodule Events.Listener do
     if can_pass do
       case event do
         %{ cast: :key, to: :game } ->
-          p = expect_from(event, {:world_id, :key})
-          GenServer.cast(String.to_atom("world_#{p.contents.world_id}"), {:keypress, p})
+          p = expect_from(event, {:key})
+          GenServer.cast(String.to_atom("entity_#{event.origin.id}"), {:keypress, p})
         %{ cast: :join, to: :world } ->
           p = expect_from(event, {:world_id})
           GenServer.cast(String.to_atom("world_#{p.contents.world_id}"), {:join, p})
         %{ cast: :get, to: :worlds } ->
           GenServer.cast(:tree, {:get, :worlds, event})
+        _ ->
+          nil
       end
     else
       write_to(event.origin, %{

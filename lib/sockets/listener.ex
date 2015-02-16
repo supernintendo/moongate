@@ -47,7 +47,9 @@ defmodule Sockets.Listener do
   defp handler(packet, port, id) do
     incoming = packet_to_list(packet)
 
-    GenServer.cast(String.to_atom("events_" <> id), {:event, tl(incoming), hd(incoming), port})
+    if hd(incoming) != :invalid_message do
+      GenServer.cast(String.to_atom("events_" <> id), {:event, tl(incoming), hd(incoming), port})
+    end
     ""
   end
 end

@@ -5,7 +5,13 @@ defmodule Mixins.Packets do
       # and return a list with the contents.
       defp packet_to_list(string) do
         if String.valid?(string) do
-          String.split(Regex.replace(~r/[\n\b\t\r]/, string, ""))
+          list = String.split(Regex.replace(~r/[\n\b\t\r]/, string, ""))
+
+          if hd(list) == "BEGIN" && List.last(list) == "END" do
+            tl(list)
+          else
+            [:invalid_message]
+          end
         else
           [:invalid_message]
         end

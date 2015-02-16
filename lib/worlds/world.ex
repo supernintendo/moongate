@@ -20,9 +20,15 @@ defmodule World do
 
   def handle_cast({:join, event}, state) do
     area_to_join = Enum.find(state.areas, &get_default_area(&1))
-    GenServer.cast(area_to_join.process, {:join, event.origin})
-    GenServer.cast(area_to_join.process, {:tell, event.origin})
-    {:noreply, state}
+    updated = state
+
+    if area_to_join do
+      GenServer.cast(area_to_join.process, {:join, event.origin})
+      GenServer.cast(area_to_join.process, {:tell, event.origin})
+      updated = set_in(updated, :origins, String.to_atom(":origin_#{event.origin.id}"), event.origin)
+    end
+
+    {:noreply, updated}
   end
 
   def handle_cast({:init_all_inactive_areas}, state) do
@@ -33,8 +39,9 @@ defmodule World do
     {:reply, "#{state.id};#{state.name}", state}
   end
 
-  def handle_cast({:move, event}, state) do
-    state
+  def handle_cast({:keypress, event}, state) do
+    GenServer.cast(String.to_atom("entity_#{event.origin.id}"), {:keypress, event.contents.key})
+    {:noreply, state}
   end
 
   def handle_cast({:spawn_all_areas}, state) do

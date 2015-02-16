@@ -17,11 +17,10 @@ defmodule Mixins.AreaResolver do
 
       defp spawn_area(area_params) do
         if is_map(area_params) do
-          id = "area_" <> UUID.uuid4(:hex)
+          id = UUID.uuid4(:hex)
           {module, _} = Code.eval_string(area_params["module"])
           area = %{
             default: area_params["default"],
-            entities: %{},
             id: id,
             process: nil,
             spec: %{

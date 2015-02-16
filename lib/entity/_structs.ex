@@ -1,5 +1,6 @@
 defmodule Entity do
-  defstruct origin: nil,
+  defstruct area_id: nil,
+            origin: nil,
             x: nil,
             y: nil
 end
