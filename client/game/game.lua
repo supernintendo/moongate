@@ -28,11 +28,7 @@ end
 function tick()
   -- Non drawing related tick events.
   MouseState:tick()
-  local s, status, partial = TCP.socket:receive()
-
-  if partial ~= '' then
-    NetworkEvents:receivePacket(partial)
-  end
+  NetworkEvents:tick()
 
   love.window.setTitle('Moongate - testclient (' .. love.timer.getFPS() .. ' fps)')
 end

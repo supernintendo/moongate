@@ -20,6 +20,7 @@ defmodule Area.Process do
       x: random_of(15),
       y: random_of(15)
     })
+    broadcast_entities_to_all(updated)
     broadcast_tiles_to(entity_id, updated)
     {:noreply, updated}
   end
@@ -42,6 +43,7 @@ defmodule Area.Process do
           x: x_to_check,
           y: y_to_check
         })
+        broadcast_entities_to_all(updated)
       end
       broadcast_tiles_to(entity_id, state)
     end
@@ -59,6 +61,20 @@ defmodule Area.Process do
     entity
   end
 
+  defp broadcast_entities_to_all(state) do
+    Enum.map(state.entities, &broadcast_entities_to(&1, state))
+  end
+
+  defp broadcast_entities_to(entity, state) do
+    id = Atom.to_string(elem(entity, 0))
+    GenServer.cast(String.to_atom("entity_" <> id), {
+      :tell_origin,
+      :update,
+      :entities,
+      Enum.reduce(state.entities, "", &serialize_entity(&1, &2))
+    })
+  end
+
   defp broadcast_tiles_to(entity_id, state) do
     GenServer.cast(String.to_atom("entity_" <> entity_id), {
       :tell_origin,
@@ -66,6 +82,12 @@ defmodule Area.Process do
       :grid,
       Enum.reduce(state.tiles, "", &serialize_tile(&1, &2))
     })
+  end
+
+  def serialize_entity(entity, acc) do
+    id = Atom.to_string(elem(entity, 0))
+    attributes = elem(entity, 1)
+    acc <> "#{id};#{attributes.x};#{attributes.y}|"
   end
 
   def serialize_tile(tile, acc) do

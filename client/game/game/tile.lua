@@ -4,7 +4,7 @@ function Tile:initialize(x, y, parent)
   self.x = x
   self.y = y
   math.randomseed((x + y) * 2)
-  self.fadeInSpeed = 1 * math.random(2) * math.random(2)
+  self.fadeInSpeed = 8
   self.parent = parent
   self.alpha = 0
 end

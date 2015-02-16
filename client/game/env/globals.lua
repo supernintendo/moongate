@@ -13,6 +13,7 @@ TCP = (require 'game.network.tcp'):new()
 Auth = (require 'game.network.auth'):new()
 GridState = (require 'game.network.grid'):new()
 Worlds = (require 'game.network.worlds'):new()
+EntityState = (require 'game.network.entities'):new()
 
 -- Global classes
 Overlay = require 'game.ui.overlay.basic'
