@@ -5,7 +5,7 @@ defmodule Moongate do
     Initialize the game server.
   """
   def start(_type, _args) do
-    {:ok, read} = File.read "pkg/configs/default.json"
+    {:ok, read} = File.read "config/server.json"
     {:ok, config} = JSON.decode(read)
 
     Say.greeting
