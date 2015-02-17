@@ -33,7 +33,8 @@ defmodule Moongate.Mixfile do
       {:uuid, "~> 0.1.5"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
       {:timex, "~> 0.13.1"},
-      {:json, "~> 0.3.0"}
+      {:json, "~> 0.3.0"},
+      {:cauldron, "~> 0.1.2"}
     ]
   end
 end
