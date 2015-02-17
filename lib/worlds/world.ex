@@ -24,7 +24,6 @@ defmodule World do
 
     if area_to_join do
       GenServer.cast(area_to_join.process, {:join, event.origin})
-      GenServer.cast(area_to_join.process, {:tell, event.origin})
       updated = set_in(updated, :origins, String.to_atom(":origin_#{event.origin.id}"), event.origin)
     end
 

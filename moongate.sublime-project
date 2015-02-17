@@ -4,7 +4,6 @@
         {
             "file_exclude_patterns": ["*.lock"],
             "folder_exclude_patterns": ["_build", "deps"],
-            "follow_symlinks": true,
             "name": "Moongate",
             "path": "/"
         }

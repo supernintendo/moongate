@@ -49,11 +49,6 @@ defmodule Area.Process do
     {:noreply, updated}
   end
 
-  def handle_cast({:tell, origin}, state) do
-    # tiles = Enum.reduce("", &serialize_tiles(&1, &2, state))
-    {:noreply, state}
-  end
-
   defp new_entity(origin, area_id) do
     {:ok, entity} = GenServer.call(:tree, {:spawn, :entities, origin})
     GenServer.cast(entity, {:set_area, area_id})
