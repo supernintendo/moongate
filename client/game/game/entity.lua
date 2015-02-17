@@ -1,14 +1,15 @@
-local Tile = class('Tile')
+local Entity = class('Entity')
 
-function Tile:initialize(x, y, parent)
+function Entity:initialize(x, y, parent)
   self.x = x
   self.y = y
   self.fadeInSpeed = 8
   self.parent = parent
+  self.image = IMAGES["human"]
   self.alpha = 0
 end
 
-function Tile:draw()
+function Entity:draw()
   if self.image then
     if self.alpha < 255 then
       self:fadeIn()
@@ -23,9 +24,9 @@ function Tile:draw()
   end
 end
 
-function Tile:fadeIn()
-  if self.alpha + self.fadeInSpeed > 128 then self.alpha = 128
+function Entity:fadeIn()
+  if self.alpha + self.fadeInSpeed > 255 then self.alpha = 255
   else self.alpha = self.alpha + self.fadeInSpeed end
 end
 
-return Tile
+return Entity

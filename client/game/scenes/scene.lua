@@ -74,7 +74,13 @@ function Scene:assignGrids()
   if self.json["grids"] then
     for key, grid in pairs(self.json["grids"]) do
       self.layers.grids[key] = {
-        instance = Grid:new(grid.height, grid.width, grid.space_x, grid.space_y)
+        instance = Grid:new(
+          grid.height,
+          grid.width,
+          grid.space_x,
+          grid.space_y,
+          grid.subs
+        )
       }
     end
   end

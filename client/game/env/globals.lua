@@ -13,7 +13,6 @@ TCP = (require 'game.network.tcp'):new()
 Auth = (require 'game.network.auth'):new()
 GridState = (require 'game.network.grid'):new()
 Worlds = (require 'game.network.worlds'):new()
-EntityState = (require 'game.network.entities'):new()
 
 -- Global classes
 Overlay = require 'game.ui.overlay.basic'
@@ -23,7 +22,11 @@ TextOverlay = require 'game.ui.overlay.text'
 Input = require 'game.ui.menu.input'
 Grid = require 'game.game.grid'
 Tile = require 'game.game.tile'
+Entity = require 'game.game.entity'
 Scene = require 'game.scenes.scene'
+pub = {
+  entities = (require 'game.network.entities'):new()
+}
 
 -- Environmental globals
 authToken = 'anon'

@@ -12,13 +12,11 @@
       "map": {
         "space_x": 64,
         "space_y": 64,
+        "subs": [
+            "entities"
+        ],
         "height": 16,
         "width": 16
       }
-    },
-    "entities": {
-        "players": {
-            "sub": "players"
-        }
     }
 }

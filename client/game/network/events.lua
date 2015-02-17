@@ -43,7 +43,7 @@ end
 
 function NetworkEvents:processPacket(packet)
   if packet.namespace == 'auth' then Auth:receive(packet) end
-  if packet.namespace == 'entities' then EntityState:receive(packet) end
+  if packet.namespace == 'entities' then pub["entities"]:receive(packet) end
   if packet.namespace == 'grid' then GridState:receive(packet) end
   if packet.namespace == 'worlds' then Worlds:receive(packet) end
 end
