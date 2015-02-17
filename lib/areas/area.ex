@@ -17,8 +17,8 @@ defmodule Area.Process do
 
   def handle_cast({:enter, entity_id}, state) do
     updated = set_in(state, :entities, String.to_atom(entity_id), %{
-      x: random_of(15),
-      y: random_of(15)
+      x: random_of(8),
+      y: random_of(8)
     })
     broadcast_entities_to_all(updated)
     broadcast_tiles_to(entity_id, updated)
@@ -38,7 +38,6 @@ defmodule Area.Process do
       {x_to_check, y_to_check} = resolve_move(entity, direction)
 
       if tile_exists(x_to_check, y_to_check, state) do
-        IO.puts("Entity #{entity_id} moved to #{x_to_check}, #{y_to_check}.")
         updated = set_in(state, :entities, String.to_atom(entity_id), %{
           x: x_to_check,
           y: y_to_check
