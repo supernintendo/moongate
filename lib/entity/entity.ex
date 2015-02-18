@@ -1,10 +1,10 @@
 defmodule Entity.Process do
   use GenServer
   use Mixins.SocketWriter
+  use Mixins.Translator
 
   def start_link(origin) do
-    process_name = String.to_atom("entity_#{origin.id}")
-    GenServer.start_link(__MODULE__, %Entity{origin: origin}, [name: process_name])
+    link(%Entity{origin: origin}, "entity", "#{origin.id}")
   end
 
   def handle_cast({:init}, state) do

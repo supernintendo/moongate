@@ -3,10 +3,10 @@ defmodule Auth do
   use GenServer
   use Mixins.SocketWriter
   use Mixins.Store
+  use Mixins.Translator
 
   def start_link do
-    state = %{}
-    GenServer.start_link(__MODULE__, state, [name: :auth])
+    link(%{}, "auth")
   end
 
   def handle_cast({:login, event, from}, state) do

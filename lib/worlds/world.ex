@@ -2,6 +2,7 @@ defmodule World do
   use GenServer
   use Mixins.AreaResolver
   use Mixins.Store
+  use Mixins.Translator
 
   def start_link(config) do
     params = %{
@@ -9,8 +10,7 @@ defmodule World do
       id: config["id"],
       name: config["name"]
     }
-    process_name = String.to_atom("world_#{params.id}")
-    GenServer.start_link(__MODULE__, Map.merge(%World.State{}, params), [name: process_name])
+    link(Map.merge(%World.State{}, params), "world", "#{params.id}")
   end
 
   def handle_cast({:init}, state) do
