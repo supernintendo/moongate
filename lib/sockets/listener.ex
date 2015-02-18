@@ -1,12 +1,13 @@
 defmodule Sockets.Listener do
   use GenServer
   use Mixins.Packets
+  use Mixins.Translator
 
   @doc """
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    GenServer.start_link(__MODULE__, %SocketListener{port: port}, [name: String.to_atom("socket_#{port}")])
+    link(%SocketListener{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do

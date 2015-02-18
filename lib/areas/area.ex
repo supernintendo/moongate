@@ -3,11 +3,11 @@ defmodule Area.Process do
   use Mixins.Random
   use Mixins.SocketWriter
   use Mixins.Store
+  use Mixins.Translator
 
   def start_link(params) do
     seed_random
-    process_name = String.to_atom("area_#{params.id}")
-    GenServer.start_link(__MODULE__, Map.merge(%Area{}, params), [name: process_name])
+    link(Map.merge(%Area{}, params), "area", "#{params.id}")
   end
 
   def handle_cast({:init}, state) do

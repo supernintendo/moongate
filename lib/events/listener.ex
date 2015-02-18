@@ -3,9 +3,10 @@ defmodule Events.Listener do
   use Mixins.Packets
   use Mixins.SocketWriter
   use Mixins.Store
+  use Mixins.Translator
 
   def start_link(id) do
-    GenServer.start_link(__MODULE__, %EventListener{id: id}, [name: String.to_atom("events_#{id}")])
+    link(%EventListener{id: id}, "events", "#{id}")
   end
 
   def handle_cast({:init}, state) do

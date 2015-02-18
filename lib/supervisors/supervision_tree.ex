@@ -2,9 +2,10 @@ defmodule SupervisionTree do
   use GenServer
   use Mixins.SocketWriter
   use Mixins.Store
+  use Mixins.Translator
 
   def start_link do
-    GenServer.start_link(__MODULE__, %{}, [name: :tree])
+    link(%{}, "tree")
   end
 
   def init(registry) do
