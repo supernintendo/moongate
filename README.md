@@ -25,3 +25,7 @@ Run the server with `iex -S mix`.
 
 1. Install dependencies.
 ... Run `./deps.sh` from the `client` directory.
+
+### License ###
+
+MIT
