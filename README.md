@@ -23,5 +23,5 @@ Run the server with `iex -S mix`.
 
 ### Client Setup ###
 
-1. Install dependencies using luarocks.
+1. Install dependencies.
 ... Run `./deps.sh` from the `client` directory.
