@@ -1,7 +1,7 @@
 -- External dependencies
-inspect = require 'inspect'
-JSON = require 'dkjson'
-class = require 'middleclass'
+inspect = require 'deps.inspect.inspect'
+JSON = require 'deps.dkjson.dkjson'
+class = require 'deps.middleclass.middleclass'
 socket = require 'socket'
 
 -- Singleton modules
