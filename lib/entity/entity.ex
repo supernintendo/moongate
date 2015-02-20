@@ -1,5 +1,4 @@
 defmodule Entity.Process do
-  use GenServer
   use Mixins.SocketWriter
   use Mixins.Translator
 
@@ -17,7 +16,7 @@ defmodule Entity.Process do
 
     if state.area_id do
       if key == "w" or key == "a" or key == "s" or key == "d" do
-        GenServer.cast(String.to_atom("area_" <> state.area_id), {:move, key, state.origin.id})
+        tell_async(:area, state.area_id, {:move, key, state.origin.id})
       end
     end
 
@@ -26,10 +25,10 @@ defmodule Entity.Process do
 
   def handle_cast({:set_area, area_id}, state) do
     if state.area_id do
-      GenServer.cast("area_" <> String.to_atom(state.area_id), {:leave, state.origin.id})
+      tell_async(:area, state.area_id, {:leave, state.origin.id})
     end
 
-    GenServer.cast(String.to_atom("area_" <> area_id), {:enter, state.origin.id})
+    tell_async(:area, area_id, {:enter, state.origin.id})
     {:noreply, Map.put(state, :area_id, area_id)}
   end
 

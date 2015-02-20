@@ -1,5 +1,4 @@
 defmodule Sockets.Listener do
-  use GenServer
   use Mixins.Packets
   use Mixins.Translator
 
@@ -21,7 +20,7 @@ defmodule Sockets.Listener do
     uuid = UUID.uuid4(:hex)
 
     socket = Socket.TCP.accept!(listener)
-    {:ok, child} = GenServer.call(:tree, {:spawn, :events, uuid})
+    {:ok, child} = spawn_new(:events, uuid)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
     Say.pretty("Socket with id #{uuid} connected.", :blue)
     accept(listener)
@@ -34,7 +33,7 @@ defmodule Sockets.Listener do
     if packet == nil do
       # Client disconnects.
       Say.pretty("Socket with id #{id} disconnected.", :magenta)
-      GenServer.call(:tree, {:kill, :events, pid})
+      kill_by_pid(:events, pid)
       socket |> Socket.close
       :close
     else
@@ -49,7 +48,7 @@ defmodule Sockets.Listener do
     incoming = packet_to_list(packet)
 
     if hd(incoming) != :invalid_message do
-      GenServer.cast(String.to_atom("events_" <> id), {:event, tl(incoming), hd(incoming), port})
+      tell_async(:events, id, {:event, tl(incoming), hd(incoming), port})
     end
     ""
   end

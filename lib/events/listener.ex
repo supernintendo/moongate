@@ -1,5 +1,4 @@
 defmodule Events.Listener do
-  use GenServer
   use Mixins.Packets
   use Mixins.SocketWriter
   use Mixins.Store
@@ -30,11 +29,11 @@ defmodule Events.Listener do
     case event do
       %{ cast: :login, to: :auth } ->
         p = expect_from(event, {:email, :password})
-        GenServer.cast(:auth, {:login, p, self()})
+        tell_async(:auth, {:login, p, self()})
 
       %{ cast: :register, to: :auth } ->
         p = expect_from(event, {:email, :password})
-        GenServer.cast(:auth, {:register, p})
+        tell_async(:auth, {:register, p})
 
       %{ cast: :key, to: :game } ->
         authenticated_action(event, token, state)
@@ -60,12 +59,12 @@ defmodule Events.Listener do
       case event do
         %{ cast: :key, to: :game } ->
           p = expect_from(event, {:key})
-          GenServer.cast(String.to_atom("entity_#{event.origin.id}"), {:keypress, p})
+          tell_async(:entity, "#{event.origin.id}", {:keypress, p})
         %{ cast: :join, to: :world } ->
           p = expect_from(event, {:world_id})
-          GenServer.cast(String.to_atom("world_#{p.contents.world_id}"), {:join, p})
+          tell_async(:world, "#{p.contents.world_id}", {:join, p})
         %{ cast: :get, to: :worlds } ->
-          GenServer.cast(:tree, {:get, :worlds, event})
+          get(:worlds, event)
         _ ->
           nil
       end

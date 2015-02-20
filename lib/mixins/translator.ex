@@ -1,6 +1,43 @@
 defmodule Mixins.Translator do
   defmacro __using__(opts) do
     quote do
+      use GenServer
+      defp get(namespace, params) do
+        GenServer.cast(:tree, {:get, namespace, params})
+      end
+
+      defp kill_by_pid(namespace, pid) do
+        GenServer.call(:tree, {:kill, namespace, pid})
+      end
+
+      defp tell_all_async(namespace, message) do
+        GenServer.cast(:tree, {:tell_async_all_children, namespace, message})
+      end
+
+      defp tell_sync(name, message) do
+        GenServer.call(name, message)
+      end
+
+      defp tell_sync(namespace, id, message) do
+        GenServer.call(String.to_atom("#{namespace}_#{id}"), message)
+      end
+
+      defp tell_async(name, message) do
+        GenServer.cast(name, message)
+      end
+
+      defp tell_async(namespace, id, message) do
+        GenServer.cast(String.to_atom("#{namespace}_#{id}"), message)
+      end
+
+      defp tell_pid_sync(pid, message) do
+        GenServer.call(pid, message)
+      end
+
+      defp tell_pid_async(pid, message) do
+        GenServer.cast(pid, message)
+      end
+
       defp link(params, name) do
         link(params, "", name)
       end
@@ -11,6 +48,10 @@ defmodule Mixins.Translator do
         if namespace != "", do: namespace = namespace <> "_"
 
         GenServer.start_link(__MODULE__, params, [name: String.to_atom(namespace <> name)])
+      end
+
+      defp spawn_new(namespace, params) do
+        GenServer.call(:tree, {:spawn, namespace, params})
       end
     end
   end
