@@ -8,7 +8,7 @@ defmodule Entity.Supervisor do
   @doc """
     Prepare the entities supervisor.
   """
-  def init(params) do
+  def init(_) do
     children = [worker(Entity.Process, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end

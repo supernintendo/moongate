@@ -1,6 +1,5 @@
 # The Auth module manages login and new account creation.
 defmodule Auth do
-  use GenServer
   use Mixins.SocketWriter
   use Mixins.Store
   use Mixins.Translator
@@ -20,7 +19,7 @@ defmodule Auth do
           namespace: :auth,
           value: "#{token.identity}"
         })
-        GenServer.cast(from, {:auth, token.identity})
+        tell_pid_async(from, {:auth, token.identity})
         Say.pretty("#{client_id} logged in.", :green)
         {:noreply, state_mod}
       {_, message} ->

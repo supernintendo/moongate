@@ -1,5 +1,6 @@
 defmodule Moongate do
   use Application
+  use Mixins.Translator
 
   @doc """
     Initialize the game server.
@@ -11,22 +12,10 @@ defmodule Moongate do
     Say.greeting
     {:ok, supervisor} = Moongate.Supervisor.start_link
     GenServer.call(:tree, {:register, supervisor})
-    config["ports"] |> Enum.map(&start_socket(&1))
-    config["worlds"] |> Enum.map(&start_world(&1))
-    start_all_areas
+    config["ports"] |> Enum.map(&spawn_new(:sockets, &1))
+    config["worlds"] |> Enum.map(&spawn_new(:worlds, &1))
+    tell_all_async(:worlds, {:spawn_all_areas})
 
     {:ok, supervisor}
-  end
-
-  defp start_socket(port) do
-    GenServer.call(:tree, {:spawn, :sockets, port})
-  end
-
-  defp start_world(world) do
-    GenServer.call(:tree, {:spawn, :worlds, world})
-  end
-
-  defp start_all_areas do
-    GenServer.cast(:tree, {:cast_to_all_children, :worlds, {:spawn_all_areas}})
   end
 end

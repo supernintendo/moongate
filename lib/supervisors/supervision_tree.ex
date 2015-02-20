@@ -1,5 +1,4 @@
 defmodule SupervisionTree do
-  use GenServer
   use Mixins.SocketWriter
   use Mixins.Store
   use Mixins.Translator
@@ -15,9 +14,9 @@ defmodule SupervisionTree do
   @doc """
     Cast on all children of a supervisor.
   """
-  def handle_cast({:cast_to_all_children, supervisor, cast}, registry) do
+  def handle_cast({:tell_async_all_children, supervisor, cast}, registry) do
     children = Supervisor.which_children(registry[supervisor])
-    Enum.map(children, &cast_to(&1, cast))
+    Enum.map(children, &tell_pid_async(elem(&1, 1), cast))
     {:noreply, registry}
   end
 
@@ -27,7 +26,7 @@ defmodule SupervisionTree do
   def handle_cast({:get, supervisor, event}, registry) do
     children = Supervisor.which_children(registry[supervisor])
     children_info = Enum.map(Enum.map(children, fn(child) -> elem(child, 1) end), fn(pid) ->
-      [GenServer.call(pid, :give_info), "|"]
+      [tell_pid_sync(pid, :give_info), "|"]
     end)
     write_to(event.origin, %{
       cast: :info,
@@ -63,7 +62,7 @@ defmodule SupervisionTree do
   """
   def handle_call({:spawn, supervisor, params}, _from, registry) do
     {:ok, child} = Supervisor.start_child(registry[supervisor], [params])
-    GenServer.cast(child, {:init})
+    tell_pid_async(child, {:init})
 
     {:reply, {:ok, child}, registry}
   end
@@ -71,11 +70,6 @@ defmodule SupervisionTree do
   # Accumulate child processes.
   defp assign_children(child, acc) do
     Map.put(acc, elem(child, 0), elem(child, 1))
-  end
-
-  defp cast_to(child, cast) do
-    {_, process, _, _} = child
-    GenServer.cast(process, cast)
   end
 
   # Return every child that isn't the supervision tree.

@@ -1,5 +1,4 @@
 defmodule World do
-  use GenServer
   use Mixins.AreaResolver
   use Mixins.Store
   use Mixins.Translator
@@ -23,7 +22,7 @@ defmodule World do
     updated = state
 
     if area_to_join do
-      GenServer.cast(area_to_join.process, {:join, event.origin})
+      tell_pid_async(area_to_join.process, {:join, event.origin})
       updated = set_in(updated, :origins, String.to_atom(":origin_#{event.origin.id}"), event.origin)
     end
 
@@ -39,7 +38,7 @@ defmodule World do
   end
 
   def handle_cast({:keypress, event}, state) do
-    GenServer.cast(String.to_atom("entity_#{event.origin.id}"), {:keypress, event.contents.key})
+    tell_async("entity", "#{event.origin.id}", {:keypress, event.contents.key})
     {:noreply, state}
   end
 
@@ -56,7 +55,7 @@ defmodule World do
   # Spawn process for an area and return its attributes with the spec
   # removed and the pid included.
   defp start_area(area) do
-    {:ok, pid} = GenServer.call(:tree, {:spawn, :areas, area.spec})
+    {:ok, pid} = spawn_new(:areas, area.spec)
     mark_area_as_started(area, pid)
   end
 end

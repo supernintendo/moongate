@@ -1,5 +1,4 @@
 defmodule Area.Process do
-  use GenServer
   use Mixins.Random
   use Mixins.SocketWriter
   use Mixins.Store
@@ -50,8 +49,8 @@ defmodule Area.Process do
   end
 
   defp new_entity(origin, area_id) do
-    {:ok, entity} = GenServer.call(:tree, {:spawn, :entities, origin})
-    GenServer.cast(entity, {:set_area, area_id})
+    {:ok, entity} = spawn_new(:entities, origin)
+    tell_pid_async(entity, {:set_area, area_id})
     entity
   end
 
@@ -61,7 +60,7 @@ defmodule Area.Process do
 
   defp broadcast_entities_to(entity, state) do
     id = Atom.to_string(elem(entity, 0))
-    GenServer.cast(String.to_atom("entity_" <> id), {
+    tell_async(:entity, id, {
       :tell_origin,
       :update,
       :entities,
@@ -70,7 +69,7 @@ defmodule Area.Process do
   end
 
   defp broadcast_tiles_to(entity_id, state) do
-    GenServer.cast(String.to_atom("entity_" <> entity_id), {
+    tell_async(:entity, entity_id, {
       :tell_origin,
       :update,
       :grid,
