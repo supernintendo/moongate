@@ -1,0 +1,10 @@
+-- Global classes
+Overlay = require 'game.ui.overlay.basic'
+Animation = require 'game.utility.animation'
+AnimatedOverlay = require 'game.ui.overlay.animated'
+TextOverlay = require 'game.ui.overlay.text'
+Input = require 'game.ui.menu.input'
+Grid = require 'game.game.grid'
+Tile = require 'game.game.tile'
+Entity = require 'game.game.entity'
+Scene = require 'game.scenes.scene'

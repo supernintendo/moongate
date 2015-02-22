@@ -65,6 +65,10 @@ function Scene:captureEvent(event, child)
   self.logic[event](self.logic, form)
 end
 
+function Scene:get(component, attribute)
+  return self.contents[component].instance[attribute]
+end
+
 -- Check if the JSON node represents a component in the scene.
 function Scene:isComponent(key)
   return key ~= "_Meta" and

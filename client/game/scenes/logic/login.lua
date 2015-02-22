@@ -24,6 +24,7 @@ end
 function Login:joinWorld()
   TCP:send('world join ' .. currentWorld)
   self.state.worldPicked = true
+  currentScene = 'game'
 end
 
 function Login:markAsLoggedIn()
@@ -37,7 +38,9 @@ function Login:tick()
   if authToken ~= 'anon' and not self.state.loggedIn then self:markAsLoggedIn() end
   if self.state.loggedIn and not self.state.worldsRequested then self:requestWorlds() end
   if self.state.worldsRequested and not self.state.worldPicked then self:pickWorld() end
-  if currentWorld and not self.state.worldPicked then self:joinWorld() end
+  if currentWorld and not self.state.worldPicked and self.parent:get("space", "alpha") == 0 then
+      self:joinWorld()
+  end
 end
 
 function Login:startIfNotStarted()
@@ -54,7 +57,6 @@ function Login:pickWorld()
   for key, value in pairs(Worlds.worlds) do
     if not self.state.world then
       currentWorld = value.id
-      currentScene = 'game'
     end
   end
 end

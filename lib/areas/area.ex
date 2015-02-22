@@ -1,5 +1,6 @@
 defmodule Area.Process do
   use Mixins.Random
+  use Mixins.Pool
   use Mixins.SocketWriter
   use Mixins.Store
   use Mixins.Translator
@@ -15,7 +16,9 @@ defmodule Area.Process do
   end
 
   def handle_cast({:enter, entity_id}, state) do
-    updated = set_in(state, :entities, String.to_atom(entity_id), %{
+    id = String.to_atom(entity_id)
+    updated = set_in(state, :entities, id, %{
+      id: id,
       x: random_of(8),
       y: random_of(8)
     })
@@ -30,14 +33,16 @@ defmodule Area.Process do
   end
 
   def handle_cast({:move, direction, entity_id}, state) do
-    entity = state.entities[String.to_atom(entity_id)]
+    id = String.to_atom(entity_id)
+    entity = state.entities[id]
     updated = state
 
     if entity do
       {x_to_check, y_to_check} = resolve_move(entity, direction)
 
       if tile_exists(x_to_check, y_to_check, state) do
-        updated = set_in(state, :entities, String.to_atom(entity_id), %{
+        updated = set_in(state, :entities, id, %{
+          id: id,
           x: x_to_check,
           y: y_to_check
         })
@@ -61,30 +66,18 @@ defmodule Area.Process do
   defp broadcast_entities_to(entity, state) do
     id = Atom.to_string(elem(entity, 0))
     tell_async(:entity, id, {
-      :tell_origin,
-      :update,
+      :notify,
       :entities,
-      Enum.reduce(state.entities, "", &serialize_entity(&1, &2))
+      for_pool(state.entities, [:id, :x, :y])
     })
   end
 
   defp broadcast_tiles_to(entity_id, state) do
     tell_async(:entity, entity_id, {
-      :tell_origin,
-      :update,
-      :grid,
-      Enum.reduce(state.tiles, "", &serialize_tile(&1, &2))
+      :notify,
+      :map,
+      for_pool(state.tiles, [:id, :x, :y, :tile])
     })
-  end
-
-  def serialize_entity(entity, acc) do
-    id = Atom.to_string(elem(entity, 0))
-    attributes = elem(entity, 1)
-    acc <> "#{id};#{attributes.x};#{attributes.y}|"
-  end
-
-  def serialize_tile(tile, acc) do
-    acc <> "#{tile.x};#{tile.y};#{tile.tile}|"
   end
 
   defp resolve_move(entity, direction) do

@@ -9,6 +9,7 @@ defmodule Generators.GreenAcres do
   defp green_acres(width, height) do
     0..width * height |> Enum.map(
       &%{
+        id: UUID.uuid4(:hex),
         tile: random_tile,
         x: trunc(rem(&1, width)),
         y: trunc(div(&1, height))}

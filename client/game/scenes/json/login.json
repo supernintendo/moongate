@@ -20,8 +20,8 @@
             ["moon", "fadedIn", 1.3]
         ],
         "loggedIn": [
-            ["space", "fadedIn", 1],
-            ["moon", "fadedIn", 1.25],
+            ["space", "_Default", 1],
+            ["moon", "_Default", 1.25],
             ["inputUsername", "submitted"]
             ["inputPassword", "submitted"]
         ]

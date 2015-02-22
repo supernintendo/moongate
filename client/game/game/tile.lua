@@ -1,8 +1,9 @@
 local Tile = class('Tile')
 
-function Tile:initialize(x, y, parent)
-  self.x = x
-  self.y = y
+function Tile:initialize(params, parent)
+  self.x = params.x
+  self.y = params.y
+  self.image = params.image
   self.fadeInSpeed = 8
   self.parent = parent
   self.alpha = 0
@@ -16,7 +17,7 @@ function Tile:draw()
 
     love.graphics.setColor(255, 255, 255, self.alpha)
     love.graphics.draw(
-      self.image,
+      IMAGES[self.image],
       self.x * self.parent.spaceX,
       self.y * self.parent.spaceY
     )

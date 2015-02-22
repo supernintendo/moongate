@@ -1,8 +1,8 @@
 local Entity = class('Entity')
 
-function Entity:initialize(x, y, parent)
-  self.x = x
-  self.y = y
+function Entity:initialize(params, parent)
+  self.x = params.x
+  self.y = params.y
   self.fadeInSpeed = 8
   self.parent = parent
   self.image = IMAGES["human"]

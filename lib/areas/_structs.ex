@@ -5,6 +5,7 @@ defmodule Area do
             id: nil,
             spec: nil,
             started: nil,
+            tiles: [],
             timed_events: nil,
             process: nil,
             x: nil,

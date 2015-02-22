@@ -1,11 +1,10 @@
+require 'game.env.deps'
+require 'game.env.classes'
 require 'game.env.constants'
 require 'game.env.globals'
 require 'game.env.images'
-
-local scenes = {
-  login = Scene:new('login'),
-  game = Scene:new('game')
-}
+require 'game.env.pools'
+require 'game.env.singletons'
 
 function love.load()
   -- Listen for new messages from the server
@@ -13,8 +12,18 @@ function love.load()
 end
 
 function love.draw()
+  -- Create the scene if it doesn't exist.
+  if not scenes[currentScene] then
+    scenes[currentScene] = Scene:new(currentScene)
+  end
+
+  -- Non drawing related tick events.
+  MouseState:tick()
+  NetworkEvents:tick()
+
+  -- Tick the scene
   scenes[currentScene]:tick()
-  tick()
+  love.window.setTitle('Moongate - ' .. currentScene .. ' (' .. love.timer.getFPS() .. ' fps)')
 end
 
 function love.keypressed(key)
@@ -23,12 +32,4 @@ end
 
 function love.textinput(t)
   KeyState:enter(t)
-end
-
-function tick()
-  -- Non drawing related tick events.
-  MouseState:tick()
-  NetworkEvents:tick()
-
-  love.window.setTitle('Moongate - ' .. currentScene .. ' (' .. love.timer.getFPS() .. ' fps)')
 end
