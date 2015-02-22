@@ -10,7 +10,7 @@ defmodule Auth do
 
   def handle_cast({:login, event, from}, state) do
     case authenticate(event.contents) do
-      {:ok, message} ->
+      {:ok, _} ->
         client_id = "client_" <> UUID.uuid4(:hex)
         token = %AuthToken{email: event.contents[:email], source: event.origin}
         state_mod = Map.put(state, String.to_atom(client_id), token)
@@ -22,7 +22,7 @@ defmodule Auth do
         tell_pid_async(from, {:auth, token.identity})
         Say.pretty("#{client_id} logged in.", :green)
         {:noreply, state_mod}
-      {_, message} ->
+      {_, _} ->
         Say.pretty("Failed log in attempt from anonymous #{Port.info(event.origin)[:name]} connection.", :red)
         {:noreply, state}
     end
@@ -32,7 +32,7 @@ defmodule Auth do
     Make a new account with the given params if we're allowed.
   """
   def handle_cast({:register, event}, state) do
-    {status, response} = create_account(event.contents)
+    {status, _} = create_account(event.contents)
 
     if status == :ok do
       IO.puts "account created"

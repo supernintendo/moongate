@@ -12,6 +12,10 @@ defmodule World do
     link(Map.merge(%World.State{}, params), "world", "#{params.id}")
   end
 
+  def handle_call(:give_info, _from, state) do
+    {:reply, "#{state.id};#{state.name}", state}
+  end
+
   def handle_cast({:init}, state) do
     Say.pretty("World '#{state.name}' created.", :blue)
     {:noreply, state}
@@ -31,10 +35,6 @@ defmodule World do
 
   def handle_cast({:init_all_inactive_areas}, state) do
     {:noreply, state}
-  end
-
-  def handle_call(:give_info, _from, state) do
-    {:reply, "#{state.id};#{state.name}", state}
   end
 
   def handle_cast({:keypress, event}, state) do

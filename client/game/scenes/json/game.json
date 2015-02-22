@@ -1,22 +1,23 @@
 {
-    "_meta": {
+    "_Meta": {
         "name": "Game",
-        "startingComp": "default"
     },
-    "_comps": {
-        "default": [
-            ["grids", "map"]
+    "_Comps": {
+        "_Default": [
+            "grid"
         ]
     },
-    "grids": {
-      "map": {
-        "space_x": 64,
-        "space_y": 64,
-        "subs": [
-            "entities"
+    "grid": {
+        "_Class": "Grid",
+        "_Params": [
+            16,
+            16,
+            64,
+            64,
+            ["entities"]
         ],
-        "height": 16,
-        "width": 16
-      }
+        "_States": {
+            "_Default": {}
+        }
     }
 }

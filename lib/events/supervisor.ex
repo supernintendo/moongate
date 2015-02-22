@@ -8,7 +8,7 @@ defmodule Events.Supervisor do
   @doc """
     Prepare the events listener supervisor.
   """
-  def init(params) do
+  def init(_) do
     children = [worker(Events.Listener, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end

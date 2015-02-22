@@ -3,8 +3,8 @@ require 'game.env.globals'
 require 'game.env.images'
 
 local scenes = {
-  login = Scene:new('game/scenes/json/login.json', 'game.scenes.logic.login'),
-  game = Scene:new('game/scenes/json/game.json', 'game.scenes.logic.game')
+  login = Scene:new('login'),
+  game = Scene:new('game')
 }
 
 function love.load()
@@ -30,5 +30,5 @@ function tick()
   MouseState:tick()
   NetworkEvents:tick()
 
-  love.window.setTitle('Moongate - testclient (' .. love.timer.getFPS() .. ' fps)')
+  love.window.setTitle('Moongate - ' .. currentScene .. ' (' .. love.timer.getFPS() .. ' fps)')
 end

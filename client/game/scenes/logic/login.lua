@@ -12,18 +12,12 @@ function Login:initialize(parent)
   }
 end
 
-function Login:captureInputEvent(event, group)
-  if event == 'login' and (not self.state.logInRequested or self.state.loggedIn) then
-    self:attemptLogin(group.username, group.password)
-  end
-end
-
-function Login:attemptLogin(username, password)
+function Login:login(form)
   self.state.logInRequested = true
   TCP:send(
     'auth login '
-    .. username.textOverlay.value
-    .. ' ' .. password.textOverlay.value
+    .. form.inputUsername.textOverlay.value
+    .. ' ' .. form.inputPassword.textOverlay.value
   )
 end
 

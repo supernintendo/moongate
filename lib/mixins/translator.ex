@@ -1,5 +1,5 @@
 defmodule Mixins.Translator do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       use GenServer
       defp get(namespace, params) do

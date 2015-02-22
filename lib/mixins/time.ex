@@ -1,5 +1,5 @@
 defmodule Mixins.Time do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       # Return a map containing the difference between two UNIX
       # timestamps.

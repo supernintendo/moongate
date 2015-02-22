@@ -1,4 +1,15 @@
 {
+    "pools": {
+        "tiles": {
+            "args": ["id", "x", "y"]
+        },
+        "entities": {
+            "args": ["id", "x", "y"]
+        },
+        "messages": {
+            "args": ["contents"]
+        }
+    },
     "ports": [
         2593,
         2594,

@@ -1,6 +1,6 @@
 # Some methods for helping manipulate state within lists.
 defmodule Mixins.Store do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       # Return map with one of its lists updated to contain a new item.
       defp add_to(map, key_of_list, item) do

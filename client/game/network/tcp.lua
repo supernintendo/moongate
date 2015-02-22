@@ -10,7 +10,7 @@ function TCP:listen()
 end
 
 function TCP:send(message)
-  self.socket:send('BEGIN' .. ' ' .. authToken .. ' ' .. message .. ' ' .. 'END')
+  self.socket:send('begin' .. ' ' .. authToken .. ' ' .. message .. ' ' .. 'end')
 end
 
 return TCP

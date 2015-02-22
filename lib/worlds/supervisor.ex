@@ -8,7 +8,7 @@ defmodule Worlds.Supervisor do
   @doc """
     Prepare the worlds supervisor.
   """
-  def init(params) do
+  def init(_) do
     children = [worker(World, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end

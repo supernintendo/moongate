@@ -39,7 +39,7 @@ defmodule SupervisionTree do
   @doc """
     Keep track of all master supervisors.
   """
-  def handle_call({:register, supervisor}, _from, registry) do
+  def handle_call({:register, supervisor}, _from, _) do
     updated = supervisor
     |> Supervisor.which_children
     |> Enum.filter(&not_self(&1))
