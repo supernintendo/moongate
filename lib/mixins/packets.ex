@@ -1,5 +1,5 @@
 defmodule Mixins.Packets do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       # Remove escape characters from a string, split it on whitespaces
       # and return a list with the contents.
@@ -7,7 +7,7 @@ defmodule Mixins.Packets do
         if String.valid?(string) do
           list = String.split(Regex.replace(~r/[\n\b\t\r]/, string, ""))
 
-          if hd(list) == "BEGIN" && List.last(list) == "END" do
+          if hd(list) == "begin" && List.last(list) == "end" do
             tl(list)
           else
             [:invalid_message]

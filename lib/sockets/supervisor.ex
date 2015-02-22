@@ -8,7 +8,7 @@ defmodule Sockets.Supervisor do
   @doc """
     Prepare the sockets listener supervisor.
   """
-  def init(ports) do
+  def init(_) do
     children = [worker(Sockets.Listener, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end

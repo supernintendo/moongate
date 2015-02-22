@@ -1,5 +1,5 @@
 defmodule Mixins.SocketWriter do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       # Send a message to a socket connection.
       defp write_to(target, message) do

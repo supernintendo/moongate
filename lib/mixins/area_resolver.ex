@@ -1,5 +1,5 @@
 defmodule Mixins.AreaResolver do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       # Return the correct params to use for a newly spawned area.
       defp mark_area_as_started(area, pid) do

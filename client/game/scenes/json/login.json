@@ -1,113 +1,105 @@
 {
-    "_meta": {
+    "_Meta": {
         "name": "Login",
-        "startingComp": "default"
     },
-    "_comps": {
-        "default": [
-            ["overlays", "space"],
-            ["animatedOverlays", "moon"],
-            ["inputs", "username"],
-            ["inputs", "password"]
-        ],
-        "displayWorldList": [
-            ["overlays", "space"],
-            ["animatedOverlays", "moon"],
-            ["iterators", "worldSelect"]
+    "_Comps": {
+        "_Default": [
+            "space",
+            "moon",
+            "inputUsername",
+            "inputPassword"
         ],
         "loggedIn": [
-            ["overlays", "space"],
-            ["animatedOverlays", "moon"]
+            "space",
+            "moon"
         ]
     },
-    "animatedOverlays": {
-        "moon": {
-            "defaultState": "initial",
-            "src": "assets/gumps/moon.json",
-            "states": {
-                "initial": {
-                    "alpha": 0,
-                    "x": "center",
-                    "y": 100
-                },
-                "dark": {
-                    "alpha": 100
-                },
-                "out": {
-                    "alpha": 0
-                }
-            }
-        }
-    },
-    "inputs": {
-        "username": {
-            "defaultState": "initial",
-            "src": "assets/gumps/input.png",
-            "states": {
-                "initial": {
-                    "groupName": "login",
-                    "mask": false,
-                    "submitEvent": "login",
-                    "text": "Username",
-                    "textX": "center",
-                    "textY": 447,
-                    "x": "center",
-                    "y": 440
-                },
-                "out": {
-                    "disabled": true
-                }
-            }
-        },
-        "password": {
-            "defaultState": "initial",
-            "src": "assets/gumps/input.png",
-            "states": {
-                "initial": {
-                    "groupName": "login",
-                    "mask": true,
-                    "submitEvent": "login",
-                    "text": "Password",
-                    "textX": "center",
-                    "textY": 487,
-                    "x": "center",
-                    "y": 480
-                },
-                "out": {
-                    "disabled": true
-                }
-            }
-        }
-    },
-    "overlays": {
-        "space": {
-            "defaultState": "initial",
-            "src": "assets/gumps/space.png",
-            "states": {
-                "initial": {
-                    "alpha": 0,
-                    "x": 0,
-                    "y": 0
-                },
-                "dark": {
-                    "alpha": 50
-                },
-                "out": {
-                    "alpha": 0
-                }
-            }
-        }
-    },
-    "transitions": {
+    "_Transitions": {
         "fadeIn": [
-            ["overlays", "space", "dark", 0.1],
-            ["animatedOverlays", "moon", "dark", 1.3]
+            ["space", "fadedIn", 0.1],
+            ["moon", "fadedIn", 1.3]
         ],
         "loggedIn": [
-            ["overlays", "space", "out", 1],
-            ["animatedOverlays", "moon", "out", 1.25],
-            ["inputs", "username", "out", 0],
-            ["inputs", "password", "out", 0]
+            ["space", "fadedIn", 1],
+            ["moon", "fadedIn", 1.25],
+            ["inputUsername", "submitted"]
+            ["inputPassword", "submitted"]
         ]
+    },
+    "inputUsername": {
+        "_Class": "Input",
+        "_Params": [
+            "::parent",
+             "assets/gumps/input.png",
+            "center",
+            440,
+            "Username",
+            "center",
+            447,
+            false,
+            "login"
+        ],
+        "_States": {
+            "_Default": {
+                "disabled": false
+            },
+            "submitted": {
+                "disabled": true
+            }
+        }
+    },
+    "inputPassword": {
+        "_Class": "Input",
+        "_Params": [
+            "::parent",
+             "assets/gumps/input.png",
+            "center",
+            480,
+            "Password",
+            "center",
+            487,
+            true,
+            "login"
+        ],
+        "_States": {
+            "_Default": {
+                "disabled": false
+            },
+            "submitted": {
+                "disabled": true
+            }
+        }
+    },
+    "moon": {
+        "_Class": "AnimatedOverlay",
+        "_Params": [
+            "assets/gumps/moon.json",
+            "center",
+            100
+        ],
+        "_States": {
+            "_Default": {
+                "alpha": 0
+            },
+            "fadedIn": {
+                "alpha": 100
+            }
+        }
+    },
+    "space": {
+        "_Class": "Overlay",
+        "_Params": [
+            "assets/gumps/space.png",
+            0,
+            0
+        ],
+        "_States": {
+            "_Default": {
+                "alpha": 0
+            },
+            "fadedIn": {
+                "alpha": 50
+            }
+        }
     }
 }

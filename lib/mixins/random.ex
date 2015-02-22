@@ -1,5 +1,5 @@
 defmodule Mixins.Random do
-  defmacro __using__(opts) do
+  defmacro __using__(_) do
     quote do
       defp random do
         :random.uniform
