@@ -1,6 +1,6 @@
 local Grid = class('Grid')
 
-function Grid:initialize(height, width, spaceX, spaceY, subs)
+function Grid:initialize(height, width, spaceX, spaceY, watchers)
   self.height = height
   self.width = width
   self.offsetX = 0
@@ -8,79 +8,43 @@ function Grid:initialize(height, width, spaceX, spaceY, subs)
   self.spaceX = spaceX
   self.spaceY = spaceY
 
-  self.entities = {}
-  self.tiles = {}
-  self.subs = subs
-  self:createTiles()
+  self.layers = {}
+  self.watchers = watchers
 end
 
-function Grid:checkGridStateForUpdates()
-  if GridState.update then
-    self:updateFromContents(GridState.contents)
-    GridState.update = false
-  end
-end
-
-function Grid:checkSubsForUpdates()
-  for i, sub in ipairs(self.subs) do
-    if pub[sub] and pub[sub].update then
-      self:updateFromSub(sub, pub[sub].contents)
-      pub[sub].update = false
+function Grid:checkPoolsForUpdates()
+  for i, watcher in ipairs(self.watchers) do
+    if pools[watcher[1]] and pools[watcher[1]].update then
+      self:updateFromPool(watcher, pools[watcher[1]].contents)
+      pools[watcher[1]].update = false
     end
   end
-end
-
-function Grid:createTiles()
-  local tiles = {}
-
-  for row = 0, self.height - 1 do
-    for column = 0, self.width - 1 do
-      tiles['tile_' .. column .. '_' .. row] = Tile:new(column, row, self)
-    end
-  end
-
-  self.tiles = tiles
 end
 
 function Grid:draw()
-  self:checkGridStateForUpdates()
-  self:checkSubsForUpdates()
+  self:checkPoolsForUpdates()
 
-  for key, tile in pairs(self.tiles) do
-    tile:draw()
-  end
-
-  for key, entity in pairs(self.entities) do
-    entity:draw()
-  end
-end
-
-function Grid:updateFromContents(contents)
-  for row = 0, self.height - 1 do
-    for column = 0, self.width - 1 do
-      local tile = contents['tile_' .. (column + self.offsetX) .. '_' .. (row + self.offsetY)]
-
-      if tile then
-        self.tiles['tile_' .. column .. '_' .. row].image = IMAGES[tile]
+  for i, watcher in ipairs(self.watchers) do
+    if self.layers[watcher[1]] then
+      for id, instance in pairs(self.layers[watcher[1]]) do
+        instance:draw()
       end
     end
   end
 end
 
-function Grid:updateEntities(contents)
-  for i, entity in ipairs(contents) do
-    if self.entities[entity.id] then
-      self.entities[entity.id].x = entity.x
-      self.entities[entity.id].y = entity.y
-    else
-      self.entities[entity.id] = Entity:new(entity.x, entity.y, self)
-    end
-  end
-end
+function Grid:updateFromPool(watcher, contents)
+  local poolName, class, key = unpack(watcher)
 
-function Grid:updateFromSub(sub, contents)
-  if sub == "entities" then
-    self:updateEntities(contents)
+  for i, instance in ipairs(contents) do
+    if not self.layers[poolName] then self.layers[poolName] = {} end
+    if self.layers[poolName][instance[key]] then
+      for attribute, value in pairs(instance) do
+        self.layers[poolName][instance[key]][attribute] = value
+      end
+    else
+      self.layers[poolName][instance[key]] = _G[class]:new(instance, self)
+    end
   end
 end
 

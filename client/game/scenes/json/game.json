@@ -14,7 +14,10 @@
             16,
             64,
             64,
-            ["entities"]
+            [
+                ["map", "Tile", "id"],
+                ["entities", "Entity", "id"]
+            ]
         ],
         "_States": {
             "_Default": {}

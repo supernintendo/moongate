@@ -32,9 +32,9 @@ defmodule Entity.Process do
     {:noreply, Map.put(state, :area_id, area_id)}
   end
 
-  def handle_cast({:tell_origin, cast, namespace, message}, state) do
+  def handle_cast({:notify, namespace, message}, state) do
     write_to(state.origin, %{
-      cast: cast,
+      cast: :update,
       namespace: namespace,
       value: message
     })
