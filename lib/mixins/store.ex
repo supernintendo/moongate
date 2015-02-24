@@ -23,10 +23,7 @@ defmodule Mixins.Store do
 
       # Return the map with one of its lists updated to exclude an item.
       defp drop_from(map, key_of_list, to_drop) do
-        Map.merge(map, Map.put(%{},
-          key_of_list,
-            Enum.filter(Map.get(map, key_of_list), fn(item) ->
-          item != to_drop end)))
+        Map.merge(map, Map.delete(Map.get(map, key_of_list), to_drop))
       end
 
       # Set key value in a state map.

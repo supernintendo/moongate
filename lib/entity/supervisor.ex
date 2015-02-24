@@ -2,7 +2,7 @@ defmodule Entity.Supervisor do
   use Supervisor
 
   def start_link do
-    Supervisor.start_link(__MODULE__, nil, [name: :entities])
+    Supervisor.start_link(__MODULE__, nil, [name: :entity])
   end
 
   @doc """

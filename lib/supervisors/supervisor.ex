@@ -14,7 +14,7 @@ defmodule Moongate.Supervisor do
       worker(Db.Repo, [], [id: :repo]),
       worker(Auth, [], [id: :auth]),
       supervisor(Areas.Supervisor, [], [id: :areas]),
-      supervisor(Entity.Supervisor, [], [id: :entities]),
+      supervisor(Entity.Supervisor, [], [id: :entity]),
       supervisor(Events.Supervisor, [], [id: :events]),
       supervisor(Sockets.Supervisor, [], [id: :sockets]),
       supervisor(Worlds.Supervisor, [], [id: :worlds])

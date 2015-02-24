@@ -11,6 +11,15 @@ defmodule Entity.Process do
     {:noreply, state}
   end
 
+  def handle_cast({:disconnect}, state) do
+    if state.area_id do
+      tell_async(:area, state.area_id, {:leave, state.origin.id})
+    end
+
+    kill_by_pid(:entity, self())
+    {:noreply, nil}
+  end
+
   def handle_cast({:keypress, event}, state) do
     key = event.contents.key
 
