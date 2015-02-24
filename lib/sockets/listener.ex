@@ -34,6 +34,7 @@ defmodule Sockets.Listener do
       # Client disconnects.
       Say.pretty("Socket with id #{id} disconnected.", :magenta)
       kill_by_pid(:events, pid)
+      tell_async(:entity, id, {:disconnect})
       socket |> Socket.close
       :close
     else

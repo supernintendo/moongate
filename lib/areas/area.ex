@@ -15,6 +15,14 @@ defmodule Area.Process do
     {:noreply, state}
   end
 
+  def handle_cast({:leave, entity_id}, state) do
+    id = String.to_atom(entity_id)
+    updated = drop_from(state, :entities, id)
+
+    broadcast_entities_to_all(updated)
+    {:noreply, updated}
+  end
+
   def handle_cast({:enter, entity_id}, state) do
     id = String.to_atom(entity_id)
     updated = set_in(state, :entities, id, %{
@@ -54,7 +62,7 @@ defmodule Area.Process do
   end
 
   defp new_entity(origin, area_id) do
-    {:ok, entity} = spawn_new(:entities, origin)
+    {:ok, entity} = spawn_new(:entity, origin)
     tell_pid_async(entity, {:set_area, area_id})
     entity
   end

@@ -49,9 +49,9 @@ defmodule SupervisionTree do
   end
 
   @doc """
-    Kill a new child process given its PID.
+    Kill a child process given its PID.
   """
-  def handle_call({:kill, supervisor, pid}, _from, registry) do
+  def handle_call({:kill_by_pid, supervisor, pid}, _from, registry) do
     :ok = Supervisor.terminate_child(registry[supervisor], pid)
 
     {:reply, {:ok, nil}, registry}
