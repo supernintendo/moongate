@@ -18,7 +18,6 @@ defmodule Area.Process do
   def handle_cast({:leave, entity_id}, state) do
     id = String.to_atom(entity_id)
     updated = drop_from(state, :entities, id)
-
     broadcast_entities_to_all(updated)
     {:noreply, updated}
   end

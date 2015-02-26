@@ -35,7 +35,9 @@ end
 
 function Grid:updateFromPool(watcher, contents)
   local poolName, class, key = unpack(watcher)
+  local safe = {}
 
+  -- Add or update new instances
   for i, instance in ipairs(contents) do
     if not self.layers[poolName] then self.layers[poolName] = {} end
     if self.layers[poolName][instance[key]] then
@@ -44,6 +46,14 @@ function Grid:updateFromPool(watcher, contents)
       end
     else
       self.layers[poolName][instance[key]] = _G[class]:new(instance, self)
+    end
+    safe[instance[key]] = true
+  end
+
+  -- Prune old instances
+  for index, layer in pairs(self.layers[poolName]) do
+    if layer[key] and not safe[layer[key]] then
+      self.layers[poolName][layer[key]] = nil
     end
   end
 end
