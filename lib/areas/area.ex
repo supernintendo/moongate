@@ -55,7 +55,6 @@ defmodule Area.Process do
         })
         broadcast_entities_to_all(updated)
       end
-      broadcast_tiles_to(entity_id, state)
     end
     {:noreply, updated}
   end

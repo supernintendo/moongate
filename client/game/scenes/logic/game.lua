@@ -1,6 +1,7 @@
 local Game = class('Game')
 
 function Game:initialize(parent)
+  love.keyboard.setKeyRepeat(true)
   self.parent = parent
 end
 

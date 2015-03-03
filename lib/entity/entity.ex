@@ -1,4 +1,5 @@
 defmodule Entity.Process do
+  use Timex
   use Mixins.SocketWriter
   use Mixins.Translator
 
@@ -22,14 +23,17 @@ defmodule Entity.Process do
 
   def handle_cast({:keypress, event}, state) do
     key = event.contents.key
+    updated = state
 
     if state.area_id do
-      if key == "w" or key == "a" or key == "s" or key == "d" do
+      if (key == "w" or key == "a" or key == "s" or key == "d") and can_move(state.last_move_time) do
         tell_async(:area, state.area_id, {:move, key, state.origin.id})
+
+        updated = Map.put(updated, :last_move_time, Time.now(:msecs))
       end
     end
 
-    {:noreply, state}
+    {:noreply, updated}
   end
 
   def handle_cast({:set_area, area_id}, state) do
@@ -48,5 +52,13 @@ defmodule Entity.Process do
       value: message
     })
     {:noreply, state}
+  end
+
+  def can_move(last_move_time) do
+    if last_move_time do
+      (Time.now(:msecs) - last_move_time) >= 75
+    else
+      true
+    end
   end
 end
