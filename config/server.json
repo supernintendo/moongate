@@ -1,4 +1,5 @@
 {
+    "no_auth": true,
     "ports": [
         2593,
         2594,
