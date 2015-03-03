@@ -5,11 +5,17 @@ defmodule Auth do
   use Mixins.Translator
 
   def start_link do
-    link(%{}, "auth")
+    link(%{no_auth: nil}, "auth")
   end
 
   def handle_cast({:login, event, from}, state) do
-    case authenticate(event.contents) do
+    if state.no_auth do
+      auth_status = {:ok, nil}
+    else 
+      auth_status = authenticate(event.contents)
+    end
+
+    case auth_status do
       {:ok, _} ->
         client_id = "client_" <> UUID.uuid4(:hex)
         token = %AuthToken{email: event.contents[:email], source: event.origin}
@@ -40,6 +46,12 @@ defmodule Auth do
       IO.puts "error creating account"
     end
     {:noreply, state}
+  end
+
+  def handle_call({:no_auth, value}, _from, state) do
+    updated = Map.put(state, :no_auth, value)
+
+    {:reply, nil, updated}
   end
 
   # Check if the requested login is correct.

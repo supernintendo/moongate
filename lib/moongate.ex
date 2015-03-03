@@ -16,6 +16,10 @@ defmodule Moongate do
     config["worlds"] |> Enum.map(&spawn_new(:worlds, &1))
     tell_all_async(:worlds, {:spawn_all_areas})
 
+    if config["no_auth"] do
+      tell_sync(:auth, {:no_auth, config["no_auth"]})
+    end
+
     {:ok, supervisor}
   end
 end
