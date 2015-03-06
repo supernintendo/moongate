@@ -43,6 +43,7 @@ function Grid:updateFromPool(watcher, contents)
     if self.layers[poolName][instance[key]] then
       for attribute, value in pairs(instance) do
         self.layers[poolName][instance[key]][attribute] = value
+        self.layers[poolName][instance[key]].updated = true
       end
     else
       self.layers[poolName][instance[key]] = _G[class]:new(instance, self)
