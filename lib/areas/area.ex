@@ -23,11 +23,16 @@ defmodule Area.Process do
   end
 
   def handle_cast({:enter, entity_id}, state) do
+    start_x = random_of(8)
+    start_y = random_of(8)
+
     id = String.to_atom(entity_id)
     updated = set_in(state, :entities, id, %{
       id: id,
-      x: random_of(8),
-      y: random_of(8)
+      last_x: start_x,
+      last_y: start_y,
+      x: start_x,
+      y: start_y
     })
     broadcast_entities_to_all(updated)
     broadcast_tiles_to(entity_id, updated)
@@ -50,6 +55,8 @@ defmodule Area.Process do
       if tile_exists(x_to_check, y_to_check, state) do
         updated = set_in(state, :entities, id, %{
           id: id,
+          last_x: entity.x,
+          last_y: entity.y,
           x: x_to_check,
           y: y_to_check
         })
@@ -74,7 +81,7 @@ defmodule Area.Process do
     tell_async(:entity, id, {
       :notify,
       :entities,
-      for_pool(state.entities, [:id, :x, :y])
+      for_pool(state.entities, [:id, :x, :y, :last_x, :last_y])
     })
   end
 

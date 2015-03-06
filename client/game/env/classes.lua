@@ -2,6 +2,7 @@
 Overlay = require 'game.ui.overlay.basic'
 Animation = require 'game.utility.animation'
 AnimatedOverlay = require 'game.ui.overlay.animated'
+Tween = require 'game.utility.tween'
 TextOverlay = require 'game.ui.overlay.text'
 Input = require 'game.ui.menu.input'
 Grid = require 'game.game.grid'
