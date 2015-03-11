@@ -1,8 +1,8 @@
 # The Auth module manages login and new account creation.
 defmodule Auth do
-  use Mixins.SocketWriter
-  use Mixins.Store
-  use Mixins.Translator
+  use Macros.SocketWriter
+  use Macros.Store
+  use Macros.Translator
 
   def start_link do
     link(%{no_auth: nil}, "auth")

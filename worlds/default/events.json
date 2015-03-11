@@ -1,0 +1,33 @@
+{
+  "player": {
+    "Login": {
+      "arguments": ["email", "password"],
+      "include": [":self"],
+      "message": "login",
+      "to": "auth"
+    },
+    "Register": {
+      "arguments": ["email", "password"],
+      "to": "auth",
+      "message": "register"
+    },
+    "Join": {
+      "auth": true,
+      "arguments": ["world_id"],
+      "to": "world",
+      "by_id": "world_id"
+    },
+    "KeyPress": {
+      "auth": true,
+      "arguments": ["key"],
+      "to": "world",
+      "by_id": ":origin.id"
+    },
+    "Get": {
+      "auth": true,
+      "arguments": ["get"],
+      "to": "events",
+      "by_id": ":origin.id"    
+    }
+  }
+}

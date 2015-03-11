@@ -5,7 +5,8 @@ defmodule Moongate.Mixfile do
     [app: :moongate,
      version: "0.0.1",
      elixir: "~> 1.0.0",
-     deps: deps]
+     deps: deps,
+     default_task: "moongate.up"]
   end
 
   # Configuration for the OTP application

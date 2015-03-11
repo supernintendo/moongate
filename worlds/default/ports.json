@@ -1,0 +1,12 @@
+{
+  "2593": {
+    "anon": true,
+    "events": "player",
+    "type": "TCP"
+  },
+  "2594": {
+    "anon": true,
+    "events": "player",
+    "type": "TCP"
+  }
+}

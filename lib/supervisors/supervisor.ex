@@ -16,8 +16,8 @@ defmodule Moongate.Supervisor do
       supervisor(Areas.Supervisor, [], [id: :areas]),
       supervisor(Entity.Supervisor, [], [id: :entity]),
       supervisor(Events.Supervisor, [], [id: :events]),
-      supervisor(Sockets.Supervisor, [], [id: :sockets]),
-      supervisor(Worlds.Supervisor, [], [id: :worlds])
+      supervisor(Sessions.Supervisor, [], [id: :sessions]),
+      supervisor(Sockets.Supervisor, [], [id: :sockets])
     ]
     supervise(children, strategy: :one_for_one)
   end
