@@ -1,7 +1,7 @@
 defmodule SupervisionTree do
-  use Mixins.SocketWriter
-  use Mixins.Store
-  use Mixins.Translator
+  use Macros.SocketWriter
+  use Macros.Store
+  use Macros.Translator
 
   def start_link do
     link(%{}, "tree")

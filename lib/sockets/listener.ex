@@ -1,6 +1,6 @@
 defmodule Sockets.Listener do
-  use Mixins.Packets
-  use Mixins.Translator
+  use Macros.Packets
+  use Macros.Translator
 
   @doc """
     Listen for incoming socket messages on a port.

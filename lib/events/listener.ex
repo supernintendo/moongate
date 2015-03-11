@@ -1,8 +1,8 @@
 defmodule Events.Listener do
-  use Mixins.Packets
-  use Mixins.SocketWriter
-  use Mixins.Store
-  use Mixins.Translator
+  use Macros.Packets
+  use Macros.SocketWriter
+  use Macros.Store
+  use Macros.Translator
 
   def start_link(id) do
     link(%EventListener{id: id}, "events", "#{id}")
@@ -38,10 +38,10 @@ defmodule Events.Listener do
       %{ cast: :key, to: :game } ->
         authenticated_action(event, token, state)
 
-      %{ to: :world } ->
+      %{ to: :session } ->
         authenticated_action(event, token, state)
 
-      %{ to: :worlds } ->
+      %{ to: :sessions } ->
         authenticated_action(event, token, state)
 
       _ ->
@@ -60,11 +60,11 @@ defmodule Events.Listener do
         %{ cast: :key, to: :game } ->
           p = expect_from(event, {:key})
           tell_async(:entity, "#{event.origin.id}", {:keypress, p})
-        %{ cast: :join, to: :world } ->
-          p = expect_from(event, {:world_id})
-          tell_async(:world, "#{p.contents.world_id}", {:join, p})
-        %{ cast: :get, to: :worlds } ->
-          get(:worlds, event)
+        %{ cast: :join, to: :session } ->
+          p = expect_from(event, {:session_id})
+          tell_async(:session, "#{p.contents.session_id}", {:join, p})
+        %{ cast: :get, to: :sessions } ->
+          get(:sessions, event)
         _ ->
           nil
       end

@@ -1,5 +1,5 @@
 defmodule Generators.GreenAcres do
-  use Mixins.Random
+  use Macros.Random
 
   def init(params) do
     seed_random

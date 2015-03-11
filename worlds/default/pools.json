@@ -1,0 +1,21 @@
+{
+  "Entities": [
+    "id",
+    "x",
+    "y",
+    "last_x",
+    "last_y",
+    "image"
+  ],
+  "Grid": [
+    "id",
+    "x",
+    "y",
+    "image"
+  ],
+  "Messages": [
+    "id",
+    "from",
+    "contents"
+  ]
+}
