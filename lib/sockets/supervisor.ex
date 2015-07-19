@@ -9,7 +9,7 @@ defmodule Sockets.Supervisor do
     Prepare the sockets listener supervisor.
   """
   def init(_) do
-    children = [worker(Sockets.Listener, [], [])]
+    children = [worker(Sockets.TCPListener, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end
 end

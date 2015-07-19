@@ -1,4 +1,4 @@
-defmodule Sockets.Listener do
+defmodule Sockets.TCPListener do
   use Macros.Packets
   use Macros.Translator
 
@@ -47,6 +47,7 @@ defmodule Sockets.Listener do
   # Deal with a message received from a connected client.
   defp handler(packet, port, id) do
     incoming = packet_to_list(packet)
+    IO.puts packet
 
     if hd(incoming) != :invalid_message do
       tell_async(:events, id, {:event, tl(incoming), hd(incoming), port})

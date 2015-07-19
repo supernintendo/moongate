@@ -2,7 +2,12 @@
     "folders":
     [
         {
-            "file_exclude_patterns": ["*.lock"],
+            "file_exclude_patterns": [
+                "*.lock",
+                "*.sublime-project",
+                ".gitignore",
+                "LICENSE.txt"
+            ],
             "folder_exclude_patterns": ["_build", "deps"],
             "name": "Moongate",
             "path": "/"
