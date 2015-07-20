@@ -1,4 +1,4 @@
-defmodule Sockets.TCPListener do
+defmodule Sockets.TCPSocket do
   use Macros.Packets
   use Macros.Translator
 
@@ -6,11 +6,11 @@ defmodule Sockets.TCPListener do
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    link(%SocketListener{port: port}, "socket", "#{port}")
+    link(%TCPSocket{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Listening on port #{state.port}...", :green)
+    Say.pretty("Listening on port #{state.port} (TCP)...", :green)
     Socket.TCP.listen!(state.port, packet: 0)
     |> accept
   end

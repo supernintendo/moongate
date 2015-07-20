@@ -2,6 +2,7 @@ defmodule Macros.Translator do
   defmacro __using__(_) do
     quote do
       use GenServer
+
       defp pid_for_name(namespace, id) do
         Process.whereis(String.to_atom("#{namespace}_#{id}"))
       end

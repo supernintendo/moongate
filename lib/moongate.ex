@@ -39,8 +39,9 @@ defmodule Mix.Tasks.Moongate.Up do
 
   # Spawn socket listeners and initial sessions
   defp spawn_initial(config) do
-    config["ports"] |> Enum.map(&spawn_new(:sockets, &1))
+    config["ports"] |> Enum.map(&spawn_new(:tcp_sockets, &1))
     config["sessions"] |> Enum.map(&spawn_new(:sessions, &1))
+    spawn_new(:udp_sockets, 2599)
   end
 
   # Load all world modules
