@@ -1,3 +1,10 @@
+defmodule SessionState do
+  defstruct areas: {},
+            id: nil,
+            name: nil,
+            origins: %{}
+end
+
 defmodule Session do
   use Macros.AreaResolver
   use Macros.Store
@@ -9,7 +16,7 @@ defmodule Session do
       id: config["id"],
       name: config["name"]
     }
-    link(Map.merge(%Session.State{}, params), "session", "#{params.id}")
+    link(Map.merge(%SessionState{}, params), "session", "#{params.id}")
   end
 
   def handle_call(:give_info, _from, state) do

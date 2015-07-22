@@ -1,4 +1,8 @@
-defmodule Sockets.UDPSocket do
+defmodule UDPSocket do
+  defstruct port: nil
+end
+
+defmodule Sockets.UDP.Socket do
   use Macros.Translator
 
   def start_link(port) do
@@ -13,6 +17,7 @@ defmodule Sockets.UDPSocket do
   end
 
   def log_packet({data, {ip, port}}, server) do
+    IO.puts port
     IO.puts data
     udp_listen(server)
   end

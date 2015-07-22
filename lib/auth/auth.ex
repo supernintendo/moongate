@@ -1,3 +1,9 @@
+defmodule AuthToken do
+  defstruct email: nil,
+            identity: UUID.uuid4(:hex),
+            source: nil
+end
+
 # The Auth module manages login and new account creation.
 defmodule Auth do
   use Macros.SocketWriter
