@@ -8,7 +8,7 @@ require 'game.env.singletons'
 
 function love.load()
   -- Listen for new messages from the server
-  TCP:listen()
+  Network:listen()
 end
 
 function love.draw()

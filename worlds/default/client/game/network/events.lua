@@ -5,7 +5,7 @@ function NetworkEvents:initialize()
 end
 
 function NetworkEvents:tick()
-  local s, status, partial = TCP.socket:receive()
+  local s, status, partial = Network.socket:receive()
 
   if partial ~= '' then
     self:receivePacket(partial)
@@ -27,12 +27,14 @@ function NetworkEvents:parsePacket(packet)
   local group = {}
   local parsed = {}
 
-  for key, value in string.gmatch(packet, '(%w+)=([%w%s%!%.%_%;%|]+)') do
-    parsed[key] = value
+  if packet then
+    for key, value in string.gmatch(packet, '(%w+)=([%w%s%!%.%_%;%|]+)') do
+      parsed[key] = value
 
-    if key == "end" then
-      table.insert(group, parsed)
-      parsed = {}
+      if key == "end" then
+        table.insert(group, parsed)
+        parsed = {}
+      end
     end
   end
 

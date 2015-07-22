@@ -7,7 +7,7 @@ end
 
 function Game:tick()
   function love.keypressed(key)
-    TCP:send('game key ' .. ' ' .. key)
+    Network:send('game key ' .. ' ' .. key)
   end
 end
 

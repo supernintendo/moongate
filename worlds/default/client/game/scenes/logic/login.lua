@@ -14,7 +14,7 @@ end
 
 function Login:login(form)
   self.state.logInRequested = true
-  TCP:send(
+  Network:send(
     'auth login '
     .. form.inputUsername.textOverlay.value
     .. ' ' .. form.inputPassword.textOverlay.value
@@ -22,7 +22,7 @@ function Login:login(form)
 end
 
 function Login:joinSession()
-  TCP:send('session join ' .. currentSession)
+  Network:send('session join ' .. currentSession)
   self.state.sessionPicked = true
   currentScene = 'game'
 end
@@ -49,7 +49,7 @@ function Login:startIfNotStarted()
 end
 
 function Login:requestSessions()
-  TCP:send('sessions get')
+  Network:send('sessions get')
   self.state.sessionsRequested = true
 end
 
