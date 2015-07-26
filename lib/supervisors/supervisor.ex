@@ -16,7 +16,6 @@ defmodule Moongate.Supervisor do
       supervisor(Areas.Supervisor, [], [id: :areas]),
       supervisor(Entity.Supervisor, [], [id: :entity]),
       supervisor(Events.Supervisor, [], [id: :events]),
-      supervisor(Sessions.Supervisor, [], [id: :sessions]),
       supervisor(Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
       supervisor(Sockets.UDP.Supervisor, [], [id: :udp_sockets])
     ]

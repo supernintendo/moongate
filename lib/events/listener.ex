@@ -47,12 +47,6 @@ defmodule Events.Listener do
       %{ cast: :key, to: :game } ->
         authenticated_action(event, token, state)
 
-      %{ to: :session } ->
-        authenticated_action(event, token, state)
-
-      %{ to: :sessions } ->
-        authenticated_action(event, token, state)
-
       _ ->
        IO.puts "Socket message received: #{message}"
     end
@@ -69,11 +63,6 @@ defmodule Events.Listener do
         %{ cast: :key, to: :game } ->
           p = expect_from(event, {:key})
           tell_async(:entity, "#{event.origin.id}", {:keypress, p})
-        %{ cast: :join, to: :session } ->
-          p = expect_from(event, {:session_id})
-          tell_async(:session, "#{p.contents.session_id}", {:join, p})
-        %{ cast: :get, to: :sessions } ->
-          get(:sessions, event)
         _ ->
           nil
       end

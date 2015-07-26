@@ -4,7 +4,7 @@ defmodule Moongate do
   @doc """
     Generic start.
   """
-  def start(_type, args) do
+  def start(_type, _args) do
     {:ok, self()}
   end
 end
@@ -16,17 +16,11 @@ defmodule Mix.Tasks.Moongate.Up do
     Initialize the game server.
   """
   def run(args) do
-    IO.inspect args
     world = if List.first(args), do: hd(args), else: "default"
     load_world(world)
-    {:ok, read} = File.read "config/server.json"
-    {:ok, config} = JSON.decode(read)
-
+    supervisor = start_supervisor
     Say.greeting
-    {:ok, supervisor} = Moongate.Supervisor.start_link
-    GenServer.call(:tree, {:register, supervisor})
-    spawn_initial(config)
-    tell_all_async(:sessions, {:spawn_all_areas})
+    spawn_sockets(world)
     tell_sync(:auth, {:no_auth, true})
     recur
 
@@ -38,12 +32,24 @@ defmodule Mix.Tasks.Moongate.Up do
     load_all_in_directory(File.ls("worlds/#{world}/modules"), world)
   end
 
-  # Spawn socket listeners and initial sessions
-  defp spawn_initial(config) do
-    IO.inspect config
-    config["ports"] |> Enum.map(&spawn_new(:tcp_sockets, &1))
-    config["sessions"] |> Enum.map(&spawn_new(:sessions, &1))
-    spawn_new(:udp_sockets, 2599)
+  # Spawn socket listeners
+  defp spawn_sockets(world) do
+    {:ok, read} = File.read "worlds/#{world}/ports.json"
+    {:ok, ports} = JSON.decode(read)
+    ports |> Enum.map(&spawn_socket(&1))
+  end
+
+  defp start_supervisor do
+    {:ok, supervisor} = Moongate.Supervisor.start_link
+    GenServer.call(:tree, {:register, supervisor})
+    supervisor
+  end
+
+  defp spawn_socket({port, params}) do
+    case params["protocol"] do
+      "TCP" -> spawn_new(:tcp_sockets, String.to_integer(port))
+      "UDP" -> spawn_new(:udp_sockets, String.to_integer(port))
+    end
   end
 
   # Load all world modules
