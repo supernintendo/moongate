@@ -38,7 +38,6 @@ defmodule Sockets.TCP.Socket do
       # Client disconnects.
       Say.pretty("Socket with id #{id} disconnected.", :magenta)
       kill_by_pid(:events, pid)
-      tell_async(:entity, id, {:disconnect})
       socket |> Socket.close
       :close
     else
@@ -53,7 +52,7 @@ defmodule Sockets.TCP.Socket do
     incoming = packet_to_list(packet)
 
     if hd(incoming) != :invalid_message do
-      tell_async(:events, id, {:event, tl(incoming), hd(incoming), port})
+      tell_async(:events, id, {:event, tl(incoming), hd(incoming), {port, :tcp}})
     end
     ""
   end

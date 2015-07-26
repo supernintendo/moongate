@@ -1,3 +1,3 @@
 defmodule SocketOrigin do
-  defstruct port: nil, id: nil
+  defstruct id: nil, ip: nil, port: nil, protocol: nil
 end

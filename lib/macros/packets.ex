@@ -17,53 +17,48 @@ defmodule Macros.Packets do
         end
       end
 
+      defp from_list(list, {port, protocol}, id) do
+        from_list(list, {port, protocol, nil}, id)
+      end
+
       # Parse a packet list into an events list.
-      defp from_list(list, socket, id) do
+      defp from_list(list, {port, protocol, ip}, id) do
+        origin = %SocketOrigin{
+          id: id,
+          ip: ip,
+          port: port,
+          protocol: protocol
+        }
         case length(list) do
           1 ->
             %ClientEvent{
               contents: hd(list),
-              origin: %SocketOrigin{
-                id: id,
-                port: socket
-              }
+              origin: origin
             }
           2 ->
             %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: %SocketOrigin{
-                id: id,
-                port: socket
-              }
+              origin: origin
             }
           3 ->
             %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: %SocketOrigin{
-                id: id,
-                port: socket
-              }
+              origin: origin
             }
           _ when length(list) > 3 ->
             %ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
-              origin: %SocketOrigin{
-                id: id,
-                port: socket
-              }
+              origin: origin
             }
           _ ->
             %ClientEvent{
               error: :list_too_small,
-              origin: %SocketOrigin{
-                id: id,
-                port: socket
-              }
+              origin: origin
             }
         end
       end

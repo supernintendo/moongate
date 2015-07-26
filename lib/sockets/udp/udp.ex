@@ -3,6 +3,7 @@ defmodule UDPSocket do
 end
 
 defmodule Sockets.UDP.Socket do
+  use Macros.Packets
   use Macros.Translator
 
   def start_link(port) do
@@ -16,13 +17,20 @@ defmodule Sockets.UDP.Socket do
     {:noreply, server}
   end
 
-  def log_packet({data, {ip, port}}, server) do
-    IO.puts port
-    IO.puts data
-    udp_listen(server)
+  def handler({packet, {ip, port}}, server) do
+    incoming = packet_to_list(packet)
+
+    unless pid_for_name(:events, "#{port}") do
+      spawn_new(:events, "#{port}")
+    end
+
+    if hd(incoming) != :invalid_message do
+      tell_async(:events, "#{port}", {:event, tl(incoming), hd(incoming), {server, :udp, ip}})
+      udp_listen(server)
+    end
   end
 
   def udp_listen(server) do
-    server |> Socket.Datagram.recv! |> log_packet(server)
+    server |> Socket.Datagram.recv! |> handler(server)
   end
 end

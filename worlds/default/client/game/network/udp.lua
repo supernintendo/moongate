@@ -2,6 +2,7 @@ local UDP = class('UDP')
 
 function UDP:initialize()
   self.socket = socket.udp()
+  self.socket:setsockname('*', PORT)
 end
 
 function UDP:listen()

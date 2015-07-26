@@ -17,6 +17,7 @@ defmodule Macros.Pool do
 
       defp pool_item_arg(arg, acc, item) do
         value = Map.get(item, arg)
+
         {elem(acc, 0) <> "#{value};", elem(acc, 1)}
       end
     end

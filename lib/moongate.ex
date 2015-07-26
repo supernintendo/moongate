@@ -16,6 +16,7 @@ defmodule Mix.Tasks.Moongate.Up do
     Initialize the game server.
   """
   def run(args) do
+    IO.inspect args
     world = if List.first(args), do: hd(args), else: "default"
     load_world(world)
     {:ok, read} = File.read "config/server.json"
@@ -39,6 +40,7 @@ defmodule Mix.Tasks.Moongate.Up do
 
   # Spawn socket listeners and initial sessions
   defp spawn_initial(config) do
+    IO.inspect config
     config["ports"] |> Enum.map(&spawn_new(:tcp_sockets, &1))
     config["sessions"] |> Enum.map(&spawn_new(:sessions, &1))
     spawn_new(:udp_sockets, 2599)

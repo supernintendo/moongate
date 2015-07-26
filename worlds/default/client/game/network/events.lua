@@ -20,6 +20,7 @@ end
 -- Given a packet, parse the packet and relay it.
 function NetworkEvents:receivePacket(packet)
   local parsed = self:parsePacket(packet)
+  inspect(parsed)
 end
 
 -- Given a packet, return a table containing the packet's contents.

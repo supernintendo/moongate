@@ -27,7 +27,7 @@
       "auth": true,
       "arguments": ["get"],
       "to": "events",
-      "by_id": ":origin.id"    
+      "by_id": ":origin.id"
     }
   }
 }

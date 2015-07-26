@@ -1,3 +1,17 @@
+defmodule Area do
+  defstruct default: false,
+            entities: %{},
+            generator: nil,
+            id: nil,
+            spec: nil,
+            started: nil,
+            tiles: [],
+            timed_events: nil,
+            process: nil,
+            x: nil,
+            y: nil
+end
+
 defmodule Area.Process do
   use Macros.Random
   use Macros.Pool

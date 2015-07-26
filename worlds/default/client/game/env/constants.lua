@@ -1,7 +1,7 @@
 -- Network configuration
 ADDRESS = 'localhost'
-PORT = 2599
-PROTOCOL = 'UDP'
+PORT = 2593
+PROTOCOL = 'TCP'
 
 -- Viewport dimensions
 DIMENSIONS = {
