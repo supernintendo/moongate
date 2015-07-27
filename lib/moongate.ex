@@ -18,13 +18,20 @@ defmodule Mix.Tasks.Moongate.Up do
   def run(args) do
     world = if List.first(args), do: hd(args), else: "default"
     load_world(world)
-    supervisor = start_supervisor
+    flags = load_flags(world)
+    supervisor = start_supervisor(world)
     Say.greeting
     spawn_sockets(world)
-    tell_sync(:auth, {:no_auth, true})
+    tell_sync(:auth, {:no_auth, flags["no_auth"]})
     recur
 
     {:ok, supervisor}
+  end
+
+  defp load_flags(world) do
+    {:ok, read} = File.read "worlds/#{world}/flags.json"
+    {:ok, flags} = JSON.decode(read)
+    flags
   end
 
   # Load all modules for game world and set up macros using config files
@@ -39,8 +46,10 @@ defmodule Mix.Tasks.Moongate.Up do
     ports |> Enum.map(&spawn_socket(&1))
   end
 
-  defp start_supervisor do
-    {:ok, supervisor} = Moongate.Supervisor.start_link
+  defp start_supervisor(world) do
+    {:ok, read} = File.read "worlds/#{world}/supervisors.json"
+    {:ok, world_supervisors} = JSON.decode(read)
+    {:ok, supervisor} = Moongate.Supervisor.start_link(world_supervisors)
     GenServer.call(:tree, {:register, supervisor})
     supervisor
   end
@@ -60,6 +69,7 @@ defmodule Mix.Tasks.Moongate.Up do
   end
 
   defp load_world_module(filename) do
+    Say.pretty "Compiled #{filename}.", :yellow
     Code.eval_file(filename)
   end
 

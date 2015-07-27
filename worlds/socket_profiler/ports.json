@@ -2,5 +2,9 @@
     "2593": {
         "anon": true,
         "protocol": "TCP"
+    },
+    "2594": {
+        "anon": true,
+        "protocol": "UDP"
     }
 }

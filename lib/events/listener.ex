@@ -44,9 +44,6 @@ defmodule Events.Listener do
         p = expect_from(event, {:email, :password})
         tell_async(:auth, {:register, p})
 
-      %{ cast: :key, to: :game } ->
-        authenticated_action(event, token, state)
-
       _ ->
        IO.puts "Socket message received: #{message}"
     end
@@ -60,9 +57,6 @@ defmodule Events.Listener do
 
     if can_pass do
       case event do
-        %{ cast: :key, to: :game } ->
-          p = expect_from(event, {:key})
-          tell_async(:entity, "#{event.origin.id}", {:keypress, p})
         _ ->
           nil
       end
