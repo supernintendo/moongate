@@ -1,0 +1,4 @@
+{
+    "no_auth": true,
+    "outgoing_packet_delimiter": ";;;"
+}

@@ -16,22 +16,26 @@ defmodule Mix.Tasks.Moongate.Up do
     Initialize the game server.
   """
   def run(args) do
-    world = if List.first(args), do: hd(args), else: "default"
-    load_world(world)
-    flags = load_flags(world)
-    supervisor = start_supervisor(world)
+    {:ok, read} = File.read "config/config.json"
+    {:ok, config} = JSON.decode(read)
+
+    world = config["world"] || "default"
     Say.greeting
+    IO.puts "Starting world #{world}..."
+    load_world(world)
+    server_config = load_server_config(world)
+    supervisor = start_supervisor(world)
     spawn_sockets(world)
-    tell_sync(:auth, {:no_auth, flags["no_auth"]})
+    tell_sync(:auth, {:no_auth, server_config["no_auth"]})
     recur
 
     {:ok, supervisor}
   end
 
-  defp load_flags(world) do
-    {:ok, read} = File.read "worlds/#{world}/flags.json"
-    {:ok, flags} = JSON.decode(read)
-    flags
+  defp load_server_config(world) do
+    {:ok, read} = File.read "worlds/#{world}/server.json"
+    {:ok, server_config} = JSON.decode(read)
+    server_config
   end
 
   # Load all modules for game world and set up macros using config files

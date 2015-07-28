@@ -17,6 +17,26 @@ defmodule Events.Listener do
     link(%EventListener{id: id}, "events", "#{id}")
   end
 
+  defmacro world_events do
+    {:ok, read} = File.read "config/config.json"
+    {:ok, config} = JSON.decode(read)
+    world = config["world"] || "default"
+    {:ok, read} = File.read "worlds/#{world}/events.json"
+    {:ok, events} = JSON.decode(read)
+
+    Enum.map events, fn({event, params}) ->
+      event = String.to_atom(event)
+      namespace = String.to_atom(params["namespace"])
+      arguments = Enum.map params["arguments"], String.to_atom
+
+      quote do
+        %{ cast: unquote(event), to: unquote(namespace) } ->
+          p = expect_from(event, unquote(List.to_tuple(arguments)))
+          tell_async(unquote(namespace), {unquote(event), p})
+      end
+    end
+  end
+
   def handle_cast({:init}, state) do
     Say.pretty("Event listener for client #{state.id} has been started.", :green)
     {:noreply, state}
@@ -44,29 +64,13 @@ defmodule Events.Listener do
         p = expect_from(event, {:email, :password})
         tell_async(:auth, {:register, p})
 
+      world_events
+
       _ ->
        IO.puts "Socket message received: #{message}"
     end
 
     {:noreply, state}
-  end
-
-  # Handle a socket message from an authenticated client.
-  defp authenticated_action(event, token, state) do
-    can_pass = authenticated?(state, token)
-
-    if can_pass do
-      case event do
-        _ ->
-          nil
-      end
-    else
-      write_to(event.origin, %{
-        cast: :error,
-        namespace: :global,
-        value: "Not authenticated."
-      })
-    end
   end
 
   defp authenticated?(state, token) do

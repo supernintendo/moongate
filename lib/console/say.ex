@@ -3,12 +3,14 @@ defmodule Say do
     A greeting message, output when the server is started.
   """
   def greeting do
-    pretty("       _..._
+    pretty("
+       _..._
      .' .::::.
     :  ::::::::  moongate", :blue)
    pretty("    :  ::::::::   v#{Moongate.Mixfile.project[:version]}
     `. '::::::'
-      `-.::''", :magenta)
+      `-.::''
+    ", :magenta)
   end
 
   @doc """
