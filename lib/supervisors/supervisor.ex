@@ -25,6 +25,6 @@ defmodule Moongate.Supervisor do
   end
 
   def supervisor_from({id, params}) do
-    supervisor(Module.safe_concat([params["module"]]), [], [id: id])
+    supervisor(Module.safe_concat([params["module"]]), [], [id: String.to_atom(id)])
   end
 end

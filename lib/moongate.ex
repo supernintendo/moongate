@@ -27,6 +27,7 @@ defmodule Mix.Tasks.Moongate.Up do
     supervisor = start_supervisor(world)
     spawn_sockets(world)
     tell_sync(:auth, {:no_auth, server_config["no_auth"]})
+    Scopes.Start.on_load
     recur
 
     {:ok, supervisor}
