@@ -1,6 +1,16 @@
 defmodule Macros.Packets do
   defmacro __using__(_) do
     quote do
+      # Coerce a packet list into a map with keynames.
+      defp expect_from(event, schema) do
+        results = Enum.reduce(
+          Enum.map(0..length(Tuple.to_list(schema)) - 1,
+                  fn(i) -> Map.put(%{}, elem(schema, i), elem(event.contents, i)) end),
+          fn(first, second) -> Map.merge(first, second) end)
+
+        %{event | contents: results}
+      end
+
       # Remove escape characters from a string, split it on whitespaces
       # and return a list with the contents.
       defp packet_to_list(string) do

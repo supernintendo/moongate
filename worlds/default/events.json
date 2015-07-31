@@ -1,9 +1,2 @@
 {
-    "send": {
-        "auth": true,
-        "namespace": "messages",
-        "params": [
-            "message"
-        ]
-    }
 }
