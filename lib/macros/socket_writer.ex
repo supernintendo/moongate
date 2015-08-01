@@ -14,7 +14,7 @@ defmodule Macros.SocketWriter do
 
         case target.protocol do
           :tcp -> target.port |> Socket.Stream.send! parsed_message
-          :udp -> target.port |> Socket.Datagram.send! parsed_message, {target.ip, target.id}
+          :udp -> target.port |> Socket.Datagram.send! parsed_message, {target.ip, String.to_integer(target.id)}
         end
       end
     end

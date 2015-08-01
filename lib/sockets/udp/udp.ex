@@ -13,7 +13,7 @@ defmodule Sockets.UDP.Socket do
   def handle_cast({:init}, state) do
     Say.pretty("Listening on port #{state.port} (UDP)...", :green)
     {:ok, server} = Socket.UDP.open(state.port)
-    udp_listen(server)
+    server |> udp_listen
     {:noreply, server}
   end
 
@@ -26,8 +26,9 @@ defmodule Sockets.UDP.Socket do
 
     if hd(incoming) != :invalid_message do
       tell_async(:events, "#{port}", {:event, tl(incoming), hd(incoming), {server, :udp, ip}})
-      udp_listen(server)
     end
+
+    server |> udp_listen
   end
 
   def udp_listen(server) do
