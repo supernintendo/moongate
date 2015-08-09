@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+        <title>web</title>
+        <style type="text/css">
+            body, html {
+                background: black;
+                color: white;
+                font-family: monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="messageToSend" value="foo"></input>
+        <div id="console"></div>
+        <script>
+            var ip = "127.0.0.1",
+                port = 2595,
+                packetDelay = 15,
+                socket = new WebSocket("ws://" + ip + ":" + port),
+                sendMessage = function() {
+                    socket.send("begin anon messages send " + document.getElementById("messageToSend").value + " end")
+                }
+
+            socket.onopen = function() {
+                setInterval(sendMessage, packetDelay);
+            };
+            socket.onmessage = function(message) {
+                var node = document.createTextNode(message.data),
+                    br = document.createElement("br"),
+                    el = document.getElementById("console");
+
+                if (el.innerHTML.length > 25000) {
+                    el.innerHTML = "";
+                }
+                el.appendChild(node);
+                el.appendChild(br);
+            };
+        </script>
+    </body>
+</html>

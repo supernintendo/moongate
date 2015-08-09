@@ -6,5 +6,9 @@
     "2594": {
         "anon": true,
         "protocol": "UDP"
+    },
+    "2595": {
+        "anon": true,
+        "protocol": "WebSocket"
     }
 }
