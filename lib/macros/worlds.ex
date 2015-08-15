@@ -4,11 +4,15 @@ defmodule Macros.Worlds do
     {:ok, config} = JSON.decode(read)
     world = config["world"] || "default"
 
-    if File.dir?("worlds/#{world}/http") do
-      quote do
-        def world_http_directory do
-          world = unquote(world)
-          "worlds/#{world}/http"
+    quote do
+      defp world_directory(key) do
+        world = unquote(world)
+
+        case key do
+          :http ->
+            "worlds/#{world}/http"
+          _ ->
+            "worlds/#{world}"
         end
       end
     end

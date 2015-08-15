@@ -11,15 +11,11 @@ defmodule Auth do
   use Macros.Translator
 
   def start_link do
-    link(%{no_auth: nil}, "auth")
+    link(nil, "auth")
   end
 
   def handle_cast({:login, event, from}, state) do
-    if state.no_auth do
-      auth_status = {:ok, nil}
-    else 
-      auth_status = authenticate(event.contents)
-    end
+    auth_status = authenticate(event.contents)
 
     case auth_status do
       {:ok, _} ->

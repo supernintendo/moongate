@@ -10,12 +10,13 @@ defmodule Moongate do
 end
 
 defmodule Mix.Tasks.Moongate.Up do
+  use Macros.ExternalResources
   use Macros.Translator
 
   @doc """
     Initialize the game server.
   """
-  def run(args) do
+  def run(_) do
     {:ok, read} = File.read "config/config.json"
     {:ok, config} = JSON.decode(read)
 
@@ -23,20 +24,13 @@ defmodule Mix.Tasks.Moongate.Up do
     Say.greeting
     IO.puts "Starting world #{world}..."
     load_world(world)
-    server_config = load_server_config(world)
+    load_scopes(world)
     supervisor = start_supervisor(world)
     spawn_sockets(world)
-    # tell_sync(:auth, {:no_auth, server_config["no_auth"]})
     Scopes.Start.on_load
     recur
 
     {:ok, supervisor}
-  end
-
-  defp load_server_config(world) do
-    {:ok, read} = File.read "worlds/#{world}/server.json"
-    {:ok, server_config} = JSON.decode(read)
-    server_config
   end
 
   # Load all modules for game world and set up macros using config files
@@ -76,8 +70,17 @@ defmodule Mix.Tasks.Moongate.Up do
   end
 
   defp load_world_module(filename) do
-    Say.pretty "Compiled #{filename}.", :yellow
     Code.eval_file(filename)
+    Say.pretty "Compiled #{filename}.", :yellow
+  end
+
+  defp load_scopes(world) do
+    {:ok, files} = File.ls("worlds/#{world}/scopes")
+    Enum.map(files, &load_scope(&1, world))
+  end
+
+  defp load_scope(filename, world) do
+    Code.eval_file("worlds/#{world}/scopes/#{filename}")
   end
 
   # Fairly straightforward.

@@ -23,8 +23,8 @@ defmodule HTTP.Host do
       path = "/index.html"
     end
 
-    if File.exists?(world_http_directory <> path) do
-      req |> Request.reply(200, File.open!(world_http_directory <> path))
+    if File.exists?(world_directory(:http) <> path) do
+      req |> Request.reply(200, File.open!(world_directory(:http) <> path))
     else
       req |> Request.reply(404)
     end

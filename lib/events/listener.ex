@@ -33,14 +33,15 @@ defmodule Events.Listener do
     Deliver a parsed socket message to the appropriate server.
   """
   def handle_cast({:event, message, token, socket}, state) do
+    authenticated = authenticated?(state, token)
     event = from_list(message, socket, state.id)
 
     case event do
-      %{ cast: :login, to: :auth } ->
+      %{ cast: :login, to: :auth } when not authenticated ->
         p = expect_from(event, {:email, :password})
         tell_async(:auth, {:login, p, self()})
 
-      %{ cast: :register, to: :auth } ->
+      %{ cast: :register, to: :auth } when not authenticated ->
         p = expect_from(event, {:email, :password})
         tell_async(:auth, {:register, p})
 

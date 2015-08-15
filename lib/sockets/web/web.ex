@@ -22,7 +22,7 @@ defmodule Sockets.Web.Socket do
     client = listener |> Socket.Web.accept!
     client |> Socket.Web.accept!
 
-    {:ok, child} = spawn_new(:events, uuid)
+    spawn_new(:events, uuid)
     spawn(fn -> handle(client, uuid) end)
     accept(listener)
   end
