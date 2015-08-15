@@ -1,17 +1,17 @@
-defmodule WebSocket do
+defmodule Moongate.WebSocket do
   defstruct port: nil
 end
 
-defmodule Sockets.Web.Socket do
-  use Macros.Packets
-  use Macros.Translator
+defmodule Moongate.Sockets.Web.Socket do
+  use Moongate.Macros.Packets
+  use Moongate.Macros.Translator
 
   def start_link(port) do
-    link(%WebSocket{port: port}, "socket", "#{port}")
+    link(%Moongate.WebSocket{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Listening on port #{state.port} (WebSocket)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (WebSocket)...", :green)
 
     server = Socket.Web.listen!(state.port) |> accept
     {:noreply, server}
@@ -38,7 +38,7 @@ defmodule Sockets.Web.Socket do
 
         handle(client, id)
       _ ->
-        Say.pretty("Socket with id #{id} disconnected.", :magenta)
+        Moongate.Say.pretty("Socket with id #{id} disconnected.", :magenta)
         kill_by_id(:events, id)
     end
   end

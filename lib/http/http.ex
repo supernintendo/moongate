@@ -1,18 +1,18 @@
-defmodule HTTP do
+defmodule Moongate.HTTP do
   defstruct dispatch: nil, port: nil
 end
 
-defmodule HTTP.Host do
+defmodule Moongate.HTTP.Host do
   use Cauldron
-  use Macros.Translator
-  use Macros.Worlds
+  use Moongate.Macros.Translator
+  use Moongate.Macros.Worlds
 
   def start_link(port) do
-    link(%HTTP{port: port}, "socket", "#{port}")
+    link(%Moongate.HTTP{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Listening on port #{state.port} (HTTP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (HTTP)...", :green)
     Cauldron.start &handle/3, port: state.port
 
     {:noreply, state}

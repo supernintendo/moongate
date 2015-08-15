@@ -1,17 +1,17 @@
-defmodule UDPSocket do
+defmodule Moongate.UDPSocket do
   defstruct port: nil
 end
 
-defmodule Sockets.UDP.Socket do
-  use Macros.Packets
-  use Macros.Translator
+defmodule Moongate.Sockets.UDP.Socket do
+  use Moongate.Macros.Packets
+  use Moongate.Macros.Translator
 
   def start_link(port) do
-    link(%UDPSocket{port: port}, "socket", "#{port}")
+    link(%Moongate.UDPSocket{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Listening on port #{state.port} (UDP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (UDP)...", :green)
     {:ok, server} = Socket.UDP.open(state.port)
     server |> udp_listen
     {:noreply, server}

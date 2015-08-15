@@ -1,4 +1,4 @@
-defmodule Macros.ExternalResources do
+defmodule Moongate.Macros.ExternalResources do
   defmacro __before_compile__(_env) do
     {:ok, read} = File.read "config/config.json"
     {:ok, config} = JSON.decode(read)
@@ -22,7 +22,7 @@ defmodule Macros.ExternalResources do
 
   defmacro __using__(_) do
     quote do
-      @before_compile Macros.ExternalResources
+      @before_compile Moongate.Macros.ExternalResources
     end
   end
 end

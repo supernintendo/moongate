@@ -1,4 +1,4 @@
-defmodule Macros.Worlds do
+defmodule Moongate.Macros.Worlds do
   defmacro __using__(_) do
     {:ok, read} = File.read "config/config.json"
     {:ok, config} = JSON.decode(read)

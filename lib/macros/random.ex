@@ -1,4 +1,4 @@
-defmodule Macros.Random do
+defmodule Moongate.Macros.Random do
   defmacro __using__(_) do
     quote do
       defp random do

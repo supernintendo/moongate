@@ -1,6 +1,6 @@
-defmodule Scopes.Events do
-  use Macros.Packets
-  use Macros.Translator
+defmodule Moongate.Scopes.Events do
+  use Moongate.Macros.Packets
+  use Moongate.Macros.Translator
 
   def take(event) do
     case event do

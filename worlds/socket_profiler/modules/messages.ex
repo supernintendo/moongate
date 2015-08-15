@@ -1,13 +1,13 @@
 defmodule SocketProfiler.Messages do
-  use Macros.Translator
-  use Macros.SocketWriter
+  use Moongate.Macros.Translator
+  use Moongate.Macros.SocketWriter
 
   def start_link(_) do
     link(%{}, "messages", "public")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("(SocketProfiler) Messages process started.", :cyan)
+    Moongate.Say.pretty("(SocketProfiler) Messages process started.", :cyan)
     {:noreply, state}
   end
 

@@ -1,4 +1,4 @@
-defmodule Db.User do
+defmodule Moongate.Db.User do
   use Ecto.Model
 
   schema "users" do

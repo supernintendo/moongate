@@ -1,4 +1,4 @@
-defmodule Macros.Pool do
+defmodule Moongate.Macros.Pool do
   defmacro __using__(_) do
     quote do
       defp for_pool(collection, schema) do

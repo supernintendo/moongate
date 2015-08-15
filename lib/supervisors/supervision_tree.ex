@@ -1,7 +1,7 @@
-defmodule SupervisionTree do
-  use Macros.SocketWriter
-  use Macros.Store
-  use Macros.Translator
+defmodule Moongate.SupervisionTree do
+  use Moongate.Macros.SocketWriter
+  use Moongate.Macros.Store
+  use Moongate.Macros.Translator
 
   def start_link do
     link(%{}, "tree")

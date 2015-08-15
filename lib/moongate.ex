@@ -10,8 +10,8 @@ defmodule Moongate do
 end
 
 defmodule Mix.Tasks.Moongate.Up do
-  use Macros.ExternalResources
-  use Macros.Translator
+  use Moongate.Macros.ExternalResources
+  use Moongate.Macros.Translator
 
   @doc """
     Initialize the game server.
@@ -21,13 +21,13 @@ defmodule Mix.Tasks.Moongate.Up do
     {:ok, config} = JSON.decode(read)
 
     world = config["world"] || "default"
-    Say.greeting
+    Moongate.Say.greeting
     IO.puts "Starting world #{world}..."
     load_world(world)
     load_scopes(world)
     supervisor = start_supervisor(world)
     spawn_sockets(world)
-    Scopes.Start.on_load
+    Moongate.Scopes.Start.on_load
     recur
 
     {:ok, supervisor}
@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Moongate.Up do
 
   defp load_world_module(filename) do
     Code.eval_file(filename)
-    Say.pretty "Compiled #{filename}.", :yellow
+    Moongate.Say.pretty "Compiled #{filename}.", :yellow
   end
 
   defp load_scopes(world) do

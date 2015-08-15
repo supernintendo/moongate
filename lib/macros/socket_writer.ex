@@ -1,4 +1,4 @@
-defmodule Macros.SocketWriter do
+defmodule Moongate.Macros.SocketWriter do
   defmacro __using__(_) do
     {:ok, read} = File.read "config/config.json"
     {:ok, config} = JSON.decode(read)

@@ -1,12 +1,12 @@
-defmodule Db.UserQueries do
+defmodule Moongate.Db.UserQueries do
   @capital_letters    ?A..?Z |> Enum.map(&String.Chars.to_string([&1]))
   @lowercase_letters  ?a..?z |> Enum.map(&String.Chars.to_string([&1]))
   @numbers            0..9 |> Enum.map fn (n) -> "#{n}" end
 
   import Ecto.Query
 
-  alias Db.Repo, as: Repo
-  alias Db.User, as: User
+  alias Moongate.Db.Repo, as: Repo
+  alias Moongate.Db.User, as: User
 
   def create(params) do
    if (length(find_by_email(params[:email])) == 0) do

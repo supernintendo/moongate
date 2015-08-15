@@ -1,4 +1,4 @@
-defmodule Sockets.Web.Supervisor do
+defmodule Moongate.Sockets.Web.Supervisor do
   use Supervisor
 
   def start_link do
@@ -9,7 +9,7 @@ defmodule Sockets.Web.Supervisor do
     Prepare the sockets listener supervisor.
   """
   def init(_) do
-    children = [worker(Sockets.Web.Socket, [], [])]
+    children = [worker(Moongate.Sockets.Web.Socket, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end
 end

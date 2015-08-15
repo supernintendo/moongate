@@ -1,4 +1,4 @@
-defmodule Sockets.UDP.Supervisor do
+defmodule Moongate.Sockets.UDP.Supervisor do
   use Supervisor
 
   def start_link do
@@ -9,7 +9,7 @@ defmodule Sockets.UDP.Supervisor do
     Prepare the sockets listener supervisor.
   """
   def init(_) do
-    children = [worker(Sockets.UDP.Socket, [], [])]
+    children = [worker(Moongate.Sockets.UDP.Socket, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end
 end

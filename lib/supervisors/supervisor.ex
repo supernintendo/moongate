@@ -10,14 +10,14 @@ defmodule Moongate.Supervisor do
   """
   def init(world_supervisors) do
     children = [
-      worker(SupervisionTree, [], [id: :tree]),
-      worker(Db.Repo, [], [id: :repo]),
-      worker(Auth, [], [id: :auth]),
-      supervisor(Events.Supervisor, [], [id: :events]),
-      supervisor(Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
-      supervisor(Sockets.UDP.Supervisor, [], [id: :udp_sockets]),
-      supervisor(Sockets.Web.Supervisor, [], [id: :web_sockets]),
-      supervisor(Sockets.HTTP.Supervisor, [], [id: :http_hosts])
+      worker(Moongate.SupervisionTree, [], [id: :tree]),
+      worker(Moongate.Db.Repo, [], [id: :repo]),
+      worker(Moongate.Auth, [], [id: :auth]),
+      supervisor(Moongate.Events.Supervisor, [], [id: :events]),
+      supervisor(Moongate.Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
+      supervisor(Moongate.Sockets.UDP.Supervisor, [], [id: :udp_sockets]),
+      supervisor(Moongate.Sockets.Web.Supervisor, [], [id: :web_sockets]),
+      supervisor(Moongate.Sockets.HTTP.Supervisor, [], [id: :http_hosts])
     ] ++ supervisors_from(world_supervisors)
     supervise(children, strategy: :one_for_one)
   end

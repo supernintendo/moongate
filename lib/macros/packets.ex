@@ -1,4 +1,4 @@
-defmodule Macros.Packets do
+defmodule Moongate.Macros.Packets do
   defmacro __using__(_) do
     quote do
       # Coerce a packet list into a map with keynames.
@@ -33,7 +33,7 @@ defmodule Macros.Packets do
 
       # Parse a packet list into an events list.
       defp from_list(list, {port, protocol, ip}, id) do
-        origin = %SocketOrigin{
+        origin = %Moongate.SocketOrigin{
           id: id,
           ip: ip,
           port: port,
@@ -41,32 +41,32 @@ defmodule Macros.Packets do
         }
         case length(list) do
           1 ->
-            %ClientEvent{
+            %Moongate.ClientEvent{
               contents: hd(list),
               origin: origin
             }
           2 ->
-            %ClientEvent{
+            %Moongate.ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               to: String.to_atom(hd(list)),
               origin: origin
             }
           3 ->
-            %ClientEvent{
+            %Moongate.ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
               origin: origin
             }
           _ when length(list) > 3 ->
-            %ClientEvent{
+            %Moongate.ClientEvent{
               cast: String.to_atom(hd(tl(list))),
               contents: List.to_tuple(tl(tl(list))),
               to: String.to_atom(hd(list)),
               origin: origin
             }
           _ ->
-            %ClientEvent{
+            %Moongate.ClientEvent{
               error: :list_too_small,
               origin: origin
             }

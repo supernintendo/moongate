@@ -1,20 +1,20 @@
-defmodule TCPSocket do
+defmodule Moongate.TCPSocket do
   defstruct port: nil
 end
 
-defmodule Sockets.TCP.Socket do
-  use Macros.Packets
-  use Macros.Translator
+defmodule Moongate.Sockets.TCP.Socket do
+  use Moongate.Macros.Packets
+  use Moongate.Macros.Translator
 
   @doc """
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    link(%TCPSocket{port: port}, "socket", "#{port}")
+    link(%Moongate.TCPSocket{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Listening on port #{state.port} (TCP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (TCP)...", :green)
     Socket.TCP.listen!(state.port, packet: 0)
     |> accept
   end
@@ -26,7 +26,7 @@ defmodule Sockets.TCP.Socket do
     socket = Socket.TCP.accept!(listener)
     {:ok, child} = spawn_new(:events, uuid)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
-    Say.pretty("Socket with id #{uuid} connected.", :blue)
+    Moongate.Say.pretty("Socket with id #{uuid} connected.", :blue)
     accept(listener)
   end
 
@@ -36,7 +36,7 @@ defmodule Sockets.TCP.Socket do
 
     if packet == nil do
       # Client disconnects.
-      Say.pretty("Socket with id #{id} disconnected.", :magenta)
+      Moongate.Say.pretty("Socket with id #{id} disconnected.", :magenta)
       kill_by_pid(:events, pid)
       socket |> Socket.close
       :close

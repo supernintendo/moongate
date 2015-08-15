@@ -1,4 +1,4 @@
-defmodule Scopes.Start do
+defmodule Moongate.Scopes.Start do
   def on_load do
   end
 end

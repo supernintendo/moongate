@@ -1,4 +1,4 @@
-defmodule Macros.Time do
+defmodule Moongate.Macros.Time do
   defmacro __using__(_) do
     quote do
       use Timex

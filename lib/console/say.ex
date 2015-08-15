@@ -1,4 +1,4 @@
-defmodule Say do
+defmodule Moongate.Say do
   @doc """
     A greeting message, output when the server is started.
   """

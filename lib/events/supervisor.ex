@@ -1,4 +1,4 @@
-defmodule Events.Supervisor do
+defmodule Moongate.Events.Supervisor do
   use Supervisor
 
   def start_link do
@@ -9,7 +9,7 @@ defmodule Events.Supervisor do
     Prepare the events listener supervisor.
   """
   def init(_) do
-    children = [worker(Events.Listener, [], [])]
+    children = [worker(Moongate.Events.Listener, [], [])]
     supervise(children, strategy: :simple_one_for_one)
   end
 end

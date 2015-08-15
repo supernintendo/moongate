@@ -1,5 +1,5 @@
 # Some methods for helping manipulate state within lists.
-defmodule Macros.Store do
+defmodule Moongate.Macros.Store do
   defmacro __using__(_) do
     quote do
       # Return map with one of its lists updated to contain a new item.

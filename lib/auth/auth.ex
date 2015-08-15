@@ -1,14 +1,14 @@
-defmodule AuthToken do
+defmodule Moongate.AuthToken do
   defstruct email: nil,
             identity: UUID.uuid4(:hex),
             source: nil
 end
 
 # The Auth module manages login and new account creation.
-defmodule Auth do
-  use Macros.SocketWriter
-  use Macros.Store
-  use Macros.Translator
+defmodule Moongate.Auth do
+  use Moongate.Macros.SocketWriter
+  use Moongate.Macros.Store
+  use Moongate.Macros.Translator
 
   def start_link do
     link(nil, "auth")
@@ -20,7 +20,7 @@ defmodule Auth do
     case auth_status do
       {:ok, _} ->
         client_id = "client_" <> UUID.uuid4(:hex)
-        token = %AuthToken{email: event.contents[:email], source: event.origin}
+        token = %Moongate.AuthToken{email: event.contents[:email], source: event.origin}
         state_mod = Map.put(state, String.to_atom(client_id), token)
         write_to(event.origin, %{
           cast: :set_token,
@@ -59,7 +59,7 @@ defmodule Auth do
   # Check if the requested login is correct.
   # TODO: Make secure.
   defp authenticate(params) do
-    results = Db.UserQueries.find_by_email(params[:email])
+    results = Moongate.Db.UserQueries.find_by_email(params[:email])
 
     if length(results) == 0 do
       {:error, "bad_email"}
@@ -77,7 +77,7 @@ defmodule Auth do
 
   # Attempt to create an account with the given params.
   defp create_account(params) do
-    Db.UserQueries.create([
+    Moongate.Db.UserQueries.create([
       email: params[:email],
       password: params[:password]
     ])

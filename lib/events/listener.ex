@@ -1,24 +1,24 @@
-defmodule ClientEvent do
+defmodule Moongate.ClientEvent do
   defstruct cast: nil, contents: nil, error: nil, origin: nil, to: nil
 end
 
-defmodule EventListener do
+defmodule Moongate.EventListener do
   defstruct auth: nil,
             id: nil
 end
 
-defmodule Events.Listener do
-  use Macros.Packets
-  use Macros.SocketWriter
-  use Macros.Store
-  use Macros.Translator
+defmodule Moongate.Events.Listener do
+  use Moongate.Macros.Packets
+  use Moongate.Macros.SocketWriter
+  use Moongate.Macros.Store
+  use Moongate.Macros.Translator
 
   def start_link(id) do
-    link(%EventListener{id: id}, "events", "#{id}")
+    link(%Moongate.EventListener{id: id}, "events", "#{id}")
   end
 
   def handle_cast({:init}, state) do
-    Say.pretty("Event listener for client #{state.id} has been started.", :green)
+    Moongate.Say.pretty("Event listener for client #{state.id} has been started.", :green)
     {:noreply, state}
   end
 
@@ -46,7 +46,7 @@ defmodule Events.Listener do
         tell_async(:auth, {:register, p})
 
       _ ->
-        Scopes.Events.take(event)
+        Moongate.Scopes.Events.take(event)
     end
 
     {:noreply, state}
