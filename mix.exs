@@ -36,8 +36,7 @@ defmodule Moongate.Mixfile do
       {:timex, "~> 0.13.1"},
       {:json, "~> 0.3.0"},
       {:cauldron, "~> 0.1.2"},
-      {:vex, "~> 0.5"},
-      {:hexate,  ">= 0.5.0"}
+      {:vex, "~> 0.5"}
     ]
   end
 end
