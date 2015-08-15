@@ -34,12 +34,12 @@ defmodule Auth do
         tell_pid_async(from, {:auth, token.identity})
         Say.pretty("#{client_id} logged in.", :green)
         {:noreply, state_mod}
-      {_, _} ->
-        Say.pretty("Failed log in attempt from anonymous #{Port.info(event.origin)[:name]} connection.", :red)
+      _ ->
+        Say.pretty("Failed log in attempt from anonymous #{Atom.to_string(event.origin.protocol)} connection.", :red)
         {:noreply, state}
     end
   end
-  
+
   @doc """
     Make a new account with the given params if we're allowed.
   """
@@ -68,7 +68,10 @@ defmodule Auth do
     if length(results) == 0 do
       {:error, "bad_email"}
     else
-      if hd(results).password == params[:password] do
+      record = hd(results)
+      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, params[:password], record.password_salt, 4096)
+
+      if :pbkdf2.to_hex(encrypted_pass) == record.password do
         {:ok, "login_success"}
       else
         {:error, "bad_password"}
@@ -79,8 +82,8 @@ defmodule Auth do
   # Attempt to create an account with the given params.
   defp create_account(params) do
     Db.UserQueries.create([
-            email: params[:email],
-            password: params[:password]
+      email: params[:email],
+      password: params[:password]
     ])
   end
 end

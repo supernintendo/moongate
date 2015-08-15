@@ -1,4 +1,8 @@
 defmodule Db.UserQueries do
+  @capital_letters    ?A..?Z |> Enum.map(&String.Chars.to_string([&1]))
+  @lowercase_letters  ?a..?z |> Enum.map(&String.Chars.to_string([&1]))
+  @numbers            0..9 |> Enum.map fn (n) -> "#{n}" end
+
   import Ecto.Query
 
   alias Db.Repo, as: Repo
@@ -27,16 +31,30 @@ defmodule Db.UserQueries do
   end
 
   def generate_user(params) do
-    # TODO: Better crypto.
-    salt = UUID.uuid4(:hex)
-    # {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, params[:password], salt, 4096)
+    salt = generate_salt
+    {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, params[:password], salt, 4096)
+    password = :pbkdf2.to_hex(encrypted_pass)
 
     [
         email: params[:email],
-        password: params[:password],
-        salt: salt,
+        password: password,
+        password_salt: salt,
         created_at: Ecto.DateTime.utc,
         last_login: Ecto.DateTime.utc
     ]
+  end
+
+  def generate_salt do
+    # Get 12 random bytes and cast them as 3 32-bit ints
+    <<a :: size(32), b :: size(32), c :: size(32) >> = :crypto.rand_bytes(12)
+
+    # Use random ints for seeding
+    :random.seed({a,b,c})
+
+    Enum.shuffle(salt_characters) |> Enum.slice(0..15) |> Enum.join("")
+  end
+
+  defp salt_characters do
+    @capital_letters ++ @lowercase_letters ++ @numbers
   end
 end

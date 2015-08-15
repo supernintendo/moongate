@@ -30,12 +30,14 @@ defmodule Moongate.Mixfile do
     [
       {:socket, "~> 0.2.8"},
       {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 0.2.0"},
+      {:ecto, "~> 0.15.0"},
       {:uuid, "~> 0.1.5"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
       {:timex, "~> 0.13.1"},
       {:json, "~> 0.3.0"},
-      {:cauldron, "~> 0.1.2"}
+      {:cauldron, "~> 0.1.2"},
+      {:vex, "~> 0.5"},
+      {:hexate,  ">= 0.5.0"}
     ]
   end
 end

@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS dblink;
+
 DO
 $body$
 DECLARE
@@ -27,6 +28,8 @@ BEGIN
         PERFORM dblink_exec('dbname=' || current_database()
                             , $$CREATE DATABASE moongate$$);
     END IF;
+
+    ALTER USER moongate WITH SUPERUSER;
 END
 $body$
 ;
