@@ -1,14 +1,14 @@
 {
     "2593": {
-        "anon": true,
         "protocol": "TCP"
     },
     "2594": {
-        "anon": true,
         "protocol": "UDP"
     },
     "2595": {
-        "anon": true,
         "protocol": "WebSocket"
+    },
+    "2596": {
+        "protocol": "HTTP"
     }
 }

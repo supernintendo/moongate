@@ -16,7 +16,8 @@ defmodule Moongate.Supervisor do
       supervisor(Events.Supervisor, [], [id: :events]),
       supervisor(Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
       supervisor(Sockets.UDP.Supervisor, [], [id: :udp_sockets]),
-      supervisor(Sockets.Web.Supervisor, [], [id: :web_sockets])
+      supervisor(Sockets.Web.Supervisor, [], [id: :web_sockets]),
+      supervisor(Sockets.HTTP.Supervisor, [], [id: :http_hosts])
     ] ++ supervisors_from(world_supervisors)
     supervise(children, strategy: :one_for_one)
   end

@@ -64,6 +64,7 @@ defmodule Mix.Tasks.Moongate.Up do
       "TCP" -> spawn_new(:tcp_sockets, String.to_integer(port))
       "UDP" -> spawn_new(:udp_sockets, String.to_integer(port))
       "WebSocket" -> spawn_new(:web_sockets, String.to_integer(port))
+      "HTTP" -> spawn_new(:http_hosts, String.to_integer(port))
     end
   end
 
