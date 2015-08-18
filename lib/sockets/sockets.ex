@@ -1,3 +1,3 @@
 defmodule Moongate.SocketOrigin do
-  defstruct auth: nil, id: nil, ip: nil, port: nil, protocol: nil
+  defstruct auth: %Moongate.AuthToken{email: nil, identity: "anon"}, id: nil, ip: nil, port: nil, protocol: nil
 end

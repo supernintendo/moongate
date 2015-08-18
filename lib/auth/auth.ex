@@ -1,7 +1,5 @@
 defmodule Moongate.AuthToken do
-  defstruct email: nil,
-            identity: UUID.uuid4(:hex),
-            source: nil
+  defstruct email: nil, identity: "anon"
 end
 
 # The Auth module manages login and new account creation.
@@ -21,7 +19,7 @@ defmodule Moongate.Auth do
     case auth_status do
       {:ok, _} ->
         client_id = "client_" <> UUID.uuid4(:hex)
-        token = %Moongate.AuthToken{email: email, source: event.origin}
+        token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
         write_to(event.origin, %{
           cast: :set_token,
           namespace: :auth,

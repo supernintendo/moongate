@@ -3,7 +3,7 @@ defmodule Moongate.ClientEvent do
 end
 
 defmodule Moongate.EventListener do
-  defstruct auth: %Moongate.AuthToken{}, id: nil, origin: nil
+  defstruct id: nil, origin: nil
 end
 
 defmodule Moongate.Events.Listener do
@@ -29,7 +29,7 @@ defmodule Moongate.Events.Listener do
     Authenticate with the given params.
   """
   def handle_cast({:auth, token}, state) do
-    {:noreply, %{ state | auth: token }}
+    {:noreply, %{ state | origin: %{ state.origin | auth: token } }}
   end
 
   @doc """
@@ -37,11 +37,10 @@ defmodule Moongate.Events.Listener do
   """
   def handle_cast({:event, message, token, socket}, state) do
     authenticated = authenticated?(state, token)
-    origin = %{ state.origin | auth: state.auth }
 
     case message do
       [to | [cast | params]] ->
-        handle_message(origin, cast, params, to, authenticated)
+        handle_message(state.origin, cast, params, to, authenticated)
       _ ->
         Moongate.Scopes.Events.take(message)
     end
@@ -73,6 +72,6 @@ defmodule Moongate.Events.Listener do
   end
 
   defp authenticated?(state, token) do
-    state.auth.identity == token
+    token != "anon" and state.origin.auth.identity == token
   end
 end
