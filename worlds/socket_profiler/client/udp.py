@@ -15,7 +15,9 @@ while True:
   counter += 1
 
   if counter >= PACKET_DELAY:
-    sock.sendto('begin anon messages send %s end' % PACKET, (IP, PORT))
+    outgoing = "anon messages send {}".format(PACKET)
+    packet_length = len(outgoing.replace(" ", ""))
+    sock.sendto("{}{}{}{}".format(packet_length, "{", outgoing, "}"), (IP, PORT))
     data, addr = sock.recvfrom(BUFFER_SIZE)
     print data
     counter = 0

@@ -16,7 +16,9 @@ while True:
   counter += 1
 
   if counter >= PACKET_DELAY:
-    sock.send('begin anon messages send %s end' % PACKET)
+    outgoing = "anon messages send {}".format(PACKET)
+    packet_length = len(outgoing.replace(" ", ""))
+    sock.send("{}{}{}{}".format(packet_length, "{", outgoing, "}"))
     data = sock.recv(BUFFER_SIZE)
     print data
     counter = 0

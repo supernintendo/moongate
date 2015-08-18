@@ -22,4 +22,12 @@ defmodule Moongate.Say do
         IO.ANSI.format_fragment(
           [modifier, string <> IO.ANSI.reset], true)))
   end
+
+  def origin(o) do
+    if o.auth != nil and o.auth.email != nil do
+      o.auth.email
+    else
+      o.id
+    end
+  end
 end

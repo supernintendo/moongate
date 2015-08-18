@@ -5,8 +5,7 @@ defmodule Moongate.Scopes.Events do
   def take(event) do
     case event do
       %{ cast: :send, to: :messages } ->
-        p = expect_from(event, {:message})
-        tell_async(:messages, "public", {:message, p})
+        tell_async(:messages, "public", {:message, event.params})
     end
   end
 end

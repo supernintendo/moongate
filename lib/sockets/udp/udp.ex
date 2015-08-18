@@ -3,8 +3,8 @@ defmodule Moongate.UDPSocket do
 end
 
 defmodule Moongate.Sockets.UDP.Socket do
-  use Moongate.Macros.Packets
-  use Moongate.Macros.Translator
+  use GenServer
+  use Moongate.Macros.Processes
 
   def start_link(port) do
     link(%Moongate.UDPSocket{port: port}, "socket", "#{port}")
@@ -18,14 +18,22 @@ defmodule Moongate.Sockets.UDP.Socket do
   end
 
   def handler({packet, {ip, port}}, server) do
-    incoming = packet_to_list(packet)
+    safe_packet = Regex.replace(~r/[\n\b\t\r]/, packet, "")
+    valid = String.valid?(safe_packet)
 
-    unless pid_for_name(:events, "#{port}") do
-      spawn_new(:events, "#{port}")
-    end
-
-    if hd(incoming) != :invalid_message do
-      tell_async(:events, "#{port}", {:event, tl(incoming), hd(incoming), {server, :udp, ip}})
+    case Moongate.Packets.parse(packet) do
+      {:error, error} when valid -> Moongate.Say.pretty("Bad packet #{safe_packet}: #{error}.", :red)
+      {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
+      {:ok, parsed} ->
+        unless pid_for_name(:events, "#{port}") do
+          spawn_new(:events, %Moongate.SocketOrigin{
+            id: port,
+            ip: ip,
+            port: server,
+            protocol: :udp
+          })
+        end
+        tell_async(:events, "#{port}", {:event, tl(parsed), hd(parsed), {server, :udp, ip}})
     end
 
     server |> udp_listen

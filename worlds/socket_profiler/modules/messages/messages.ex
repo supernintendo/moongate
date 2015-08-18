@@ -1,6 +1,7 @@
 defmodule SocketProfiler.Messages do
-  use Moongate.Macros.Translator
+  use GenServer
   use Moongate.Macros.SocketWriter
+  use Moongate.Macros.Translator
 
   def start_link(_) do
     link(%{}, "messages", "public")

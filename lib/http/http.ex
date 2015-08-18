@@ -4,7 +4,8 @@ end
 
 defmodule Moongate.HTTP.Host do
   use Cauldron
-  use Moongate.Macros.Translator
+  use GenServer
+  use Moongate.Macros.Processes
   use Moongate.Macros.Worlds
 
   def start_link(port) do

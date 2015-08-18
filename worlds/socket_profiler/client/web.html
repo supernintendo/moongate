@@ -19,7 +19,10 @@
                 packetDelay = 15,
                 socket = new WebSocket("ws://" + ip + ":" + port),
                 sendMessage = function() {
-                    socket.send("begin anon messages send " + document.getElementById("messageToSend").value + " end")
+                    var message = "anon messages send " + document.getElementById("messageToSend").value,
+                        messageLength = message.replace(/ /g,'').length;
+
+                    socket.send(messageLength + "{" + message + "}");
                 }
 
             socket.onopen = function() {

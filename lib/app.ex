@@ -1,4 +1,4 @@
-defmodule Moongate do
+defmodule Moongate.Application do
   use Application
 
   @doc """
@@ -11,7 +11,8 @@ end
 
 defmodule Mix.Tasks.Moongate.Up do
   use Moongate.Macros.ExternalResources
-  use Moongate.Macros.Translator
+  use Moongate.Macros.Processes
+  use Moongate.Macros.Worlds
 
   @doc """
     Initialize the game server.
@@ -26,8 +27,9 @@ defmodule Mix.Tasks.Moongate.Up do
     load_world(world)
     load_scopes(world)
     supervisor = start_supervisor(world)
-    spawn_sockets(world)
+    initialize_stages(world)
     Moongate.Scopes.Start.on_load
+    spawn_sockets(world)
     recur
 
     {:ok, supervisor}
@@ -35,7 +37,21 @@ defmodule Mix.Tasks.Moongate.Up do
 
   # Load all modules for game world and set up macros using config files
   defp load_world(world) do
-    load_all_in_directory(File.ls("worlds/#{world}/modules"), world)
+    load_world(world, "#{world}/modules")
+  end
+
+  defp load_world(world, path) do
+    dir = File.ls("worlds/#{path}")
+    load_all_in_directory(dir, world, path)
+  end
+
+  defp load_all_in_directory({:ok, dir}, world, path) do
+    dir |> Enum.filter(&(Regex.match?(~r/.ex\b/, &1)))
+        |> Enum.map(&("worlds/#{path}/#{&1}"))
+        |> Enum.map(&load_world_module(&1))
+
+    dir |> Enum.filter(&(File.dir?(Path.expand("worlds/#{path}/#{&1}"))))
+        |> Enum.map(&(load_world(world, "#{path}/#{&1}")))
   end
 
   # Spawn socket listeners
@@ -62,13 +78,6 @@ defmodule Mix.Tasks.Moongate.Up do
     end
   end
 
-  # Load all world modules
-  defp load_all_in_directory({:ok, files}, world) do
-    files = Enum.filter(files, fn(filename) -> Regex.match?(~r/.ex\b/, filename) end)
-    files = Enum.map(files, fn(filename) -> "worlds/#{world}/modules/#{filename}" end)
-    Enum.map(files, &load_world_module(&1))
-  end
-
   defp load_world_module(filename) do
     Code.eval_file(filename)
     Moongate.Say.pretty "Compiled #{filename}.", :yellow
@@ -81,6 +90,15 @@ defmodule Mix.Tasks.Moongate.Up do
 
   defp load_scope(filename, world) do
     Code.eval_file("worlds/#{world}/scopes/#{filename}")
+  end
+
+  defp initialize_stages(world) do
+    stages = apply(world_module, :__moongate_stages, [])
+    Enum.map(stages, &initialize_stage(&1))
+  end
+
+  defp initialize_stage({id, stage}) do
+    spawn_new(:stages, [id: id, stage: stage])
   end
 
   # Fairly straightforward.
