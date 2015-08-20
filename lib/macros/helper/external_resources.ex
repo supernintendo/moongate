@@ -3,7 +3,6 @@ defmodule Moongate.Macros.ExternalResources do
     {:ok, read} = File.read "config/config.json"
     {:ok, config} = JSON.decode(read)
     world = config["world"] || "default"
-
     {:ok, modules} = File.ls("worlds/#{world}/modules")
     {:ok, scopes} = File.ls("worlds/#{world}/scopes")
 

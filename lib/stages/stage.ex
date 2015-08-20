@@ -39,7 +39,7 @@ defmodule Moongate.Stages.Instance do
     else
       manipulation = %{state | members: Enum.uniq(state.members ++ [origin.id])}
       apply(state.stage, :enrolled, [origin])
-      Moongate.Say.pretty("#{Moongate.Say.origin(origin)} enrolled in stage #{state.id}.", :cyan)
+      Moongate.Say.pretty("#{Moongate.Say.origin(origin)} joined stage #{state.id}.", :cyan)
       {:noreply, manipulation}
     end
   end

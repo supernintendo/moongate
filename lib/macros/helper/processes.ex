@@ -15,16 +15,8 @@ defmodule Moongate.Macros.Processes do
             can_receive: mod.__info__(:functions)[:receive_loop] == 1
           }
         else
-          %Moongate.ProcessCapabilites{
-            can_be_called: false,
-            can_be_cast_to: false,
-            can_receive: false
-          }
+          %Moongate.ProcessCapabilites{}
         end
-      end
-
-      defp get(namespace, params) do
-        GenServer.cast(:tree, {:get, namespace, params})
       end
 
       defp link(params, name) do

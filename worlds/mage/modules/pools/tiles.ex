@@ -1,8 +1,11 @@
 defmodule Mage.Pools.Tiles do
-  # aspects public,
-  #   x: :integer,
-  #   y: :integer,
-  #   color: :string
+  import Moongate.Pool
+
+  aspects %{
+    x: :integer,
+    y: :integer,
+    color: :string
+  }
 
   # index_by {[:x, :y], "_"}
 end
