@@ -1,8 +1,13 @@
 defmodule Moongate.Stage do
   use Moongate.Macros.Processes
 
-  def enroll(transaction, stage_name) do
-    tell_async(:stage, stage_name, {:enroll, transaction.origin})
+  def join(transaction, stage_name) do
+    tell_async(:stage, stage_name, {:join, transaction.origin})
+  end
+
+  def is_authenticated?(t) do
+    {:ok, result} = tell(:auth, {:check_auth, t.origin})
+    result
   end
 
   def kick(transaction) do

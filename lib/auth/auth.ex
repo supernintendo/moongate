@@ -1,3 +1,7 @@
+defmodule Moongate.AuthSessions do
+  defstruct tokens: %{}
+end
+
 defmodule Moongate.AuthToken do
   defstruct email: nil, identity: "anon"
 end
@@ -9,35 +13,39 @@ defmodule Moongate.Auth do
   use Moongate.Macros.SocketWriter
 
   def start_link do
-    link(nil, "auth")
+    link(%Moongate.AuthSessions{}, "auth")
   end
 
-  def handle_cast({:login, event}, _) do
+  def handle_cast({:login, event}, state) do
     {email, password} = event.params
     auth_status = authenticate(email, password)
 
     case auth_status do
       {:ok, _} ->
-        client_id = "client_" <> UUID.uuid4(:hex)
         token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
         write_to(event.origin, %{
           cast: :set_token,
           namespace: :auth,
           value: "#{token.identity}"
         })
+        state = %{state | tokens: Map.put(
+          state.tokens,
+          String.to_atom(event.origin.id),
+          token.identity
+        )}
         tell_async(:events, event.origin.id, {:auth, token})
-        Moongate.Say.pretty("#{client_id} logged in.", :green)
-        {:noreply, nil}
+        Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in.", :green)
+        {:noreply, state}
       _ ->
-        Moongate.Say.pretty("Failed log in attempt from anonymous #{Atom.to_string(event.origin.protocol)} connection.", :red)
-        {:noreply, nil}
+        Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
+        {:noreply, state}
     end
   end
 
   @doc """
     Make a new account with the given params if we're allowed.
   """
-  def handle_cast({:register, event}, _) do
+  def handle_cast({:register, event}, state) do
     {email, password} = event.params
     {status, _} = create_account(email, password)
 
@@ -46,7 +54,20 @@ defmodule Moongate.Auth do
     else
       IO.puts "error creating account"
     end
-    {:noreply, nil}
+    {:noreply, state}
+  end
+
+  def handle_call({:check_auth, origin}, _from, state) do
+    has_id = Map.has_key?(state.tokens, String.to_atom(origin.id))
+    origin_logged_in = Map.has_key?(origin.auth, :identity)
+
+    if has_id and origin_logged_in do
+      id_authenticated = Map.get(state.tokens, String.to_atom(origin.id)) == origin.auth.identity
+
+      {:reply, {:ok, id_authenticated}, state}
+    else
+      {:reply, {:ok, false}, state}
+    end
   end
 
   # Check if the requested login is correct.

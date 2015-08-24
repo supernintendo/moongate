@@ -10,7 +10,7 @@ defmodule Moongate.Macros.Processes do
           {mod, _, _} = Process.info(pid)[:dictionary][:"$initial_call"]
 
           %Moongate.ProcessCapabilites{
-            can_be_called: mod.__info__(:functions)[:handle_call] == 2,
+            can_be_called: mod.__info__(:functions)[:handle_call] == 3,
             can_be_cast_to: mod.__info__(:functions)[:handle_cast] == 2,
             can_receive: mod.__info__(:functions)[:receive_loop] == 1
           }
@@ -52,16 +52,20 @@ defmodule Moongate.Macros.Processes do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
 
-        if capabilites.can_be_called, do: GenServer.call(name, message)
-        if capabilites.can_receive, do: send(pid, message)
+        if capabilites.can_be_called, do: result = GenServer.call(name, message)
+        if capabilites.can_receive, do: result = send(pid, message)
+
+        result
       end
 
       defp tell(namespace, id, message) do
         pid = pid_for_name(namespace, id)
         capabilites = capabilities_for(pid)
 
-        if capabilites.can_be_called, do: GenServer.call(String.to_atom("#{namespace}_#{id}"), message)
-        if capabilites.can_receive, do: send(pid, message)
+        if capabilites.can_be_called, do: result = GenServer.call(String.to_atom("#{namespace}_#{id}"), message)
+        if capabilites.can_receive, do: result = send(pid, message)
+
+        result
       end
 
       defp tell_all_async(namespace, message) do
@@ -87,8 +91,10 @@ defmodule Moongate.Macros.Processes do
       defp tell_pid(pid, message) do
         capabilites = capabilities_for(pid)
 
-        if capabilites.can_be_called, do: GenServer.call(pid, message)
-        if capabilites.can_receive, do: send(pid, message)
+        if capabilites.can_be_called, do: result = GenServer.call(pid, message)
+        if capabilites.can_receive, do: result = send(pid, message)
+
+        result
       end
 
       defp tell_pid_async(pid, message) do

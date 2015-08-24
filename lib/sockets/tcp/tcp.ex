@@ -24,12 +24,13 @@ defmodule Moongate.Sockets.TCP.Socket do
     uuid = UUID.uuid4(:hex)
 
     socket = Socket.TCP.accept!(listener)
-    {:ok, child} = spawn_new(:events, %Moongate.SocketOrigin{
+    origin = %Moongate.SocketOrigin{
       id: uuid,
       ip: nil,
       port: socket,
       protocol: :tcp
-    })
+    }
+    {:ok, child} = spawn_new(:events, origin)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
     Moongate.Say.pretty("Socket with id #{uuid} connected.", :magenta)
     accept(listener)

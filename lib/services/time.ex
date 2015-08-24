@@ -14,4 +14,9 @@ defmodule Moongate.Time do
       ms: rem(rem(rem(rem(time, 86400), 3600), 60), 1000)
     }
   end
+
+  def now_formatted do
+    {:ok, date} = DateFormat.format(Date.local, "%b %d - %I:%0M:%0S %p", :strftime)
+    date
+  end
 end

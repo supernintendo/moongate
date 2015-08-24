@@ -18,8 +18,8 @@ defmodule Moongate do
     end
   end
 
-  def enroll(transaction, stage_name) do
-    tell_async(:stage, stage_name, {:enroll, transaction.origin})
+  def join(transaction, stage_name) do
+    tell_async(:stage, stage_name, {:join, transaction.origin})
   end
 
   def kick(transaction) do

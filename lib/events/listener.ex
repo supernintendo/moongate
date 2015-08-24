@@ -36,19 +36,19 @@ defmodule Moongate.Events.Listener do
     Deliver a parsed socket message to the appropriate server.
   """
   def handle_cast({:event, message, token, socket}, state) do
-    authenticated = authenticated?(state, token)
+    authenticated = is_authenticated?(socket, state, token)
+    logged_in = is_logged_in?(state, token)
 
     case message do
-      [to | [cast | params]] ->
-        handle_message(state.origin, cast, params, to, authenticated)
-      _ ->
-        Moongate.Scopes.Events.take(message)
+      [to | [cast | params]] when authenticated -> handle_message(state.origin, cast, params, to, logged_in)
+      _ when authenticated -> Moongate.Scopes.Events.take(message)
+      _ -> Moongate.Say.pretty("Bad event: Authentication token #{token} does not match that of event listener: #{state.origin.auth.identity}.", :red)
     end
 
     {:noreply, state}
   end
 
-  def handle_message(origin, cast, params, to, authenticated) do
+  def handle_message(origin, cast, params, to, logged_in) do
     event = %Moongate.ClientEvent{
       cast: String.to_atom(cast),
       to: String.to_atom(to),
@@ -57,21 +57,18 @@ defmodule Moongate.Events.Listener do
     }
 
     case event do
-      %{ cast: :login, to: :auth } when not authenticated ->
-        tell_async(:auth, {:login, event})
-
-      %{ cast: :register, to: :auth } when not authenticated ->
-        tell_async(:auth, {:register, event})
-
-      %{ cast: any, to: stage} ->
-        tell_async(:stage, stage, {:tunnel, event})
-
-      _ ->
-        Moongate.Scopes.Events.take(event)
+      %{ cast: :login, to: :auth } when not logged_in -> tell_async(:auth, {:login, event})
+      %{ cast: :register, to: :auth } when not logged_in -> tell_async(:auth, {:register, event})
+      %{ cast: any, to: stage} -> tell_async(:stage, stage, {:tunnel, event})
+      _ -> Moongate.Scopes.Events.take(event)
     end
   end
 
-  defp authenticated?(state, token) do
+  defp is_authenticated?(socket, state, token) do
+    state.origin.auth.identity == token and state.origin.port
+  end
+
+  defp is_logged_in?(state, token) do
     token != "anon" and state.origin.auth.identity == token
   end
 end

@@ -1,4 +1,4 @@
-defmodule Mage.Pools.Tiles do
+defmodule Default.Pools.Tiles do
   import Moongate.Pool
 
   aspects %{

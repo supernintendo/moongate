@@ -80,7 +80,7 @@ defmodule Mix.Tasks.Moongate.Up do
 
   defp load_world_module(filename) do
     Code.eval_file(filename)
-    Moongate.Say.pretty "Compiled #{filename}.", :yellow
+    Moongate.Say.pretty "Compiled #{filename}.", :yellow, [suppress_timestamp: true]
   end
 
   defp load_scopes(world) do

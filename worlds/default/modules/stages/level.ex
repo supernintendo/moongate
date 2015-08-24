@@ -1,14 +1,14 @@
-defmodule Mage.Stage.Level do
+defmodule Default.Stage.Level do
   import Moongate.Stage
 
   meta %{}
   pools %{
-    characters: Mage.Pools.Characters,
-    tiles: Mage.Pools.Tiles
+    # characters: Default.Pools.Characters,
+    tiles: Default.Pools.Tiles
   }
   # takes :move, move_character: [:tiles]
 
-  defp enrolled(t) do
+  def joined(_) do
     # origin = t.origin
 
     # if origin.trusted do
@@ -20,7 +20,7 @@ defmodule Mage.Stage.Level do
     # end
   end
 
-  def move_character(t) do
+  def move_character(_) do
     # arrange(:move_to, %{
     #   pool: :character,
     #   subject: :is
