@@ -65,7 +65,9 @@ defmodule Moongate.Events.Listener do
   end
 
   defp is_authenticated?(socket, state, token) do
-    state.origin.auth.identity == token and state.origin.port
+    {port, protocol} = socket
+
+    state.origin.auth.identity == token and state.origin.port == port
   end
 
   defp is_logged_in?(state, token) do
