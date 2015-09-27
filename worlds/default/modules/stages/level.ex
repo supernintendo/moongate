@@ -2,28 +2,14 @@ defmodule Default.Stage.Level do
   import Moongate.Stage
 
   meta %{}
-  pools %{
-    # characters: Default.Pools.Characters,
-    tiles: Default.Pools.Tiles
-  }
-  # takes :move, move_character: [:tiles]
+  pools [Character]
 
-  def joined(_) do
-    # origin = t.origin
-
-    # if origin.trusted do
-    #   publish(origin, :characters)
-    #   subscribe(origin, :tiles)
-    #   :ok
-    # else
-    #   {:error, "User is not logged in."}
-    # end
+  def joined(e) do
+    new Character, [origin: e.origin]
+    :ok
   end
 
-  def move_character(_) do
-    # arrange(:move_to, %{
-    #   pool: :character,
-    #   subject: :is
-    # })
+  def player_move(e) do
+    :ok
   end
 end

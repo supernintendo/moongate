@@ -84,12 +84,12 @@ defmodule Mix.Tasks.Moongate.Up do
   end
 
   defp load_scopes(world) do
-    {:ok, files} = File.ls("worlds/#{world}/scopes")
+    {:ok, files} = File.ls("worlds/#{world}/modules/scopes")
     Enum.map(files, &load_scope(&1, world))
   end
 
   defp load_scope(filename, world) do
-    Code.eval_file("worlds/#{world}/scopes/#{filename}")
+    Code.eval_file("worlds/#{world}/modules/scopes/#{filename}")
   end
 
   defp initialize_stages(world) do

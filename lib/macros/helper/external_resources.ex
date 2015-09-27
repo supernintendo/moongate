@@ -4,7 +4,7 @@ defmodule Moongate.Macros.ExternalResources do
     {:ok, config} = JSON.decode(read)
     world = config["world"] || "default"
     {:ok, modules} = File.ls("worlds/#{world}/modules")
-    {:ok, scopes} = File.ls("worlds/#{world}/scopes")
+    {:ok, scopes} = File.ls("worlds/#{world}/modules/scopes/")
 
     Enum.map(modules, fn(resource) ->
       quote do
@@ -14,9 +14,15 @@ defmodule Moongate.Macros.ExternalResources do
 
     Enum.map(scopes, fn(resource) ->
       quote do
-        @external_resource "worlds/#{unquote(world)}/scopes/#{unquote(resource)}"
+        @external_resource "worlds/#{unquote(world)}/modules/scopes/#{unquote(resource)}"
       end
     end)
+
+    quote do
+      def world_name do
+        unquote(world)
+      end
+    end
   end
 
   defmacro __using__(_) do

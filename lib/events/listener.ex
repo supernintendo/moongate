@@ -7,9 +7,9 @@ defmodule Moongate.EventListener do
 end
 
 defmodule Moongate.Events.Listener do
+  import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
-  use Moongate.Macros.SocketWriter
   use Moongate.Macros.Worlds
 
   def start_link(origin) do
@@ -20,7 +20,7 @@ defmodule Moongate.Events.Listener do
 
   def handle_cast({:init}, state) do
     Moongate.Say.pretty("Event listener for client #{state.id} has been started.", :green)
-    apply(world_module, :connected, [%Moongate.StageTransaction{ origin: state.origin }])
+    apply(world_module, :connected, [%Moongate.StageEvent{ origin: state.origin }])
 
     {:noreply, state}
   end
@@ -29,6 +29,7 @@ defmodule Moongate.Events.Listener do
     Authenticate with the given params.
   """
   def handle_cast({:auth, token}, state) do
+    write_to(state.origin, :set_token, "#{token.identity}")
     {:noreply, %{ state | origin: %{ state.origin | auth: token } }}
   end
 

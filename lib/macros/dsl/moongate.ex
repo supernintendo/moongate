@@ -18,11 +18,11 @@ defmodule Moongate do
     end
   end
 
-  def join(transaction, stage_name) do
-    tell_async(:stage, stage_name, {:join, transaction.origin})
+  def join(event, stage_name) do
+    tell_async(:stage, stage_name, {:join, event.origin})
   end
 
-  def kick(transaction) do
-    tell_async(:stage, transaction.from, {:kick, transaction.origin})
+  def kick(event) do
+    tell_async(:stage, event.from, {:kick, event.origin})
   end
 end

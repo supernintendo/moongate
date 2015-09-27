@@ -2,7 +2,7 @@ defmodule Default.Stage.LoginScreen do
   import Moongate.Stage
 
   meta %{}
-  pools %{}
+  pools []
   takes :proceed, :check_authenticated
 
   def joined(_) do

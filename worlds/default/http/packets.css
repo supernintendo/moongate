@@ -1,0 +1,17 @@
+#incoming-indicator.off, #outgoing-indicator.off {
+    color: #F3F3F3;
+    transition: color 0.5s;
+}
+#incoming-indicator {
+    color: #44B449;
+}
+#outgoing-indicator {
+    color: #FF4640;
+}
+.snippet {
+    background: #FFF8ED;
+    border: 1px solid #F6E4CC;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 2px;
+}

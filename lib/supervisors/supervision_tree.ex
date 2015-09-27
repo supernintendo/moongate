@@ -1,7 +1,6 @@
 defmodule Moongate.SupervisionTree do
   use GenServer
   use Moongate.Macros.Processes
-  use Moongate.Macros.SocketWriter
 
   def start_link do
     link(%{}, "tree")
@@ -17,22 +16,6 @@ defmodule Moongate.SupervisionTree do
   def handle_cast({:tell_async_all_children, supervisor, cast}, registry) do
     children = Supervisor.which_children(registry[supervisor])
     Enum.map(children, &tell_pid_async(elem(&1, 1), cast))
-    {:noreply, registry}
-  end
-
-  @doc """
-    Send information about all children of a supervisor to the client.
-  """
-  def handle_cast({:get, supervisor, event}, registry) do
-    children = Supervisor.which_children(registry[supervisor])
-    children_info = Enum.map(Enum.map(children, fn(child) -> elem(child, 1) end), fn(pid) ->
-      [tell_pid(pid, :give_info), "|"]
-    end)
-    write_to(event.origin, %{
-      cast: :info,
-      namespace: supervisor,
-      value: List.to_string(List.flatten(children_info))
-    })
     {:noreply, registry}
   end
 

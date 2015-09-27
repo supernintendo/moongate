@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+    <head>
+        <link href="packets.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <span id="stage-prefix"></span><span id="stage-name"></span>
+        <input id="auth-token" placeholder="token" value="anon"></input>
+        <input id="message" placeholder="message" value="auth login foo bar"></input>
+        <select id="presets">
+            <option value="auth login foo bar">Login Screen > Login</option>
+            <option value="login_screen proceed">Login Screen > Proceed</option>
+        </select>
+        <button id="send-packet">Send</button>
+        <span id="incoming-indicator" class="off">&#x25B2;</span>
+        <span id="outgoing-indicator" class="off">&#x25BC;</span>
+        <div id="log"></div>
+        <script src="packets.js"></script>
+    </body>
+</html>

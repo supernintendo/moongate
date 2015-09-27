@@ -1,6 +1,10 @@
 defmodule Moongate.Time do
   use Timex
 
+  def current_ms do
+    Time.now(:msecs)
+  end
+
   # Return a map containing the difference between two UNIX
   # timestamps.
   def diff(from, to) do

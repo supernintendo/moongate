@@ -8,9 +8,9 @@ end
 
 # The Auth module manages login and new account creation.
 defmodule Moongate.Auth do
+  import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
-  use Moongate.Macros.SocketWriter
 
   def start_link do
     link(%Moongate.AuthSessions{}, "auth")
@@ -23,11 +23,6 @@ defmodule Moongate.Auth do
     case auth_status do
       {:ok, _} ->
         token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
-        write_to(event.origin, %{
-          cast: :set_token,
-          namespace: :auth,
-          value: "#{token.identity}"
-        })
         state = %{state | tokens: Map.put(
           state.tokens,
           String.to_atom(event.origin.id),

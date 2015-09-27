@@ -24,10 +24,13 @@ defmodule Moongate.HTTP.Host do
       path = "/index.html"
     end
 
-    if File.exists?(world_directory(:http) <> path) do
-      req |> Request.reply(200, File.open!(world_directory(:http) <> path))
-    else
-      req |> Request.reply(404)
+    cond do
+      File.exists?(world_directory(:http) <> path) ->
+        req |> Request.reply(200, File.open!(world_directory(:http) <> path))
+      File.exists?(world_directory(:http) <> path <> ".html") ->
+        req |> Request.reply(200, File.open!(world_directory(:http) <> path <> ".html"))
+      true ->
+        req |> Request.reply(404)
     end
   end
 end

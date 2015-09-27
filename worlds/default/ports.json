@@ -1,6 +1,6 @@
 {
     "2593": {
-        "protocol": "TCP",
+        "protocol": "WebSocket",
         "tags": [
             "players"
         ]

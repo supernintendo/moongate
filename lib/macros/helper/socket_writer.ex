@@ -1,23 +1,15 @@
 defmodule Moongate.Macros.SocketWriter do
-  defmacro __using__(_) do
-    {:ok, read} = File.read "config/config.json"
-    {:ok, config} = JSON.decode(read)
-    world = config["world"] || "default"
-    {:ok, read} = File.read "worlds/#{world}/server.json"
-    {:ok, server_config} = JSON.decode(read)
+  def write_to(target, tag, message) do
+    auth_token = target.auth.identity
+    name = Atom.to_string(Process.info(self())[:registered_name])
+    tag = Atom.to_string(tag)
+    packet_length = String.length(auth_token <> name <> tag <> message)
+    parsed_message = "#{packet_length}{#{auth_token} #{name} #{tag} #{message}}"
 
-    quote do
-      # Send a message to a socket connection.
-      defp write_to(target, message) do
-        delimiter = unquote(server_config["outgoing_packet_delimiter"] || ",")
-        parsed_message = "begin=true#{delimiter} cast=#{Atom.to_string(message[:cast])}#{delimiter} namespace=#{Atom.to_string(message[:namespace])}#{delimiter} value=#{message[:value]}#{delimiter} end=true#{delimiter} "
-
-        case target.protocol do
-          :tcp -> target.port |> Socket.Stream.send! parsed_message
-          :udp -> target.port |> Socket.Datagram.send! parsed_message, {target.ip, String.to_integer(target.id)}
-          :web -> target.port |> Socket.Web.send!({:text, parsed_message})
-        end
-      end
+    case target.protocol do
+      :tcp -> target.port |> Socket.Stream.send! parsed_message
+              :udp -> target.port |> Socket.Datagram.send! parsed_message, {target.ip, String.to_integer(target.id)}
+                      :web -> target.port |> Socket.Web.send!({:text, parsed_message})
     end
   end
 end
