@@ -14,7 +14,7 @@ defmodule Moongate.Supervisor do
       worker(Moongate.Db.Repo, [], [id: :repo]),
       worker(Moongate.Auth, [], [id: :auth]),
       supervisor(Moongate.Events.Supervisor, [], [id: :events]),
-      supervisor(Moongate.Pools.Supervisor, [], [id: :pools]),
+      supervisor(Moongate.Pools.Supervisor, [], [id: :pool]),
       supervisor(Moongate.Stages.Supervisor, [], [id: :stages]),
       supervisor(Moongate.Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
       supervisor(Moongate.Sockets.UDP.Supervisor, [], [id: :udp_sockets]),

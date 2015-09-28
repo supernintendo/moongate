@@ -3,6 +3,7 @@ defmodule Moongate.PoolState do
 end
 
 defmodule Moongate.Pools.Pool do
+  import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes
@@ -16,7 +17,7 @@ defmodule Moongate.Pools.Pool do
       triggers: triggers,
       spec: pool
     }
-    link(state, "pools", name)
+    link(state, "pool", name)
   end
 
   def handle_cast({:init}, state) do
@@ -27,6 +28,17 @@ defmodule Moongate.Pools.Pool do
   def handle_cast({:add_to_pool, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
     state = %{state | members: state.members ++ [attributes]}
+    {:noreply, state}
+  end
+
+  def handle_cast({:describe, origin}, state) do
+    attributes = Enum.map(state.attributes, fn(attribute) ->
+      case attribute do
+        {key, {type, value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> " "
+        {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> " "
+      end
+    end)
+    write_to(origin, :describe, List.to_string(attributes))
     {:noreply, state}
   end
 

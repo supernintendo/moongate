@@ -15,6 +15,6 @@ defmodule Default.Pools.Tile do
     false
   end
 
-  def refresh(e) do
+  def refresh(event) do
   end
 end

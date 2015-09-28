@@ -4,12 +4,12 @@ defmodule Default.Stage.Level do
   meta %{}
   pools [Character]
 
-  def joined(e) do
-    new Character, [origin: e.origin]
+  def joined(event) do
+    new Character, [origin: event.origin]
     :ok
   end
 
-  def player_move(e) do
+  def player_move(event) do
     :ok
   end
 end

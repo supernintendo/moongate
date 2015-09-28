@@ -16,8 +16,20 @@ var App = {
         /* Bind event listeners neccessary for this to do things,
          and show a random welcome message. */
         document.getElementById('send-packet').addEventListener('click', this.sendPacket.bind(this));
-        document.getElementById('presets').addEventListener('change', this.setFromPreset.bind(this));
+        document.getElementById('presets').addEventListener('change', this.setFromPreset.bind(this));        
+        document.getElementById('auth-token').addEventListener('keyup', this.handleKeyUp.bind(this));
+        document.getElementById('message').addEventListener('keyup', this.handleKeyUp.bind(this));
+        this.socket.onclose = this.updateConnectionStatus.bind(this, 'off');
+        this.socket.onopen = this.updateConnectionStatus.bind(this, 'on');
         this.socket.onmessage = this.receivePacket.bind(this);
+    },
+    handleKeyUp: function(e) {
+        var key = e.keyCode || e.which;
+
+        if (key === 13) {
+            this.sendPacket();
+        }
+        this.updatePresetDisplay(e);
     },
     handlePacket: function(packet) {
         /* Take a packet and if it is valid, do stuff with
@@ -84,24 +96,44 @@ var App = {
         /* Change the value of the outgoing packet input to a
          selection in the preset dropdown. */
         document.getElementById('message').value = e.target.value;
-        document.getElementById('presets')[0].selected = true;
     },
     receivePacket: function(e) {
         /* Receive a packet from the server.
          */
-        var str = '<code>' + e.data + '</code>',
-            div = document.createElement('div');
+        this.writeToConsole(e.data);
+        this.flash('incoming');
+        this.handlePacket(e.data);
+    },
+    updateConnectionStatus: function(status) {
+        var el = document.getElementById('connection-status');
+        el.className = status;
+        document.getElementById('send-packet').disabled = (status === 'off');
 
-        div.className = 'snippet';
+        if (status === 'off') {
+            this.writeToConsole('This session has expired. Refresh the page to reconnect.', 'special')
+        }
+    },
+    writeToConsole: function(content, className) {
+        var str = '<code>' + content + '</code>',
+        div = document.createElement('div');
+
+        div.className = 'snippet ' + className;
         div.innerHTML = str;
         document.getElementById('log').appendChild(div);
         setTimeout(function() {
-            div.className = 'snippet expand';
+            div.className = 'snippet expand ' + className;
         }, 100);
         document.getElementById('log').appendChild(document.createElement('br'));
+    },
+    updatePresetDisplay: function(e) {
+        var value = e.target.value,
+            match = document.querySelectorAll('option[value="' + value +'"]');
 
-        this.flash('incoming');
-        this.handlePacket(e.data);
+        if (match.length > 0) {
+            document.getElementById('presets').value = value;
+        } else {
+            document.getElementById('presets')[0].selected = true;
+        }
     }
 };
 App.init();

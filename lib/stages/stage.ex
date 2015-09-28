@@ -46,6 +46,7 @@ defmodule Moongate.Stages.Instance do
         origin: origin
       }
       apply(state.stage, :joined, [event])
+      Enum.map(state.pools, &(tell_async(:pool, &1, {:describe, origin})))
       write_to(origin, :transaction, "join")
       Moongate.Say.pretty("#{Moongate.Say.origin(origin)} joined stage #{state.id}.", :cyan)
       {:noreply, manipulation}
@@ -75,8 +76,8 @@ defmodule Moongate.Stages.Instance do
     prefix = Atom.to_string(state.id)
     suffix_parts = tl(String.split(Atom.to_string(pool_module), "."))
     suffix = List.to_string(Enum.map(suffix_parts, &("_" <> String.downcase(&1))))
-    process_name = "stage_" <> prefix <> suffix
-    {:ok, pid} = spawn_new(:pools, {process_name, pool_module})
+    process_name = prefix <> suffix
+    {:ok, pid} = spawn_new(:pool, {process_name, pool_module})
     String.to_atom(process_name)
   end
 end

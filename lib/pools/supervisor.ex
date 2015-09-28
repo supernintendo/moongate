@@ -2,7 +2,7 @@ defmodule Moongate.Pools.Supervisor do
   use Supervisor
 
   def start_link do
-    Supervisor.start_link(__MODULE__, nil, [name: :pools])
+    Supervisor.start_link(__MODULE__, nil, [name: :pool])
   end
 
   @doc """

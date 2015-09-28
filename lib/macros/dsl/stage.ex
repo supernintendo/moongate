@@ -6,7 +6,7 @@ defmodule Moongate.Stage do
     result
   end
 
-  def kick(event) do
+  def depart(event) do
     tell_async(event.from, {:kick, event.origin})
   end
 
@@ -16,9 +16,10 @@ defmodule Moongate.Stage do
 
   defmacro new(module_name, params) do
     quote do
-      process_name = Process.info(self())[:registered_name]
+      process_name = Atom.to_string(Process.info(self())[:registered_name])
       module_parts = String.split(String.downcase(Atom.to_string(unquote(module_name))), ".")
-      name = "pools_" <> Atom.to_string(process_name) <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
+      {"stage_", pool_name} = String.split_at(process_name, 6)
+      name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
       GenServer.cast(String.to_atom(name), {:add_to_pool, unquote(params)})
     end
   end

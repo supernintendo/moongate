@@ -8,12 +8,12 @@ defmodule Default.Stage.LoginScreen do
   def joined(_) do
   end
 
-  defp check_authenticated(t, {}) do
-    auth = is_authenticated?(t)
+  defp check_authenticated(event, {}) do
+    auth = is_authenticated?(event)
 
     if auth do
-      kick(t)
-      join(t, :test_level)
+      depart event
+      join event, :test_level
     end
   end
 end

@@ -14,8 +14,8 @@ defmodule Default.Pools.Character do
     {:refresh, {:every, 1000}}
   ]
 
-  def refresh(e) do
-    characters = batch e, Character, [:name, :x, :y]
-    tell e.this, characters
+  def refresh(event) do
+    characters = batch event, Character, [:name, :x, :y]
+    tell event.this, characters
   end
 end
