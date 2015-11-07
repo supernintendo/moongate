@@ -1,4 +1,4 @@
-defmodule Default.Stage.LoginScreen do
+defmodule Test.Stage.LoginScreen do
   import Moongate.Stage
 
   meta %{}
@@ -8,12 +8,12 @@ defmodule Default.Stage.LoginScreen do
   def joined(_) do
   end
 
-  defp check_authenticated(event, {}) do
+  defp check_authenticated(event, _) do
     auth = is_authenticated?(event)
 
     if auth do
       depart event
-      join event, :test_level
+      join event, :test_stage
     end
   end
 end

@@ -17,6 +17,7 @@ defmodule Moongate.Sockets.Web.Socket do
     {:noreply, server}
   end
 
+  # Accept a socket message.
   defp accept(listener) do
     uuid = UUID.uuid4(:hex)
     client = listener |> Socket.Web.accept!
@@ -32,6 +33,7 @@ defmodule Moongate.Sockets.Web.Socket do
     accept(listener)
   end
 
+  # Receive messages from a socket connection.
   defp handle(client, id) do
     case client |> Socket.Web.recv! do
       {:text, packet} ->

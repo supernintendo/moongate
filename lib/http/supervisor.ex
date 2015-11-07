@@ -6,7 +6,7 @@ defmodule Moongate.Sockets.HTTP.Supervisor do
   end
 
   @doc """
-    Prepare the sockets listener supervisor.
+    Prepare the HTTP server supervisor.
   """
   def init(_) do
     children = [worker(Moongate.HTTP.Host, [], [])]

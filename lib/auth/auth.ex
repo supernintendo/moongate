@@ -8,7 +8,6 @@ end
 
 # The Auth module manages login and new account creation.
 defmodule Moongate.Auth do
-  import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
 
@@ -16,6 +15,9 @@ defmodule Moongate.Auth do
     link(%Moongate.AuthSessions{}, "auth")
   end
 
+  @doc """
+    Attempt to login with the provided credentials.
+  """
   def handle_cast({:login, event}, state) do
     {email, password} = event.params
     auth_status = authenticate(email, password)
@@ -38,7 +40,7 @@ defmodule Moongate.Auth do
   end
 
   @doc """
-    Make a new account with the given params if we're allowed.
+    Create a new account with the given params if we're allowed.
   """
   def handle_cast({:register, event}, state) do
     {email, password} = event.params
@@ -52,6 +54,9 @@ defmodule Moongate.Auth do
     {:noreply, state}
   end
 
+  @doc """
+    Check whether a Moongate.SocketOrigin is authenticated.
+  """
   def handle_call({:check_auth, origin}, _from, state) do
     has_id = Map.has_key?(state.tokens, String.to_atom(origin.id))
     origin_logged_in = Map.has_key?(origin.auth, :identity)
@@ -66,7 +71,6 @@ defmodule Moongate.Auth do
   end
 
   # Check if the requested login is correct.
-  # TODO: Make secure.
   defp authenticate(email, password) do
     results = Moongate.Db.UserQueries.find_by_email(email)
 

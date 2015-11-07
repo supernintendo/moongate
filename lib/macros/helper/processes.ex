@@ -1,5 +1,9 @@
 defmodule Moongate.ProcessCapabilites do
-  defstruct can_be_cast_to: false, can_be_called: false, can_receive: false
+  defstruct(
+    can_be_cast_to: false,
+    can_be_called: false,
+    can_receive: false
+  )
 end
 
 defmodule Moongate.Macros.Processes do

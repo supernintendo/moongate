@@ -1,8 +1,10 @@
 defmodule Moongate.Macros.Worlds do
   defmacro __using__(_) do
-    {:ok, read} = File.read "config/config.json"
-    {:ok, config} = JSON.decode(read)
-    world = config["world"] || "default"
+    if Mix.env() == :test do
+      world = "test"
+    else
+      world = Application.get_env(:moongate, :world) || "default"
+    end
     camel_world = Mix.Utils.camelize(world)
 
     quote do
@@ -17,7 +19,7 @@ defmodule Moongate.Macros.Worlds do
           :http ->
             "worlds/#{world}/http"
           _ ->
-            "worlds/#{world}"
+            "priv/worlds/#{world}"
         end
       end
     end

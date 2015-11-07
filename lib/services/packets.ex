@@ -1,4 +1,24 @@
 defmodule Moongate.Packets do
+  @doc """
+    This function takes a Moongate.BatchUpdate which contains a list
+    of keys and a list of lists containing values mapped to those
+    keys. It generates a string representing these keys and the
+    members of the collection.
+  """
+  def batch_update_for(message) do
+    keys = List.to_string(Enum.map(message.keys, &(Atom.to_string(&1) <> "¦")))
+    keys_string = "(" <> String.rstrip(keys, ?¦) <> ")"
+    values = List.to_string(Enum.map(message.values, fn(value_set) ->
+      "(" <> String.rstrip(List.to_string(Enum.map(value_set, &("#{&1}¦"))), ?¦) <> "),"
+    end))
+    values_string = "[" <> String.rstrip(values, ?,) <> "]"
+
+    "#{keys_string} #{values_string}"
+  end
+
+  @doc """
+    Validate and parse an incoming packet.
+  """
   def parse(string) do
     parsed_string = Regex.replace(~r/[\n\b\t\r]/, string, "")
     parsed_string = Regex.replace(~r/[\{]/, parsed_string, " { ")
@@ -8,6 +28,7 @@ defmodule Moongate.Packets do
     inner = list -- ["{", "}"]
 
     if inner != [] and Regex.match?(~r/^[0-9]*$/, hd(list)) do
+      # Make sure the packet length looks OK.
       expected_length = String.to_integer(hd(list))
       actual_length = String.length(List.to_string(tl(inner)))
 

@@ -1,22 +1,26 @@
 defmodule Moongate.Macros.ExternalResources do
   defmacro __before_compile__(_env) do
-    {:ok, read} = File.read "config/config.json"
-    {:ok, config} = JSON.decode(read)
-    world = config["world"] || "default"
-    {:ok, modules} = File.ls("worlds/#{world}/modules")
-    {:ok, scopes} = File.ls("worlds/#{world}/modules/scopes/")
+    if Mix.env() == :test do
+      world = "test"
+    else
+      world = Application.get_env(:moongate, :world) || "default"
+    end
+    {:ok, modules} = File.ls("priv/worlds/#{world}/modules")
 
     Enum.map(modules, fn(resource) ->
       quote do
-        @external_resource "worlds/#{unquote(world)}/modules/#{unquote(resource)}"
+        @external_resource "priv/worlds/#{unquote(world)}/modules/#{unquote(resource)}"
       end
     end)
 
-    Enum.map(scopes, fn(resource) ->
-      quote do
-        @external_resource "worlds/#{unquote(world)}/modules/scopes/#{unquote(resource)}"
-      end
-    end)
+    if File.dir?("priv/worlds/#{world}/modules/scopes/") do
+      {:ok, scopes} = File.ls("priv/worlds/#{world}/modules/scopes/")
+      Enum.map(scopes, fn(resource) ->
+        quote do
+          @external_resource "priv/worlds/#{unquote(world)}/modules/scopes/#{unquote(resource)}"
+        end
+      end)
+    end
 
     quote do
       def world_name do

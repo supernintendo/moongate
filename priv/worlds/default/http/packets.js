@@ -115,15 +115,24 @@ var App = {
     },
     writeToConsole: function(content, className) {
         var str = '<code>' + content + '</code>',
-        div = document.createElement('div');
+            div = document.createElement('div'),
+            scroll;
 
         div.className = 'snippet ' + className;
         div.innerHTML = str;
+
+        if (window.scrollY + window.innerHeight >= document.body.scrollHeight) {
+            scroll = true;
+        }
         document.getElementById('log').appendChild(div);
         setTimeout(function() {
             div.className = 'snippet expand ' + className;
         }, 100);
         document.getElementById('log').appendChild(document.createElement('br'));
+
+        if (scroll) {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
     },
     updatePresetDisplay: function(e) {
         var value = e.target.value,

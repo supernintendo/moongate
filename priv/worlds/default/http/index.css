@@ -28,15 +28,15 @@
     border-radius: 4px;
     display: inline-block;
     font-size: 11px;
-    max-height: 1px;
-    overflow: hidden;
-    transition: max-height 6s;
+    margin: 2px;
+    opacity: 0;
+    padding: 4px;
+    transition: opacity 0.5s;
 }
 .snippet.special {
     background: #E5E8FF;
     border: 1px solid #D8D8E5;
 }
 .snippet.expand {
-    max-height: 500px;
-    overflow: scroll;
+    opacity: 1;
 }

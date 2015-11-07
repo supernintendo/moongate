@@ -8,10 +8,6 @@ defmodule Moongate.Db.User do
     field :password_confirmation, :string, virtual: true
     field :session_token, :string
 
-    # Perform validations with Vex
-    field :_vex, :any, virtual: true
-    field :errors, :any, virtual: true
-
     timestamps
   end
 

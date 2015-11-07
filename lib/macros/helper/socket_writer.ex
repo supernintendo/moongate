@@ -6,10 +6,26 @@ defmodule Moongate.Macros.SocketWriter do
     packet_length = String.length(auth_token <> name <> tag <> message)
     parsed_message = "#{packet_length}{#{auth_token} #{name} #{tag} #{String.strip(message)}}"
 
-    case target.protocol do
-      :tcp -> target.port |> Socket.Stream.send! parsed_message
-      :udp -> target.port |> Socket.Datagram.send! parsed_message, {target.ip, String.to_integer(target.id)}
-      :web -> target.port |> Socket.Web.send!({:text, parsed_message})
+    pid = Process.whereis(String.to_atom("events_" <> target.id))
+
+    if pid do
+      case target.protocol do
+        :tcp -> write_to_tcp(target, parsed_message)
+        :udp -> write_to_udp(target, parsed_message)
+        :web -> write_to_web(target, parsed_message)
+      end
     end
+  end
+
+  def write_to_tcp(target, message) do
+    target.port |> Socket.Stream.send! message
+  end
+
+  def write_to_udp(target, message) do
+    target.port |> Socket.Datagram.send! message, {target.ip, String.to_integer(target.id)}
+  end
+
+  def write_to_web(target, message) do
+    target.port |> Socket.Web.send!({:text, message})
   end
 end

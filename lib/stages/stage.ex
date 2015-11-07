@@ -3,7 +3,13 @@ defmodule Moongate.StageEvent do
 end
 
 defmodule Moongate.StageInstance do
-  defstruct events: %{}, id: nil, members: [], pools: [], stage: nil
+  defstruct(
+    events: %{},
+    id: nil,
+    members: [],
+    pools: [],
+    stage: nil
+  )
 end
 
 defmodule Moongate.Stages.Instance do
@@ -21,6 +27,14 @@ defmodule Moongate.Stages.Instance do
     {:noreply, state}
   end
 
+  def handle_cast({:bubble, event, from, key}, state) do
+    state.pools |> Enum.map(&(bubble_to(&1, event, from, key)))
+    {:noreply, state}
+  end
+
+  @doc """
+    Remove a Moongate.SocketOrigin from the stage.
+  """
   def handle_cast({:kick, origin}, state) do
     is_member_of = Enum.any?(state.members, &(&1 == origin.id))
 
@@ -34,6 +48,10 @@ defmodule Moongate.Stages.Instance do
     end
   end
 
+  @doc """
+    Add a Moongate.SocketOrigin to the stage and subscribe it to
+    all pools.
+  """
   def handle_cast({:join, origin}, state) do
     is_member_of = Enum.any?(state.members, &(&1 == origin.id))
 
@@ -53,6 +71,11 @@ defmodule Moongate.Stages.Instance do
     end
   end
 
+  @doc """
+    Receive a message from an event listener and if the origin on the
+    event is qualified, call the callback defined on the stage
+    module.
+  """
   def handle_cast({:tunnel, event}, state) do
     cast = event.cast
     params = event.params
@@ -66,18 +89,29 @@ defmodule Moongate.Stages.Instance do
     {:noreply, state}
   end
 
+  @doc """
+    Initialize all pools.
+  """
   def initialize_pools(state) do
     pools = apply(state.stage, :__moongate__stage_pools, [])
     pools = Enum.map(pools, &(initialize_pool(&1, state)))
     state = %{state | pools: pools}
   end
 
+  @doc """
+    Initialize one pool.
+  """
   def initialize_pool(pool_module, state) do
     prefix = Atom.to_string(state.id)
     suffix_parts = tl(String.split(Atom.to_string(pool_module), "."))
     suffix = List.to_string(Enum.map(suffix_parts, &("_" <> String.downcase(&1))))
     process_name = prefix <> suffix
-    {:ok, pid} = spawn_new(:pool, {process_name, pool_module})
+    {:ok, pid} = spawn_new(:pool, {process_name, state.id, pool_module})
     String.to_atom(process_name)
+  end
+
+  defp bubble_to(pool, event, from, key) do
+    pool_name = String.to_atom("pool_#{Atom.to_string(pool)}")
+    GenServer.cast(pool_name, {:bubble, event, from, key})
   end
 end

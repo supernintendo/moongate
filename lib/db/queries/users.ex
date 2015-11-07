@@ -36,11 +36,11 @@ defmodule Moongate.Db.UserQueries do
     password = :pbkdf2.to_hex(encrypted_pass)
 
     [
-        email: params[:email],
-        password: password,
-        password_salt: salt,
-        created_at: Ecto.DateTime.utc,
-        last_login: Ecto.DateTime.utc
+      email: params[:email],
+      password: password,
+      password_salt: salt,
+      created_at: Ecto.DateTime.utc,
+      last_login: Ecto.DateTime.utc
     ]
   end
 

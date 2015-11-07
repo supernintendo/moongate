@@ -1,9 +1,8 @@
 defmodule Moongate.HTTP do
-  defstruct dispatch: nil, port: nil
+  defstruct port: nil
 end
 
 defmodule Moongate.HTTP.Host do
-  use Cauldron
   use GenServer
   use Moongate.Macros.Processes
   use Moongate.Macros.Worlds
@@ -14,23 +13,21 @@ defmodule Moongate.HTTP.Host do
 
   def handle_cast({:init}, state) do
     Moongate.Say.pretty("Listening on port #{state.port} (HTTP)...", :green)
-    Cauldron.start &handle/3, port: state.port
+    listen(state.port)
 
     {:noreply, state}
   end
 
-  def handle("GET", %URI{path: path}, req) do
-    if path == "/" do
-      path = "/index.html"
-    end
+  defp listen(port) do
+    Application.ensure_all_started(:cowboy)
+    dispatch = :cowboy_router.compile([{:_, routes}])
+    {:ok, _} = :cowboy.start_http(:http, 100, [{:port, port}], [{ :env, [{:dispatch, dispatch}]}])
+  end
 
-    cond do
-      File.exists?(world_directory(:http) <> path) ->
-        req |> Request.reply(200, File.open!(world_directory(:http) <> path))
-      File.exists?(world_directory(:http) <> path <> ".html") ->
-        req |> Request.reply(200, File.open!(world_directory(:http) <> path <> ".html"))
-      true ->
-        req |> Request.reply(404)
-    end
+  defp routes do
+    [
+      {"/", :cowboy_static, {:priv_file, :moongate, world_directory(:http) <> "/index.html"}},
+      {"/[...]", :cowboy_static, {:priv_dir,  :moongate, world_directory(:http)}}
+    ]
   end
 end
