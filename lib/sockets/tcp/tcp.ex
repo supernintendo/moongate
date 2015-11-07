@@ -3,8 +3,8 @@ defmodule Moongate.TCPSocket do
 end
 
 defmodule Moongate.Sockets.TCP.Socket do
-  use Moongate.Macros.Packets
-  use Moongate.Macros.Translator
+  use GenServer
+  use Moongate.Macros.Processes
 
   @doc """
     Listen for incoming socket messages on a port.
@@ -24,9 +24,15 @@ defmodule Moongate.Sockets.TCP.Socket do
     uuid = UUID.uuid4(:hex)
 
     socket = Socket.TCP.accept!(listener)
-    {:ok, child} = spawn_new(:events, uuid)
+    origin = %Moongate.SocketOrigin{
+      id: uuid,
+      ip: nil,
+      port: socket,
+      protocol: :tcp
+    }
+    {:ok, child} = spawn_new(:events, origin)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
-    Moongate.Say.pretty("Socket with id #{uuid} connected.", :blue)
+    Moongate.Say.pretty("Socket with id #{uuid} connected.", :magenta)
     accept(listener)
   end
 
@@ -36,7 +42,7 @@ defmodule Moongate.Sockets.TCP.Socket do
 
     if packet == nil do
       # Client disconnects.
-      Moongate.Say.pretty("Socket with id #{id} disconnected.", :magenta)
+      Moongate.Say.pretty("Socket with id #{id} disconnected.", :black)
       kill_by_pid(:events, pid)
       socket |> Socket.close
       :close
@@ -49,10 +55,13 @@ defmodule Moongate.Sockets.TCP.Socket do
 
   # Deal with a message received from a connected client.
   defp handler(packet, port, id) do
-    incoming = packet_to_list(packet)
+    safe_packet = Regex.replace(~r/[\n\b\t\r]/, packet, "")
+    valid = String.valid?(safe_packet)
 
-    if hd(incoming) != :invalid_message do
-      tell_async(:events, id, {:event, tl(incoming), hd(incoming), {port, :tcp}})
+    case Moongate.Packets.parse(packet) do
+      {:error, error} when valid -> Moongate.Say.pretty("Bad packet `#{safe_packet}`: #{error}.", :red)
+      {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
+      {:ok, parsed} -> tell_async(:events, id, {:event, tl(parsed), hd(parsed), {port, :tcp}})
     end
     ""
   end

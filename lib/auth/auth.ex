@@ -1,46 +1,50 @@
+defmodule Moongate.AuthSessions do
+  defstruct tokens: %{}
+end
+
 defmodule Moongate.AuthToken do
-  defstruct email: nil,
-            identity: UUID.uuid4(:hex),
-            source: nil
+  defstruct email: nil, identity: "anon"
 end
 
 # The Auth module manages login and new account creation.
 defmodule Moongate.Auth do
-  use Moongate.Macros.SocketWriter
-  use Moongate.Macros.Store
-  use Moongate.Macros.Translator
+  use GenServer
+  use Moongate.Macros.Processes
 
   def start_link do
-    link(nil, "auth")
+    link(%Moongate.AuthSessions{}, "auth")
   end
 
-  def handle_cast({:login, event, from}, state) do
-    auth_status = authenticate(event.contents)
+  @doc """
+    Attempt to login with the provided credentials.
+  """
+  def handle_cast({:login, event}, state) do
+    {email, password} = event.params
+    auth_status = authenticate(email, password)
 
     case auth_status do
       {:ok, _} ->
-        client_id = "client_" <> UUID.uuid4(:hex)
-        token = %Moongate.AuthToken{email: event.contents[:email], source: event.origin}
-        state_mod = Map.put(state, String.to_atom(client_id), token)
-        write_to(event.origin, %{
-          cast: :set_token,
-          namespace: :auth,
-          value: "#{token.identity}"
-        })
-        tell_pid_async(from, {:auth, token.identity})
-        Say.pretty("#{client_id} logged in.", :green)
-        {:noreply, state_mod}
+        token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
+        state = %{state | tokens: Map.put(
+          state.tokens,
+          String.to_atom(event.origin.id),
+          token.identity
+        )}
+        tell_async(:events, event.origin.id, {:auth, token})
+        Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in.", :green)
+        {:noreply, state}
       _ ->
-        Say.pretty("Failed log in attempt from anonymous #{Atom.to_string(event.origin.protocol)} connection.", :red)
+        Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
         {:noreply, state}
     end
   end
 
   @doc """
-    Make a new account with the given params if we're allowed.
+    Create a new account with the given params if we're allowed.
   """
   def handle_cast({:register, event}, state) do
-    {status, _} = create_account(event.contents)
+    {email, password} = event.params
+    {status, _} = create_account(email, password)
 
     if status == :ok do
       IO.puts "account created"
@@ -50,22 +54,31 @@ defmodule Moongate.Auth do
     {:noreply, state}
   end
 
-  def handle_call({:no_auth, value}, _from, state) do
-    updated = Map.put(state, :no_auth, value)
+  @doc """
+    Check whether a Moongate.SocketOrigin is authenticated.
+  """
+  def handle_call({:check_auth, origin}, _from, state) do
+    has_id = Map.has_key?(state.tokens, String.to_atom(origin.id))
+    origin_logged_in = Map.has_key?(origin.auth, :identity)
 
-    {:reply, nil, updated}
+    if has_id and origin_logged_in do
+      id_authenticated = Map.get(state.tokens, String.to_atom(origin.id)) == origin.auth.identity
+
+      {:reply, {:ok, id_authenticated}, state}
+    else
+      {:reply, {:ok, false}, state}
+    end
   end
 
   # Check if the requested login is correct.
-  # TODO: Make secure.
-  defp authenticate(params) do
-    results = Moongate.Db.UserQueries.find_by_email(params[:email])
+  defp authenticate(email, password) do
+    results = Moongate.Db.UserQueries.find_by_email(email)
 
     if length(results) == 0 do
       {:error, "bad_email"}
     else
       record = hd(results)
-      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, params[:password], record.password_salt, 4096)
+      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, record.password_salt, 4096)
 
       if :pbkdf2.to_hex(encrypted_pass) == record.password do
         {:ok, "login_success"}
@@ -76,10 +89,10 @@ defmodule Moongate.Auth do
   end
 
   # Attempt to create an account with the given params.
-  defp create_account(params) do
+  defp create_account(email, password) do
     Moongate.Db.UserQueries.create([
-      email: params[:email],
-      password: params[:password]
+      email: email,
+      password: password
     ])
   end
 end

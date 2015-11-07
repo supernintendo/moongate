@@ -7,37 +7,24 @@ defmodule Moongate.Mixfile do
      version: "0.0.1",
      elixir: "~> 1.0.5",
      deps: deps,
-     default_task: "moongate.up"]
+     default_task: "run"]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type `mix help compile.app` for more information
   def application do
     [applications: [:logger, :postgrex, :ecto],
-     mod: {Moongate, []}]
+     mod: {Moongate.Application, []}]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:mydep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
-  #
-  # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:socket, "~> 0.2.8"},
-      {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 0.15.0"},
-      {:uuid, "~> 0.1.5"},
+      {:cowboy, "1.0.3"},
+      {:ecto, "~> 1.0.2"},
+      {:json, "~> 0.3.2"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
+      {:postgrex, ">= 0.7.0"},
+      {:socket, "~> 0.3.1"},
       {:timex, "~> 0.13.1"},
-      {:json, "~> 0.3.0"},
-      {:cauldron, "~> 0.1.2"},
-      {:vex, "~> 0.5"}
+      {:uuid, "~> 1.1.0"}
     ]
   end
 end

@@ -1,0 +1,11 @@
+{
+    "2593": {
+        "protocol": "WebSocket",
+        "tags": [
+            "players"
+        ]
+    },
+    "2594": {
+        "protocol": "HTTP"
+    }
+}
