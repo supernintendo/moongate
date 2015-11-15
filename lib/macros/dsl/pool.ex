@@ -48,8 +48,10 @@ defmodule Moongate.Pool do
     end
   end
 
-  def sync(event, {pool, member}, keys) do
+  def tagged(event, member, message) do
+    {:tagged, :drop, "#{member[:__moongate_pool_index]}"}
   end
+
   def sync(event, pool, keys), do: sync(event.pools[pool], keys)
   def sync(pool, keys) do
     keys = [:__moongate_pool_index] ++ keys
@@ -80,11 +82,12 @@ defmodule Moongate.Pool do
   end
 
   def tell(member, message) do
+    {origin, _} = member[:origin]
+
     case message do
-      %Moongate.SyncEvent{} ->
-        {origin, _} = member[:origin]
-        write_to(origin, :sync, Moongate.Packets.sync(message))
-      _ -> IO.puts "foo"
+      %Moongate.SyncEvent{} -> write_to(origin, :sync, Moongate.Packets.sync(message))
+      {:tagged, tag, index} -> write_to(origin, tag, index)
+      _ -> nil
     end
   end
 end

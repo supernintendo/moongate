@@ -16,12 +16,12 @@ defmodule Default.Pools.Character do
   conveys [
     {:sync_all, {:every, 3000}},
     {:sync_all, {:upon, Character, :create}},
-    {:sync_all, {:upon, Character, :move}}
+    {:sync_all, {:upon, Character, :move}},
+    {:sync_drop, {:upon, Character, :drop}}
   ]
 
   def move(event, params) do
     char = event.this
-
     move_char(char, params)
     bubble event, :move
   end
@@ -45,13 +45,19 @@ defmodule Default.Pools.Character do
     if (y_delta != 0), do: mutate(char, :y, 0, @move_transform)
   end
 
-  def sync_one(event, params) do
-    packet = sync event, {Character, hd(params)}, [:name, :x, :y]
+  def sync_all(event, params), do: sync_all(event)
+  def sync_all(event) do
+    packet = sync event, Character, [:name, :x, :y]
     tell event.this, packet
   end
 
-  def sync_all(event) do
-    packet = sync event, Character, [:name, :x, :y]
+  def sync_drop(event, {char}) do
+    packet = tagged event, char, "drop"
+    tell event.this, packet
+  end
+
+  def sync_one(event, params) do
+    packet = sync event, {Character, hd(params)}, [:name, :x, :y]
     tell event.this, packet
   end
 end

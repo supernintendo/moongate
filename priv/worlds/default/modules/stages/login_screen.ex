@@ -9,7 +9,6 @@ defmodule Default.Stage.LoginScreen do
   end
 
   def departure(_) do
-    IO.puts "leaving"
   end
 
   defp check_authenticated(event, _) do

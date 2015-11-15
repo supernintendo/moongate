@@ -1,5 +1,5 @@
 defmodule Moongate.StageEvent do
-  defstruct from: nil, origin: nil
+  defstruct from: nil, origin: nil, params: nil
 end
 
 defmodule Moongate.StageInstance do

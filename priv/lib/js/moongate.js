@@ -5,8 +5,8 @@
             keydown: function(e) {},
             keypress: function(e) {},
             keyup: function(e) {},
-            poolMemberAdded: function(key, member) {},
-            poolMemberRemoved: function() {},
+            poolMemberAdded: function(member, key, pool) {},
+            poolMemberRemoved: function(member, key, pool) {},
             stageJoined: function(stage) {},
             tick: function() {}
         }, k = Object.keys(defaults), l = k.length;
@@ -53,7 +53,7 @@
         this.pools[pool].members[values[0]] = member;
 
         if (isNew) {
-            this.app.poolMemberAdded(values[0], member);
+            this.app.poolMemberAdded(member, values[0], pool);
         }
         return member;
     };
@@ -206,7 +206,7 @@
         var member = this.pools[pool].members[index];
 
         if (member) {
-            this.app.poolMemberRemoved(index, member);
+            this.app.poolMemberRemoved(member, index, pool);
             delete this.pools[pool].members.index;
         }
     };
@@ -277,8 +277,7 @@
     Moongate.prototype.usePoolPacket = function(packet) {
         switch (packet.action) {
         case 'drop':
-            console.log(packet.id);
-            console.log(packet.params[0]);
+            this.removeFromPool(packet.id, packet.params[0]);
             break;
         case 'sync':
             var update = this.sync(packet.id, packet.params[0]);

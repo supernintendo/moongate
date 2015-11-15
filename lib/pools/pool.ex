@@ -60,14 +60,14 @@ defmodule Moongate.Pools.Pool do
     members = List.delete(state.members, member)
     stage_name = Atom.to_string(state.stage)
     stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:bubble, event, state.spec, :drop})
+    GenServer.cast(stage, {:bubble, %{event | params: {target}}, state.spec, :drop})
     {:noreply, %{state | members: members}}
   end
 
   def handle_cast({:bubble, event, from, key}, state) do
     conveyed = state.conveys |> Enum.map(fn(convey) ->
       if elem(convey, 1) == {:upon, from, key} do
-        Enum.map(state.members, &(pool_callback(elem(convey, 0), &1, state)))
+        Enum.map(state.members, &(pool_callback(elem(convey, 0), &1, state, event.params)))
       end
     end)
 

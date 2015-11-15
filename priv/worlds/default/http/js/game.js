@@ -14,8 +14,11 @@ var Game = {
         packet = GamePackets.keyup(key);
         packet && GameGate.stageSend(packet);
     },
-    poolMemberAdded: function(key, member) {
-        GameCanvas.addEntity(key, member);
+    poolMemberAdded: function(member, index, pool) {
+        GameCanvas.addEntity(index, member);
+    },
+    poolMemberRemoved: function(member, index, pool) {
+        GameCanvas.removeEntity(index, member);
     },
     stageJoined: function(stage) {},
     tick: function() {
