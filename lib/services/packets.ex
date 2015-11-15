@@ -1,22 +1,5 @@
 defmodule Moongate.Packets do
   @doc """
-    This function takes a Moongate.BatchUpdate which contains a list
-    of keys and a list of lists containing values mapped to those
-    keys. It generates a string representing these keys and the
-    members of the collection.
-  """
-  def batch_update_for(message) do
-    keys = List.to_string(Enum.map(message.keys, &(Atom.to_string(&1) <> "¦")))
-    keys_string = "(" <> String.rstrip(keys, ?¦) <> ")"
-    values = List.to_string(Enum.map(message.values, fn(value_set) ->
-      "(" <> String.rstrip(List.to_string(Enum.map(value_set, &("#{&1}¦"))), ?¦) <> "),"
-    end))
-    values_string = "[" <> String.rstrip(values, ?,) <> "]"
-
-    "#{keys_string} #{values_string}"
-  end
-
-  @doc """
     Validate and parse an incoming packet.
   """
   def parse(string) do
@@ -40,5 +23,22 @@ defmodule Moongate.Packets do
     else
       {:error, :bad_packet}
     end
+  end
+
+  @doc """
+    This function takes a Moongate.SyncEvent which contains a list
+    of keys and a list of lists containing values mapped to those
+    keys. It generates a string representing these keys and the
+    members of the collection.
+  """
+  def sync(message) do
+    keys = List.to_string(Enum.map(tl(message.keys), &(Atom.to_string(&1) <> "¦")))
+    keys_string = String.rstrip(keys, ?¦)
+    values = List.to_string(Enum.map(message.values, fn(value_set) ->
+      String.rstrip(List.to_string(Enum.map(value_set, &("#{&1}¦"))), ?¦) <> "„"
+    end))
+    values_string = String.rstrip(values, ?„)
+
+    "#{keys_string}:#{values_string}"
   end
 end

@@ -52,7 +52,7 @@ defmodule Moongate.Macros.Processes do
         GenServer.call(:tree, {:spawn, namespace, params})
       end
 
-      defp tell(name, message) do
+      defp tell_sync(name, message) do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
 
@@ -62,7 +62,7 @@ defmodule Moongate.Macros.Processes do
         result
       end
 
-      defp tell(namespace, id, message) do
+      defp tell_sync(namespace, id, message) do
         pid = pid_for_name(namespace, id)
         capabilites = capabilities_for(pid)
 

@@ -7,6 +7,6 @@ defmodule Default.Game do
   }
 
   def connected(event) do
-    join event, :login_screen
+    arrive event, :login_screen
   end
 end

@@ -1,4 +1,4 @@
-defmodule Moongate.BatchUpdate do
+defmodule Moongate.SyncEvent do
   defstruct keys: [], values: []
 end
 
@@ -48,8 +48,12 @@ defmodule Moongate.Pool do
     end
   end
 
-  def batch(event, pool, keys) do
-    attributes = Enum.map(event.pools[pool], fn(member) ->
+  def sync(event, {pool, member}, keys) do
+  end
+  def sync(event, pool, keys), do: sync(event.pools[pool], keys)
+  def sync(pool, keys) do
+    keys = [:__moongate_pool_index] ++ keys
+    attributes = Enum.map(pool, fn(member) ->
       Enum.map(keys, fn(key) ->
         attribute = member[key]
 
@@ -59,10 +63,11 @@ defmodule Moongate.Pool do
             "#{attr(member, key)}#{represented_transforms}"
           {value, transforms} -> value
           %Moongate.SocketOrigin{} -> attribute.id
+          value -> value
         end
       end)
     end)
-    %Moongate.BatchUpdate{
+    %Moongate.SyncEvent{
       keys: keys,
       values: attributes
     }
@@ -76,9 +81,9 @@ defmodule Moongate.Pool do
 
   def tell(member, message) do
     case message do
-      %Moongate.BatchUpdate{} ->
+      %Moongate.SyncEvent{} ->
         {origin, _} = member[:origin]
-        write_to(origin, :batch_update, Moongate.Packets.batch_update_for(message))
+        write_to(origin, :sync, Moongate.Packets.sync(message))
       _ -> IO.puts "foo"
     end
   end

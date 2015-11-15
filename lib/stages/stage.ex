@@ -35,13 +35,14 @@ defmodule Moongate.Stages.Instance do
   @doc """
     Remove a Moongate.SocketOrigin from the stage.
   """
-  def handle_cast({:kick, origin}, state) do
-    is_member_of = Enum.any?(state.members, &(&1 == origin.id))
+  def handle_cast({:depart, event}, state) do
+    is_member_of = Enum.any?(state.members, &(&1 == event.origin.id))
 
     if is_member_of do
-      manipulation = %{state | members: Enum.filter(state.members, &(&1 != origin.id))}
-      write_to(origin, :transaction, "leave")
-      Moongate.Say.pretty("#{Moongate.Say.origin(origin)} left stage #{state.id}.", :blue)
+      manipulation = %{state | members: Enum.filter(state.members, &(&1 != event.origin.id))}
+      write_to(event.origin, :transaction, "leave")
+      Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} left stage #{state.id}.", :blue)
+      apply(state.stage, :departure, [event])
       {:noreply, manipulation}
     else
       {:noreply, state}
@@ -52,7 +53,7 @@ defmodule Moongate.Stages.Instance do
     Add a Moongate.SocketOrigin to the stage and subscribe it to
     all pools.
   """
-  def handle_cast({:join, origin}, state) do
+  def handle_cast({:arrive, origin}, state) do
     is_member_of = Enum.any?(state.members, &(&1 == origin.id))
 
     if is_member_of do
@@ -63,7 +64,7 @@ defmodule Moongate.Stages.Instance do
         from: Process.info(self())[:registered_name],
         origin: origin
       }
-      apply(state.stage, :joined, [event])
+      apply(state.stage, :arrival, [event])
       Enum.map(state.pools, &(tell_async(:pool, &1, {:describe, origin})))
       write_to(origin, :transaction, "join")
       Moongate.Say.pretty("#{Moongate.Say.origin(origin)} joined stage #{state.id}.", :cyan)

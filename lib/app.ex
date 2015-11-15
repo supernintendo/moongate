@@ -19,7 +19,7 @@ defmodule Moongate.Application do
     load_world(world)
     load_scopes(world)
     supervisor = start_supervisor(world)
-    initialize_stages()
+    initialize_stages
     Moongate.Scopes.Start.on_load
     spawn_sockets(world)
 
