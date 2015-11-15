@@ -11,7 +11,7 @@ This project is intended to be a platform for building multiplayer game servers.
 - *Pools* - Pools contain the objects that make up your game world. Members of a pool have attributes that can be mutated over time (for example, a `Character`'s movement).
 - *Stages* - Stages are essentially a collection of pools. Game clients can join stages, allowing them to send messages to the pools within as well as synchronize with their state.
 
-Moongate supports TCP, UDP and WebSockets. It includes a JavaScript library `moongate.js` as a reference for client-side communication with Moongate.
+Moongate supports TCP, UDP and WebSockets. It includes a JavaScript library `moongate.js` as a reference for client-side communication with your server.
 
 ### Status ###
 
