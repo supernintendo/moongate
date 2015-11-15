@@ -9,43 +9,49 @@ defmodule Default.Pools.Character do
     name:       {:string, "a noob"},
     health:     {:int, 3},
     max_health: {:int, 3},
-    speed:      {:float, 0.05},
+    speed:      {:float, 0.2},
     x:          {:float, 50.0},
     y:          {:float, 50.0}
   }
   conveys [
-    {:refresh, {:every, 3000}},
-    {:refresh, {:upon, Character, :init}},
-    {:refresh, {:upon, Character, :move}}
+    {:sync_all, {:every, 3000}},
+    {:sync_all, {:upon, Character, :create}},
+    {:sync_all, {:upon, Character, :move}}
   ]
 
   def move(event, params) do
     char = event.this
-    blocked = is_blocked(char, params)
 
-    if blocked, do: stopping(char), else: moving(char, params)
+    move_char(char, params)
     bubble event, :move
   end
 
-  def is_blocked(char, params) do
-    false
+  def move_char(char, {x_delta, y_delta}) do
+    speed = attr(char, :speed)
+
+    if (x_delta < 0), do: mutate(char, :x, -speed, @move_transform)
+    if (x_delta > 0), do: mutate(char, :x, speed, @move_transform)
+    if (y_delta < 0), do: mutate(char, :y, -speed, @move_transform)
+    if (y_delta > 0), do: mutate(char, :y, speed, @move_transform)
   end
 
-  def moving(char, {x_delta, y_delta}) do
-    x_speed = attr(char, :speed) * x_delta
-    y_speed = attr(char, :speed) * y_delta
-    mutate char, :x, x_speed, @move_transform
-    mutate char, :y, y_speed, @move_transform
+  def stop(event, params) do
+    stop_char event.this, params
+    bubble event, :move
   end
 
-  def stopping(char) do
-    mutate char, :x, 0, @move_transform
-    mutate char, :y, 0, @move_transform
+  def stop_char(char, {x_delta, y_delta}) do
+    if (x_delta != 0), do: mutate(char, :x, 0, @move_transform)
+    if (y_delta != 0), do: mutate(char, :y, 0, @move_transform)
   end
 
-  def refresh(event, _) do
-    char = event.this
-    chars = batch event, Character, [:name, :x, :y]
-    tell char, chars
+  def sync_one(event, params) do
+    packet = sync event, {Character, hd(params)}, [:name, :x, :y]
+    tell event.this, packet
+  end
+
+  def sync_all(event) do
+    packet = sync event, Character, [:name, :x, :y]
+    tell event.this, packet
   end
 end

@@ -9,7 +9,7 @@ defmodule Moongate.ClientEvent do
 end
 
 defmodule Moongate.EventListener do
-  defstruct id: nil, origin: nil
+  defstruct id: nil, origin: nil, stages: []
 end
 
 defmodule Moongate.Events.Listener do
@@ -28,7 +28,21 @@ defmodule Moongate.Events.Listener do
     Moongate.Say.pretty("Event listener for client #{state.id} has been started.", :green)
     apply(world_module, :connected, [%Moongate.StageEvent{ origin: state.origin }])
 
-    {:noreply, state}
+    origin = %{state.origin | events_listener: self}
+    {:noreply, %{state | origin: origin}}
+  end
+
+  @doc """
+    Clean up
+  """
+  def handle_call(:cleanup, _from, state) do
+    event = %Moongate.ClientEvent{
+      origin: state.origin
+    }
+    Enum.map(state.stages, fn(stage) ->
+      tell_async(String.to_atom("stage_#{Atom.to_string(stage)}"), {:depart, event})
+    end)
+    {:reply, nil, state}
   end
 
   @doc """
@@ -59,6 +73,14 @@ defmodule Moongate.Events.Listener do
     end
 
     {:noreply, state}
+  end
+
+  def handle_cast({:arrive, stage_name}, state) do
+    {:noreply, %{state | stages: state.stages ++ [stage_name]}}
+  end
+
+  def handle_cast({:depart, stage_name}, state) do
+    {:noreply, %{state | stages: Enum.filter(state.stages, &(&1 != stage_name))}}
   end
 
   @doc """

@@ -1,56 +1,61 @@
 defmodule Moongate.Stage do
   use Moongate.Macros.Processes
 
-  def is_authenticated?(t) do
-    {:ok, result} = tell(:auth, {:check_auth, t.origin})
-    result
+  def arrive(event, stage_name) do
+    tell_pid_async(event.origin.events_listener, {:arrive, stage_name})
+    tell_async(:stage, stage_name, {:arrive, event.origin})
   end
 
   def depart(event) do
-    tell_async(event.from, {:kick, event.origin})
+    tell_pid_async(event.origin.events_listener, {:depart, event.from})
+    tell_async(event.from, {:depart, event})
   end
 
-  def join(event, stage_name) do
-    tell_async(:stage, stage_name, {:join, event.origin})
+  def is_authenticated?(t) do
+    {:ok, result} = tell_sync(:auth, {:check_auth, t.origin})
+    result
   end
 
-  defmacro new(event, module_name, params) do
-    quote do
+  def pool_name(module_name) do
       process_name = Atom.to_string(Process.info(self())[:registered_name])
-      module_parts = String.split(String.downcase(Atom.to_string(unquote(module_name))), ".")
+      module_parts = String.split(String.downcase(Atom.to_string(module_name)), ".")
       {"stage_", pool_name} = String.split_at(process_name, 6)
       name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
-      GenServer.cast(String.to_atom(name), {:add_to_pool, unquote(event), unquote(params)})
-    end
+      String.to_atom(name)
   end
 
   defmacro call(event, target, callback, params) do
     quote do
-      process_name = Atom.to_string(Process.info(self())[:registered_name])
-      module_parts = String.split(String.downcase(Atom.to_string(unquote(target)[:__moongate__parent])), ".")
-      {"stage_", pool_name} = String.split_at(process_name, 6)
-      name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
-      GenServer.call(String.to_atom(name), {:cause, unquote(callback), unquote(target), unquote(params)})
+      pool = pool_name(unquote(target)[:__moongate__parent])
+      GenServer.call(pool, {:cause, unquote(callback), unquote(target), unquote(params)})
+    end
+  end
+
+  defmacro cast(event, target, callback) do
+    quote do
+      pool = pool_name(unquote(target)[:__moongate__parent])
+      GenServer.cast(pool, {:cause, unquote(callback), unquote(target)})
     end
   end
 
   defmacro cast(event, target, callback, params) do
     quote do
-      process_name = Atom.to_string(Process.info(self())[:registered_name])
-      module_parts = String.split(String.downcase(Atom.to_string(unquote(target)[:__moongate__parent])), ".")
-      {"stage_", pool_name} = String.split_at(process_name, 6)
-      name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
-      GenServer.cast(String.to_atom(name), {:cause, unquote(callback), unquote(target), unquote(params)})
+      pool = pool_name(unquote(target)[:__moongate__parent])
+      GenServer.cast(pool, {:cause, unquote(callback), unquote(target), unquote(params)})
+    end
+  end
+
+  defmacro drop(event, target) do
+    quote do
+      pool = pool_name(unquote(target)[:__moongate__parent])
+      GenServer.cast(pool, {:remove_from_pool, unquote(event), unquote(target)})
     end
   end
 
   defmacro find(module_name, params) do
     quote do
-      process_name = Atom.to_string(Process.info(self())[:registered_name])
-      module_parts = String.split(String.downcase(Atom.to_string(unquote(module_name))), ".")
-      {"stage_", pool_name} = String.split_at(process_name, 6)
-      name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
-      results = GenServer.call(String.to_atom(name), {:get, unquote(params)})
+      pool = pool_name(unquote(module_name))
+      results = GenServer.call(pool, {:get, unquote(params)})
       Enum.map(results, &(&1 ++ [__moongate__parent: unquote(module_name)]))
     end
   end
@@ -62,20 +67,27 @@ defmodule Moongate.Stage do
     end
   end
 
-  defmacro pools(pool_list) do
-    quote do
-      def __moongate__stage_pools(_), do: __moongate__stage_pools
-      def __moongate__stage_pools do
-        unquote(pool_list)
-      end
-    end
-  end
-
   defmacro meta(stage_meta) do
     quote do
       def __moongate__stage_meta(_), do: __moongate__stage_meta
       def __moongate__stage_meta do
         unquote(stage_meta)
+      end
+    end
+  end
+
+  defmacro new(event, module_name, params) do
+    quote do
+      pool = pool_name(unquote(module_name))
+      GenServer.cast(pool, {:add_to_pool, unquote(event), unquote(params)})
+    end
+  end
+
+  defmacro pools(pool_list) do
+    quote do
+      def __moongate__stage_pools(_), do: __moongate__stage_pools
+      def __moongate__stage_pools do
+        unquote(pool_list)
       end
     end
   end

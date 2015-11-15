@@ -9,11 +9,12 @@ end
 defmodule Moongate.PoolState do
   defstruct(
     attributes: %{},
+    conveys: [],
+    index: 0,
     members: [],
     name: nil,
     spec: nil,
-    stage: nil,
-    conveys: []
+    stage: nil
   )
 end
 
@@ -47,11 +48,20 @@ defmodule Moongate.Pools.Pool do
   """
   def handle_cast({:add_to_pool, event, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
-    state = %{state | members: state.members ++ [attributes]}
+    state = %{state | members: state.members ++ [[__moongate_pool_index: state.index] ++ attributes]}
     stage_name = Atom.to_string(state.stage)
     stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:bubble, event, state.spec, :init})
-    {:noreply, state}
+    GenServer.cast(stage, {:bubble, event, state.spec, :create})
+    {:noreply, %{state | index: state.index + 1}}
+  end
+
+  def handle_cast({:remove_from_pool, event, target}, state) do
+    member = Enum.find(state.members, &(&1[:origin] == target[:origin]))
+    members = List.delete(state.members, member)
+    stage_name = Atom.to_string(state.stage)
+    stage = String.to_atom("stage_#{stage_name}")
+    GenServer.cast(stage, {:bubble, event, state.spec, :drop})
+    {:noreply, %{state | members: members}}
   end
 
   def handle_cast({:bubble, event, from, key}, state) do
@@ -67,6 +77,10 @@ defmodule Moongate.Pools.Pool do
   @doc """
     Asynchronously call a function defined on the pool module.
   """
+  def handle_cast({:cause, callback, member}, state) do
+    pool_callback(callback, member, state, nil)
+    {:noreply, state}
+  end
   def handle_cast({:cause, callback, member, params}, state) do
     pool_callback(callback, member, state, params)
     {:noreply, state}
@@ -79,8 +93,8 @@ defmodule Moongate.Pools.Pool do
   def handle_cast({:describe, origin}, state) do
     attributes = Enum.map(state.attributes, fn(attribute) ->
       case attribute do
-        {key, {type, value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> " "
-        {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> " "
+        {key, {type, value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
+        {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
       end
     end)
     write_to(origin, :describe, List.to_string(attributes))
@@ -207,7 +221,7 @@ defmodule Moongate.Pools.Pool do
   # the pool designated as a target. That member, along with
   # a list of all members and any provided params will be
   # passed to the callback function.
-  defp pool_callback(callback, member, state), do: pool_callback(callback, member, state, [])
+  defp pool_callback(callback, member, state), do: pool_callback(callback, member, state, nil)
   defp pool_callback(callback, member, state, params) do
     world = String.to_atom(String.capitalize(world_name))
     pool_module = Module.safe_concat([world, Pools, state.spec])
@@ -218,6 +232,10 @@ defmodule Moongate.Pools.Pool do
       pools: pools,
       stage: state.stage
     }
-    apply(pool_module, callback, [event, params])
+    if params do
+      apply(pool_module, callback, [event, params])
+    else
+      apply(pool_module, callback, [event])
+    end
   end
 end

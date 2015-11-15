@@ -49,6 +49,7 @@ defmodule Moongate.Sockets.Web.Socket do
         handle(client, id)
       _ ->
         Moongate.Say.pretty("Socket with id #{id} disconnected.", :magenta)
+        tell_sync(:events, id, :cleanup)
         kill_by_id(:events, id)
     end
   end

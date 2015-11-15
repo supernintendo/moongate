@@ -3,22 +3,14 @@
     <head>
         <link href="index.css" rel="stylesheet" type="text/css">
         <meta charset="utf-8">
-        <title>moongate packets util</title>
+        <title>moongate</title>
     </head>
     <body>
-        <div id="connection-status"></div>
-        <span id="stage-prefix"></span><span id="stage-name"></span>
-        <input id="auth-token" placeholder="token" spellcheck="false" value="anon" autocomplete="off"></input>
-        <input id="message" placeholder="message" spellcheck="false" value="auth login foo bar" autocomplete="off"></input>
-        <select id="presets" autocomplete="off">
-            <option value="" default disabled>Presets</option>
-            <option value="auth login foo bar">Login Screen > Login</option>
-            <option value="login_screen proceed">Login Screen > Proceed</option>
-        </select>
-        <button id="send-packet" disabled>Send</button>
-        <span id="incoming-indicator" class="off">&#x25B2;</span>
-        <span id="outgoing-indicator" class="off">&#x25BC;</span>
-        <div id="log"></div>
-        <script src="packets.js"></script>
+        <script src="vendor/pixi.min.js"></script>
+        <script src="moongate.js"></script>
+        <script src="js/canvas.js"></script>
+        <script src="js/packets.js"></script>
+        <script src="js/game.js"></script>
+        <script src="index.js"></script>
     </body>
 </html>

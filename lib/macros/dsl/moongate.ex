@@ -19,10 +19,10 @@ defmodule Moongate do
   end
 
   def depart(event) do
-    tell_async(:stage, event.from, {:kick, event.origin})
+    tell_async(:stage, event.from, {:depart, event.origin})
   end
 
-  def join(event, stage_name) do
-    tell_async(:stage, stage_name, {:join, event.origin})
+  def arrive(event, stage_name) do
+    tell_async(:stage, stage_name, {:arrive, event.origin})
   end
 end
