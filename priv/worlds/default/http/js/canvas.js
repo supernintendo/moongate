@@ -17,6 +17,10 @@ var GameCanvas = {
             callback();
         }.bind(this));
     },
+    removeEntity: function(key, member) {
+        GameCanvas.stage.removeChild(GameCanvas.entities[key].sprite);
+        delete GameCanvas.entities[key];
+    },
     syncAllEntities: function() {
         var i, k = Object.keys(this.entities);
 
