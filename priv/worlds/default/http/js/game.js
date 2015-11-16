@@ -15,10 +15,10 @@ var Game = {
         packet && GameGate.stageSend(packet);
     },
     poolMemberAdded: function(member, index, pool) {
-        GameCanvas.addEntity(index, member);
+        GameCanvas.addEntity(pool, index, member);
     },
     poolMemberRemoved: function(member, index, pool) {
-        GameCanvas.removeEntity(index, member);
+        GameCanvas.removeEntity(pool, index, member);
     },
     stageJoined: function(stage) {},
     tick: function() {

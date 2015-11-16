@@ -72,7 +72,7 @@ defmodule Moongate.Pools.Pool do
   end
 
   def handle_cast({:bubble, event, from, key}, state) do
-    cascadeed = state.cascades |> Enum.map(fn(cascade) ->
+    cascaded = state.cascades |> Enum.map(fn(cascade) ->
       if elem(cascade, 1) == {:upon, from, key} do
         Enum.map(state.members, &(pool_callback(elem(cascade, 0), &1, state, event.params)))
       end

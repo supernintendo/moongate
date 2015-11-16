@@ -26,28 +26,28 @@ defmodule Moongate.Stage do
 
   defmacro call(event, target, callback, params) do
     quote do
-      pool = pool_name(unquote(target)[:__moongate__parent])
+      pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.call(pool, {:cause, unquote(callback), unquote(target), unquote(params)})
     end
   end
 
   defmacro cast(event, target, callback) do
     quote do
-      pool = pool_name(unquote(target)[:__moongate__parent])
+      pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.cast(pool, {:cause, unquote(callback), unquote(target)})
     end
   end
 
   defmacro cast(event, target, callback, params) do
     quote do
-      pool = pool_name(unquote(target)[:__moongate__parent])
+      pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.cast(pool, {:cause, unquote(callback), unquote(target), unquote(params)})
     end
   end
 
   defmacro drop(event, target) do
     quote do
-      pool = pool_name(unquote(target)[:__moongate__parent])
+      pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.cast(pool, {:remove_from_pool, unquote(event), unquote(target)})
     end
   end
@@ -56,7 +56,7 @@ defmodule Moongate.Stage do
     quote do
       pool = pool_name(unquote(module_name))
       results = GenServer.call(pool, {:get, unquote(params)})
-      Enum.map(results, &(&1 ++ [__moongate__parent: unquote(module_name)]))
+      Enum.map(results, &(&1 ++ [__moongate_pool: unquote(module_name)]))
     end
   end
 

@@ -3,37 +3,47 @@ var GameCanvas = {
     renderer: PIXI.autoDetectRenderer(640, 512),
     assets: {},
     entities: {},
-    addEntity: function(key, member) {
-        GameCanvas.entities[key] = {
+    addEntity: function(pool, key, member) {
+        if (!GameCanvas.entities[pool]) {
+            GameCanvas.entities[pool] = {};
+        }
+        GameCanvas.entities[pool][key] = {
             member: member,
-            sprite: new PIXI.Sprite(GameCanvas.assets.player.texture)
+            sprite: new PIXI.Sprite(GameCanvas.assets[pool].texture)
         };
-        GameCanvas.syncEntity(key);
-        GameCanvas.stage.addChild(GameCanvas.entities[key].sprite);
+        GameCanvas.syncEntity(pool, key);
+        GameCanvas.stage.addChild(GameCanvas.entities[pool][key].sprite);
     },
     loadAssets: function(callback) {
-        PIXI.loader.add('player', 'sprites/player.png').load(function(loader, resources) {
-            this.assets = resources;
-            callback();
-        }.bind(this));
+        PIXI.loader
+            .add('test_level_character', 'sprites/player.png')
+            .add('test_level_projectile', 'sprites/projectile.png')
+            .load(function(loader, resources) {
+                this.assets = resources;
+                callback();
+            }.bind(this));
     },
-    removeEntity: function(key, member) {
-        GameCanvas.stage.removeChild(GameCanvas.entities[key].sprite);
-        delete GameCanvas.entities[key];
+    removeEntity: function(pool, key, member) {
+        GameCanvas.stage.removeChild(GameCanvas.entities[pool][key].sprite);
+        delete GameCanvas.entities[pool][key];
     },
-    syncAllEntities: function() {
-        var i, k = Object.keys(this.entities);
+    syncAllEntities: function(pool) {
+        if (!this.entities[pool]) {
+            return;
+        }
+        var i, k = Object.keys(this.entities[pool]);
 
         for (i = 0; i < k.length; i++) {
-            this.syncEntity(k[i]);
+            this.syncEntity(pool, k[i]);
         }
     },
-    syncEntity: function(key) {
-        this.entities[key].sprite.position.x = this.entities[key].member.get('x');
-        this.entities[key].sprite.position.y = this.entities[key].member.get('y');
+    syncEntity: function(pool, key) {
+        this.entities[pool][key].sprite.position.x = this.entities[pool][key].member.get('x');
+        this.entities[pool][key].sprite.position.y = this.entities[pool][key].member.get('y');
     },
     tick: function() {
-        GameCanvas.syncAllEntities();
+        GameCanvas.syncAllEntities('test_level_character');
+        GameCanvas.syncAllEntities('test_level_projectile');
         GameCanvas.renderer.render(GameCanvas.stage);
     }
 };
