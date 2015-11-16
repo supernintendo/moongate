@@ -23,11 +23,20 @@ defmodule Moongate.Pool do
     end
   end
 
-  defmacro conveys(convey_list) do
+  defmacro cascades(cascade_list) do
     quote do
-      def __moongate__pool_conveys(_), do: __moongate__pool_conveys
-      def __moongate__pool_conveys do
-        unquote(convey_list)
+      def __moongate__pool_cascades(_), do: __moongate__pool_cascades
+      def __moongate__pool_cascades do
+        unquote(cascade_list)
+      end
+    end
+  end
+
+  defmacro touches(touch_list) do
+    quote do
+      def __moongate__pool_touches(_), do: __moongate__pool_touches
+      def __moongate__pool_touches do
+        unquote(touch_list)
       end
     end
   end
@@ -36,16 +45,7 @@ defmodule Moongate.Pool do
   end
 
   def attr(member, key) do
-    mutations = elem(member[key], 1)
-
-    if length(mutations) > 0 do
-      mod = Enum.reduce(mutations, 0, fn(mutation, acc) ->
-        acc + mutation.by * (Moongate.Time.current_ms - mutation.time_started)
-      end)
-      elem(member[key], 0) + mod
-    else
-      elem(member[key], 0)
-    end
+    Moongate.Data.pool_member_attr(member, key)
   end
 
   def tagged(event, member, message) do

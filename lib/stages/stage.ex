@@ -71,7 +71,7 @@ defmodule Moongate.Stages.Instance do
       {:noreply, manipulation}
     end
   end
-
+  
   @doc """
     Receive a message from an event listener and if the origin on the
     event is qualified, call the callback defined on the stage
@@ -87,6 +87,13 @@ defmodule Moongate.Stages.Instance do
     is_member_of = Enum.any?(state.members, &(&1 == event.origin.id))
     if is_member_of, do: apply(state.stage, :__moongate__stage_takes, [{cast, params}, event])
 
+    {:noreply, state}
+  end
+
+  def handle_cast({:pool_publish, pool, pid, tag}, state) do
+    ["Elixir", pool_name] = String.split(Atom.to_string(pool), ".")
+    name = "#{Atom.to_string(state.id)}_#{String.downcase(pool_name)}"
+    tell_async(:pool, name, {:publish_to, pid, tag})
     {:noreply, state}
   end
 
