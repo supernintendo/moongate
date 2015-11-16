@@ -6,5 +6,6 @@ defmodule Default.Pools.Tile do
     y: {:int, 0},
     color: {:string, "blue"}
   }
-  conveys []
+  cascades []
+  touches []
 end

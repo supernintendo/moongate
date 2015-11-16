@@ -17,11 +17,11 @@ defmodule Moongate.Stage do
   end
 
   def pool_name(module_name) do
-      process_name = Atom.to_string(Process.info(self())[:registered_name])
-      module_parts = String.split(String.downcase(Atom.to_string(module_name)), ".")
-      {"stage_", pool_name} = String.split_at(process_name, 6)
-      name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
-      String.to_atom(name)
+    process_name = Atom.to_string(Process.info(self())[:registered_name])
+    module_parts = String.split(String.downcase(Atom.to_string(module_name)), ".")
+    {"stage_", pool_name} = String.split_at(process_name, 6)
+    name = "pool_" <> pool_name <> List.to_string(Enum.map(tl(module_parts), &("_" <> String.downcase(&1))))
+    String.to_atom(name)
   end
 
   defmacro call(event, target, callback, params) do

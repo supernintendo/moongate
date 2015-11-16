@@ -7,4 +7,17 @@ defmodule Moongate.Data do
   def condense_pool_member(member) do
     member |> Keyword.delete(:__moongate__parent)
   end
+
+  def pool_member_attr(member, key) do
+    mutations = elem(member[key], 1)
+
+    if length(mutations) > 0 do
+      mod = Enum.reduce(mutations, 0, fn(mutation, acc) ->
+        acc + mutation.by * (Moongate.Time.current_ms - mutation.time_started)
+      end)
+      elem(member[key], 0) + mod
+    else
+      elem(member[key], 0)
+    end
+  end
 end
