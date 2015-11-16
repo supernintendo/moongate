@@ -14,6 +14,7 @@ defmodule Moongate.Application do
       world = Application.get_env(:moongate, :world) || "default"
     end
 
+    :random.seed(:erlang.now())
     Moongate.Say.greeting
     IO.puts "Starting world #{world}..."
     load_world(world)

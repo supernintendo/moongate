@@ -19,10 +19,11 @@ defmodule Default.Pools.Character do
     {:sync_all, {:every, 3000}},
     {:sync_all, {:upon, Character, :create}},
     {:sync_all, {:upon, Character, :move}},
-    {:sync_drop, {:upon, Character, :drop}}
+    {:sync_drop, {:upon, Character, :drop}},
+    {:sync_projectiles, {:upon, Projectile, :sync}}
   ]
   touches [
-    {Character, :box, {:x, :y, :height, :width}}
+    {Projectile, :box, {:x, :y, :height, :width}}
   ]
 
   def move(event, params) do
@@ -40,7 +41,7 @@ defmodule Default.Pools.Character do
     if (y_delta > 0), do: mutate(char, :y, speed, @move_transform)
   end
 
-  def touches(event, {Character, char}) do
+  def touches(event, {Projectile, projectile}) do
   end
 
   def stop(event, params) do
@@ -66,6 +67,10 @@ defmodule Default.Pools.Character do
 
   def sync_one(event, params) do
     packet = sync(event, {Character, hd(params)}, [:name, :x, :y])
+    tell(event.this, packet)
+  end
+
+  def sync_projectiles(event, {packet}) do
     tell(event.this, packet)
   end
 end

@@ -2,12 +2,15 @@ defmodule Default.Stage.Level do
   import Moongate.Stage
 
   meta %{}
-  pools [Character, Tile]
+  pools [Character, Projectile]
   takes :move, :player_move, {:int, :int}
   takes :stop, :player_stop, {:int, :int}
 
   def arrival(event) do
-    new event, Character, [origin: event.origin]
+    x = :random.uniform(640)
+    y = :random.uniform(512)
+    new event, Character, [origin: event.origin, x: x, y: y]
+    new event, Projectile, [x: :random.uniform(640), y: :random.uniform(512)]
   end
 
   def departure(event) do

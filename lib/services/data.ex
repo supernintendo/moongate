@@ -5,7 +5,7 @@ defmodule Moongate.Data do
     within a pool's members list.
   """
   def condense_pool_member(member) do
-    member |> Keyword.delete(:__moongate__parent)
+    member |> Keyword.delete(:__moongate_pool)
   end
 
   def pool_member_attr(member, key) do

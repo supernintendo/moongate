@@ -47,7 +47,12 @@ defmodule Moongate.Recursive do
 
   defp respond(state, result) do
     case state.response do
-      {pid, tag} -> tell_pid_async(pid, {tag, result})
+      {pid, tag} ->
+        if Process.alive?(pid) do
+          tell_pid_async(pid, {tag, result})
+        else
+          kill_by_pid(:recursive, self())
+        end
       _ -> nil
     end
   end

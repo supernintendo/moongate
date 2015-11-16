@@ -1,5 +1,5 @@
 defmodule Moongate.SyncEvent do
-  defstruct keys: [], values: []
+  defstruct keys: [], pool: nil, values: []
 end
 
 defmodule Moongate.Pool do
@@ -71,6 +71,7 @@ defmodule Moongate.Pool do
     end)
     %Moongate.SyncEvent{
       keys: keys,
+      pool: Process.info(self())[:registered_name],
       values: attributes
     }
   end
@@ -78,14 +79,19 @@ defmodule Moongate.Pool do
   def bubble(event, key) do
     stage_name = Atom.to_string(event.stage)
     stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:bubble, event, event.this[:__moongate__parent], key})
+    GenServer.cast(stage, {:bubble, event, event.this[:__moongate_pool], key})
   end
 
   def tell(member, message) do
     {origin, _} = member[:origin]
 
     case message do
-      %Moongate.SyncEvent{} -> write_to(origin, :sync, Moongate.Packets.sync(message))
+      %Moongate.SyncEvent{} ->
+        if message.pool do
+          write_to(origin, :sync, Atom.to_string(message.pool), Moongate.Packets.sync(message))
+        else
+          write_to(origin, :sync, Moongate.Packets.sync(message))
+        end
       {:tagged, tag, index} -> write_to(origin, tag, index)
       _ -> nil
     end
