@@ -23,6 +23,8 @@ var GamePackets = {
     },
     keydown: function(key) {
         switch (key) {
+        case 32: // space
+            return 'attack';
         case 87: // up
             return 'move 0 -1';
         case 65: // left

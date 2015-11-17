@@ -7,18 +7,26 @@ defmodule Default.Pools.Character do
   }
   attributes %{
     name:       {:string, "a noob"},
-    health:     {:int, 3},
-    max_health: {:int, 3},
-    speed:      {:float, 0.2},
+    speed:      {:float, 0.1},
     height:     {:int, 24},
     width:      {:int, 24},
     x:          {:float, 50.0},
-    y:          {:float, 50.0}
+    y:          {:float, 50.0},
+    direction:  {:string, "up"},
+    stance:     {:int, 0},
+
+    archetype:  {:string, "elf"},
+    attack:     {:int, 0},
+    defense:    {:int, 0},
+    health:     {:int, 3},
+    max_health: {:int, 3},
+    rupees:     {:int, 0}
   }
   cascades [
+    {:sync_stance, {:every, 300}},
     {:sync_all, {:every, 3000}},
-    {:sync_all, {:upon, Character, :create}},
     {:sync_all, {:upon, Character, :move}},
+    {:sync_all_detailed, {:upon, Character, :create}},
     {:sync_drop, {:upon, Character, :drop}},
     {:sync_projectiles, {:upon, Projectile, :sync}}
   ]
@@ -34,11 +42,25 @@ defmodule Default.Pools.Character do
 
   def move_char(char, {x_delta, y_delta}) do
     speed = attr(char, :speed)
+    direction = attr(char, :direction)
 
-    if (x_delta < 0), do: mutate(char, :x, -speed, @move_transform)
-    if (x_delta > 0), do: mutate(char, :x, speed, @move_transform)
-    if (y_delta < 0), do: mutate(char, :y, -speed, @move_transform)
-    if (y_delta > 0), do: mutate(char, :y, speed, @move_transform)
+    if (x_delta < 0) do
+      set(char, :direction, "left")
+      mutate(char, :x, -speed, @move_transform)
+    end
+    if (x_delta > 0) do
+      set(char, :direction, "right")
+      mutate(char, :x, speed, @move_transform)
+    end
+    if (y_delta < 0) do
+      set(char, :direction, "up")
+      mutate(char, :y, -speed, @move_transform)
+    end
+    if (y_delta > 0) do
+      set(char, :direction, "down")
+      mutate(char, :y, speed, @move_transform)
+    end
+    set(char, :stance, 1)
   end
 
   def touches(event, {Projectile, projectile}) do
@@ -52,11 +74,29 @@ defmodule Default.Pools.Character do
   def stop_char(char, {x_delta, y_delta}) do
     if (x_delta != 0), do: mutate(char, :x, 0, @move_transform)
     if (y_delta != 0), do: mutate(char, :y, 0, @move_transform)
+    if (x_delta != 0 && y_delta != 0), do: set(char, :stance, 0)
   end
 
   def sync_all(event, params), do: sync_all(event)
   def sync_all(event) do
-    packet = sync(event, Character, [:name, :x, :y])
+    packet = sync(event, Character, [:name, :x, :y, :direction, :stance])
+    tell(event.this, packet)
+  end
+
+  def sync_all_detailed(event, params), do: sync_all(event)
+  def sync_all_detailed(event) do
+    packet = sync(event, Character, [
+      :archetype,
+      :direction,
+      :health,
+      :max_health,
+      :name,
+      :origin,
+      :rupees,
+      :stance,
+      :x,
+      :y,
+    ])
     tell(event.this, packet)
   end
 
@@ -66,7 +106,13 @@ defmodule Default.Pools.Character do
   end
 
   def sync_one(event, params) do
-    packet = sync(event, {Character, hd(params)}, [:name, :x, :y])
+    packet = sync(event, {Character, hd(params)}, [:name, :x, :y, :direction, :stance])
+    tell(event.this, packet)
+  end
+
+  def sync_stance(event, params), do: sync_stance(event)
+  def sync_stance(event) do
+    packet = sync(event, Character, [:name, :x, :y, :stance])
     tell(event.this, packet)
   end
 

@@ -9,8 +9,9 @@ defmodule Default.Stage.Level do
   def arrival(event) do
     x = :random.uniform(640)
     y = :random.uniform(512)
-    new event, Character, [origin: event.origin, x: x, y: y]
-    new event, Projectile, [x: :random.uniform(640), y: :random.uniform(512)]
+    archetype = elem({"elf", "mage", "skeleton"}, :random.uniform(3) - 1)
+
+    new event, Character, [origin: event.origin, archetype: archetype, x: x, y: y]
   end
 
   def departure(event) do

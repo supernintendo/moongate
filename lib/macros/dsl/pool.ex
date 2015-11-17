@@ -23,6 +23,12 @@ defmodule Moongate.Pool do
     end
   end
 
+  defmacro set(target, attribute, value) do
+    quote do
+      GenServer.cast(self(), {:set, unquote(target), unquote(attribute), unquote(value)})
+    end
+  end
+
   defmacro cascades(cascade_list) do
     quote do
       def __moongate__pool_cascades(_), do: __moongate__pool_cascades
@@ -39,9 +45,6 @@ defmodule Moongate.Pool do
         unquote(touch_list)
       end
     end
-  end
-
-  def ask(_, _) do
   end
 
   def attr(member, key) do
@@ -63,8 +66,10 @@ defmodule Moongate.Pool do
           {value, transforms} when is_number(value) ->
             represented_transforms = Enum.map(transforms, &("›#{&1.mode}:#{&1.by}")) |> Enum.join
             "#{attr(member, key)}#{represented_transforms}"
+          {%Moongate.SocketOrigin{}, transforms} ->
+            origin = elem(attribute, 0)
+            origin.auth.identity
           {value, transforms} -> value
-          %Moongate.SocketOrigin{} -> attribute.id
           value -> value
         end
       end)

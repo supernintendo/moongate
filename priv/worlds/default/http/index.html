@@ -6,11 +6,20 @@
         <title>moongate</title>
     </head>
     <body>
+        <div id="canvas-container">
+            <div class="no-select" id="game-hud">
+                <img class="icon" src="sprites/hud-heart.png"><span id="health">-</span>/<span id="max-health">-</span>
+                <img class="icon" src="sprites/hud-gem.png"><span id="rupees">-</span>
+            </div>
+        </div>
         <script src="vendor/pixi.min.js"></script>
         <script src="moongate.js"></script>
+        <script src="js/assets.js"></script>
         <script src="js/canvas.js"></script>
-        <script src="js/packets.js"></script>
         <script src="js/game.js"></script>
+        <script src="js/hud.js"></script>
+        <script src="js/packets.js"></script>
+        <script src="js/sprites.js"></script>
         <script src="index.js"></script>
     </body>
 </html>
