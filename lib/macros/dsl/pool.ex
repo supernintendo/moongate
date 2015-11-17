@@ -87,6 +87,12 @@ defmodule Moongate.Pool do
     GenServer.cast(stage, {:bubble, event, event.this[:__moongate_pool], key})
   end
 
+  def echo(event, params) do
+    stage_name = Atom.to_string(event.stage)
+    stage = String.to_atom("stage_#{stage_name}")
+    GenServer.cast(stage, {:echo, event, event.this[:__moongate_pool], params})
+  end
+
   def tell(member, message) do
     {origin, _} = member[:origin]
 

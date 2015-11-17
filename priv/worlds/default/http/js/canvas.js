@@ -3,7 +3,7 @@ var GameCanvas = {
     renderer: PIXI.autoDetectRenderer(640, 512),
     entities: {},
     characterContainer: new PIXI.Container(),
-    itemContainer: new PIXI.Container(),
+    pickupContainer: new PIXI.Container(),
     grooveInterval: 0,
     groove: 60,
     refreshLayerInterval: 0,
@@ -48,26 +48,30 @@ var GameCanvas = {
     init: function() {
         this.projectileContainer.zIndex = 1;
         this.characterContainer.zIndex = 2;
-        this.itemContainer.zIndex = 3;
+        this.pickupContainer.zIndex = 3;
         this.tileContainer.zIndex = 4;
 
         this.stage.addChild(this.projectileContainer);
         this.stage.addChild(this.characterContainer);
-        this.stage.addChild(this.itemContainer);
+        this.stage.addChild(this.pickupContainer);
         this.stage.addChild(this.tileContainer);
         this.updateLayersOrder();
     },
     refreshLayersForPool: function(pool, key) {
         var container = this.containerForPool(pool),
             entities = this.entities[pool],
+            k;
+
+        if (entities) {
             k = Object.keys(entities);
 
-        k.sort(function(a, b) {
-            return entities[a].member.get(key) - entities[b].member.get(key);
-        }).forEach(function(index) {
-            container.removeChild(entities[index].sprite);
-            container.addChild(entities[index].sprite);
-        });
+            k.sort(function(a, b) {
+                return entities[a].member.get(key) - entities[b].member.get(key);
+            }).forEach(function(index) {
+                container.removeChild(entities[index].sprite);
+                container.addChild(entities[index].sprite);
+            });
+        }
     },
     removeEntity: function(pool, key, member) {
         var container = this.containerForPool(pool);
@@ -85,17 +89,13 @@ var GameCanvas = {
             this.syncEntity(pool, k[i]);
         }
     },
-    syncEntity: function(pool, key) {
-        var entity = this.entities[pool][key],
-            direction = entity.member.get('direction'),
+    syncCharacter: function(entity) {
+        var direction = entity.member.get('direction'),
             origin = entity.member.origin,
             stance = entity.member.get('stance'),
             index;
 
-        entity.sprite.position.x = entity.member.get('x');
-        entity.sprite.position.y = entity.member.get('y');
-
-        if (origin.owned) {
+        if (origin && origin.owned) {
             GameHUD.update({
                 health: entity.member.get('health'),
                 maxHealth: entity.member.get('max_health'),
@@ -112,6 +112,23 @@ var GameCanvas = {
             }
         }
     },
+    syncEntity: function(pool, key) {
+        var entity = this.entities[pool][key];
+
+        entity.sprite.position.x = entity.member.get('x');
+        entity.sprite.position.y = entity.member.get('y');
+
+        if (pool === 'test_level_character') {
+            this.syncCharacter(entity);
+        }
+        if (pool === 'test_level_pickup') {
+            this.syncPickup(entity);
+        }
+    },
+    syncPickup: function(entity) {
+        var index = Math.round((this.grooveInterval % this.groove) / this.groove * (entity.sprites.default.length - 1));
+        entity.sprite.texture = entity.sprites.default[index];
+    },
     tick: function() {
         this.grooveInterval++;
         this.refreshLayerInterval++;
@@ -124,7 +141,7 @@ var GameCanvas = {
             this.refreshLayerInterval = 0;
         }
         GameCanvas.syncAllEntities('test_level_character');
-        // GameCanvas.syncAllEntities('test_level_projectile');
+        GameCanvas.syncAllEntities('test_level_pickup');
         GameCanvas.renderer.render(GameCanvas.stage);
     },
     updateLayersOrder: function() {

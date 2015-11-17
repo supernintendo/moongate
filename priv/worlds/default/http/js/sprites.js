@@ -115,5 +115,38 @@ GameSprites = {
         default:
             return {};
         }
+    },
+    pickup: function(member) {
+        var item = member.get('item');
+
+        switch(item) {
+        case 'green_rupee':
+            return this.generateSpritesheet(this.sheets['gem-green'], {
+                default: [
+                    [2, 2, 32, 32],
+                    [36, 2, 32, 32],
+                    [70, 2, 32, 32],
+                    [104, 2, 32, 32],
+                ]
+            });
+        case 'blue_rupee':
+            return this.generateSpritesheet(this.sheets['gem-blue'], {
+                default: [
+                    [2, 2, 32, 32],
+                    [36, 2, 32, 32],
+                    [70, 2, 32, 32],
+                    [104, 2, 32, 32],
+                ]
+            });
+        case 'red_rupee':
+            return this.generateSpritesheet(this.sheets['gem-red'], {
+                default: [
+                    [2, 2, 32, 32],
+                    [36, 2, 32, 32],
+                    [70, 2, 32, 32],
+                    [104, 2, 32, 32],
+                ]
+            });
+        }
     }
 };

@@ -12,7 +12,7 @@
             tick: function() {}
         }, k = Object.keys(defaults), l = k.length;
 
-        while(l--) {
+        while (l--) {
             this[k[l]] = app[k[l]] || defaults[k[l]];
         }
     };
