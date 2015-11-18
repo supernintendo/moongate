@@ -5,19 +5,19 @@ defmodule Moongate.Macros.ExternalResources do
     else
       world = Application.get_env(:moongate, :world) || "default"
     end
-    {:ok, modules} = File.ls("priv/worlds/#{world}/modules")
+    {:ok, modules} = File.ls("priv/worlds/#{world}/server")
 
     Enum.map(modules, fn(resource) ->
       quote do
-        @external_resource "priv/worlds/#{unquote(world)}/modules/#{unquote(resource)}"
+        @external_resource "priv/worlds/#{unquote(world)}/server/#{unquote(resource)}"
       end
     end)
 
-    if File.dir?("priv/worlds/#{world}/modules/scopes/") do
-      {:ok, scopes} = File.ls("priv/worlds/#{world}/modules/scopes/")
+    if File.dir?("priv/worlds/#{world}/server/scopes/") do
+      {:ok, scopes} = File.ls("priv/worlds/#{world}/server/scopes/")
       Enum.map(scopes, fn(resource) ->
         quote do
-          @external_resource "priv/worlds/#{unquote(world)}/modules/scopes/#{unquote(resource)}"
+          @external_resource "priv/worlds/#{unquote(world)}/server/scopes/#{unquote(resource)}"
         end
       end)
     end
