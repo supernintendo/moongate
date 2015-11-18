@@ -22,6 +22,14 @@ Moongate is currently in early development. Things are changing and features may
 * Elixir 1.0.5+
 * PostgreSQL 9.3.5+
 
+### Attribution ###
+
+The includes demo project uses art from the following asset packs:
+
+* [Blowhard 2: Blow Harder](http://opengameart.org/content/blowhard-2-blow-harder)
+* [DENZI's 16x16 oblique tilesets](http://opengameart.org/content/denzis-16x16-oblique-tilesets)
+* [RogueLite](http://opengameart.org/content/roguelite)
+
 ### License ###
 
 MIT
