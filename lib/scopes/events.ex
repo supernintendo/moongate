@@ -3,7 +3,7 @@ defmodule Moongate.Scopes.Events do
     This is called when a socket message is received by a
     client and the server has no defined way of dealing with
     it. This is overriden by the Moongate.Scopes.Events within
-    the world's modules/scopes directory.
+    the world's server/scopes directory.
   """
   def take(_message) do
   end

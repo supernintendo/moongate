@@ -30,7 +30,7 @@ defmodule Moongate.Application do
 
   # Load all modules for game world and set up macros using config files
   defp load_world(world) do
-    load_world(world, "#{world}/modules")
+    load_world(world, "#{world}/server")
   end
 
   defp load_world(world, path) do
@@ -77,14 +77,14 @@ defmodule Moongate.Application do
   end
 
   defp load_scopes(world) do
-    if File.dir?("priv/worlds/#{world}/modules/scopes") do
-      {:ok, files} = File.ls("priv/worlds/#{world}/modules/scopes")
+    if File.dir?("priv/worlds/#{world}/server/scopes") do
+      {:ok, files} = File.ls("priv/worlds/#{world}/server/scopes")
       Enum.map(files, &load_scope(&1, world))
     end
   end
 
   defp load_scope(filename, world) do
-    Code.eval_file("priv/worlds/#{world}/modules/scopes/#{filename}")
+    Code.eval_file("priv/worlds/#{world}/server/scopes/#{filename}")
   end
 
   defp initialize_stages do
