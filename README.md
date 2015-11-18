@@ -24,7 +24,7 @@ Moongate is currently in early development. Things are changing and features may
 
 ### Attribution ###
 
-The includes demo project uses art from the following asset packs:
+This repository contains art from the following asset packs:
 
 * [Blowhard 2: Blow Harder](http://opengameart.org/content/blowhard-2-blow-harder)
 * [DENZI's 16x16 oblique tilesets](http://opengameart.org/content/denzis-16x16-oblique-tilesets)
