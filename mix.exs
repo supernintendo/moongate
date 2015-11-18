@@ -4,7 +4,7 @@ defmodule Moongate.Mixfile do
 
   def project do
     [app: :moongate,
-     version: "0.0.1",
+     version: "0.1.0",
      elixir: "~> 1.0.5",
      deps: deps,
      default_task: "run"]
