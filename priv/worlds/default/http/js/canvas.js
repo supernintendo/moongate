@@ -2,14 +2,19 @@ var GameCanvas = {
     stage: new PIXI.Container(),
     renderer: PIXI.autoDetectRenderer(640, 512),
     entities: {},
+
     characterContainer: new PIXI.Container(),
-    pickupContainer: new PIXI.Container(),
     grooveInterval: 0,
     groove: 60,
     refreshLayerInterval: 0,
     refreshLayerEvery: 15,
     particleContainer: new PIXI.Container(),
+    pickupContainer: new PIXI.Container(),
     projectileContainer: new PIXI.Container(),
+    soundEffects: {
+        dead: new Audio('sounds/dead.wav'),
+        slash: new Audio('sounds/slash.wav')
+    },
     tileContainer: new PIXI.Container(),
     tints: [
         0x0532FD,
@@ -53,6 +58,7 @@ var GameCanvas = {
 
         if (parts[parts.length - 1] === 'particle') {
             direction = entity.member.get('direction');
+            this.playSoundEffectIfLoaded(entity.member.get('type'));
             entity.sprite.texture = entity.sprites[direction][0];
             entity.sprites[direction].forEach(function(sprite, index) {
                 setTimeout(function() {
@@ -64,7 +70,7 @@ var GameCanvas = {
     init: function() {
         this.projectileContainer.zIndex = 1;
         this.characterContainer.zIndex = 2;
-        this.particleContainer.zIndex = 3;
+        this.particleContainer.zIndex = 2;
         this.pickupContainer.zIndex = 4;
         this.tileContainer.zIndex = 5;
 
@@ -74,6 +80,11 @@ var GameCanvas = {
         this.stage.addChild(this.pickupContainer);
         this.stage.addChild(this.tileContainer);
         this.updateLayersOrder();
+    },
+    playSoundEffectIfLoaded: function(sound) {
+        if (this.soundEffects[sound]) {
+            this.soundEffects[sound].play();
+        }
     },
     refreshLayersForPool: function(pool, key) {
         var container = this.containerForPool(pool),
@@ -109,6 +120,7 @@ var GameCanvas = {
     },
     syncCharacter: function(entity) {
         var direction = entity.member.get('direction'),
+            health = entity.member.get('health'),
             origin = entity.member.origin,
             stance = entity.member.get('stance'),
             index;
@@ -120,7 +132,9 @@ var GameCanvas = {
                 rupees: entity.member.get('rupees')
             });
         }
-        if (direction) {
+        if (health <= 0) {
+            entity.sprite.texture = entity.sprites.dead[0];
+        } else if (direction) {
             if (stance === 0) {
                 entity.sprite.texture = entity.sprites[direction][0];
             } else {
@@ -163,6 +177,12 @@ var GameCanvas = {
         GameCanvas.syncAllEntities('test_level_projectile');
         GameCanvas.syncAllEntities('test_level_particle');
         GameCanvas.renderer.render(GameCanvas.stage);
+
+        if (document.getElementById('health').innerHTML === '0' && !this.redirecting) {
+            this.playSoundEffectIfLoaded('dead');
+            this.redirecting = true;
+            window.location.href = window.location;
+        }
     },
     updateLayersOrder: function() {
         this.stage.children.sort(function(a, b) {

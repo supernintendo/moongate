@@ -55,7 +55,8 @@ defmodule Moongate.Pool do
     {:tagged, :drop, "pool_#{member[:__moongate_pool_name]}", "#{member[:__moongate_pool_index]}"}
   end
 
-  def sync(event, pool, keys), do: sync(event.pools[pool], keys)
+  def sync(event, pool, keys) when is_atom(pool), do: sync(event.pools[pool], keys)
+  def sync(event, member, keys), do: sync([member], keys)
   def sync(pool, keys) do
     keys = [:__moongate_pool_index] ++ keys
     attributes = Enum.map(pool, fn(member) ->

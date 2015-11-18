@@ -22,20 +22,21 @@ defmodule Default.Pools.Character do
     archetype:    {:string, "elf"},
     attack:       {:int, 0},
     attack_delay: {:int, 100},
+    dead:         {:int, 0},
     defense:      {:int, 0},
     health:       {:int, 3},
     max_health:   {:int, 3},
     rupees:       {:int, 0}
   }
   cascades [
-    {:sync_movement, {:every, 15}},
+    {:sync_movement, {:every, 100}},
     {:sync_all, {:upon, Character, :sync}},
     {:check_if_hurt, {:upon, Character, :attack}},
     {:reset_stance, {:upon, Character, :reset_stance}},
     {:sync_initial, {:upon, Character, :create}},
     {:sync_drop, {:upon, Character, :drop}},
     {:sync_other, {:upon, Pickup, :sync}},
-    {:sync_other, {:upon, Particle, :sync}},
+    {:sync_other, {:upon, Particle, :sync}}
   ]
   touches [
     {Projectile, :box, {:x, :y, :height, :width}}
@@ -92,14 +93,17 @@ defmodule Default.Pools.Character do
   def attack(event) do
     char = event.this
     archetype = attr(char, :archetype)
+    dead = attr(char, :dead)
     delay = attr(char, :attack_delay)
 
-    stop(event, {1, 1})
-    set(char, :stance, @attacking)
-    echo_after(delay, event, {:reset_stance})
-    attack = attack_for(archetype, char)
-    bubble(event, :attack, attack)
-    add_particle(event, attack)
+    unless dead == 1 do
+      stop(event, {1, 1})
+      set(char, :stance, @attacking)
+      echo_after(delay, event, {:reset_stance})
+      attack = attack_for(archetype, char)
+      bubble(event, :attack, attack)
+      add_particle(event, attack)
+    end
   end
 
   def reset_stance(event) do
@@ -112,7 +116,7 @@ defmodule Default.Pools.Character do
     {x, y, w, h, d} = positional_attributes(char)
 
     case d do
-      "up" -> {id, x, y - 34, 32, 32, "slash", d}
+      "up" -> {id, x, y - 16, 32, 32, "slash", d}
       "down" -> {id, x, y + h + 2, 32, 32, "slash", d}
       "left" -> {id, x - 34, y, 32, 32, "slash", d}
       "right" -> {id, x + w + 2, y, 32, 32, "slash", d}
@@ -150,7 +154,13 @@ defmodule Default.Pools.Character do
 
     if hit?(char, attack) do
       health = attr(char, :health)
-      set(char, :health, health - 1)
+
+      if health > 1 do
+        set(char, :health, health - 1)
+      else
+        set(char, :health, 0)
+        set(char, :dead, 1)
+      end
     end
   end
 
