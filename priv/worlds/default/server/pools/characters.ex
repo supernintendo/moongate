@@ -149,19 +149,19 @@ defmodule Default.Pools.Character do
   def check_if_hurt(event, attack) do
     char = event.this
 
-    case attack do
-      {a_id, a_x, a_y, a_w, a_h, _a_type} ->
-        if (hit?(char, attack)) do
-          health = attr(char, :health)
-          set(char, :health, health - 1)
-        end
-      _ -> nil
+    if hit?(char, attack) do
+      health = attr(char, :health)
+      set(char, :health, health - 1)
     end
   end
 
-  def hit?(char, {a_id, a_x, a_y, a_w, a_h, _a_type}) do
+  def hit?(char, {a_id, a_x, a_y, a_w, a_h, a_type}) do
+    hit?(char, {a_id, a_x, a_y, a_w, a_h, a_type, "default"})
+  end
+
+  def hit?(char, {a_id, a_x, a_y, a_w, a_h, _a_type, _a_direction}) do
     id = attr(char, :origin).id
-    {d, x, y, w, h} = positional_attributes(char)
+    {x, y, w, h, d} = positional_attributes(char)
 
     id != a_id &&
       x < a_x + a_w &&
