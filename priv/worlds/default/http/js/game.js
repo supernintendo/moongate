@@ -6,7 +6,11 @@ var Game = {
         var packet;
         if (first) {
             packet = GamePackets.keydown(key);
-            packet && GameGate.stageSend(packet);
+
+            if (packet) {
+                GameGate.stageSend(packet);
+                return true;
+            }
         }
     },
     keyup: function(e, key) {

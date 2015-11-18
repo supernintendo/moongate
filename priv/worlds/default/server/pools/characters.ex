@@ -100,7 +100,7 @@ defmodule Default.Pools.Character do
       set(char, :stance, @attacking)
       echo_after(delay, event, {:reset_stance})
       attack = attack_for(archetype, char)
-      bubble(event, :attack, attack)
+      bubble(event, :attack, {attack, char})
       add_particle(event, attack)
     end
   end
@@ -148,7 +148,7 @@ defmodule Default.Pools.Character do
     end
   end
 
-  def check_if_hurt(event, attack) do
+  def check_if_hurt(event, {attack, attacker}) do
     char = event.this
 
     if hit?(char, attack) do
@@ -159,6 +159,11 @@ defmodule Default.Pools.Character do
       else
         set(char, :health, 0)
         set(char, :dead, 1)
+	
+        rupees = attr(attacker, :rupees)
+        speed = attr(attacker, :speed)
+        set(attacker, :rupees, rupees + 1)
+        set(attacker, :speed, speed + 0.025)
       end
     end
   end
