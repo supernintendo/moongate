@@ -9,7 +9,7 @@ defmodule Default.Stage.Level do
   def arrival(event) do
     new(event, Character, [
       origin: event.origin,
-      archetype: random_from({"elf"}),
+      archetype: random_from({"elf", "mage", "skeleton"}),
       x: random(640),
       y: random(512)
     ])

@@ -7,7 +7,7 @@ defmodule Default.Pools.Character do
   }
   attributes %{
     name:       {:string, "a noob"},
-    speed:      {:float, 0.115},
+    speed:      {:float, 0.125},
     height:     {:int, 24},
     width:      {:int, 24},
     x:          {:float, 50.0},
@@ -23,7 +23,7 @@ defmodule Default.Pools.Character do
     rupees:     {:int, 0}
   }
   cascades [
-    {:sync_all, {:every, 3000}},
+    {:sync_all, {:every, 200}},
     {:sync_all, {:upon, Character, :move}},
     {:sync_initial, {:upon, Character, :create}},
     {:sync_drop, {:upon, Character, :drop}},
