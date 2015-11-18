@@ -8,6 +8,7 @@ var GameCanvas = {
     groove: 60,
     refreshLayerInterval: 0,
     refreshLayerEvery: 15,
+    particleContainer: new PIXI.Container(),
     projectileContainer: new PIXI.Container(),
     tileContainer: new PIXI.Container(),
     tints: [
@@ -31,6 +32,7 @@ var GameCanvas = {
         };
         GameCanvas.syncEntity(pool, key);
         this.drawEntityToStage(pool, GameCanvas.entities[pool][key].sprite);
+        this.handleNewEntity(pool, GameCanvas.entities[pool][key]);
     },
     containerForPool: function(pool) {
         var parts = pool.split('_'),
@@ -45,14 +47,30 @@ var GameCanvas = {
             container.addChild(sprite);
         }
     },
+    handleNewEntity(pool, entity) {
+        var parts = pool.split('_'),
+            direction;
+
+        if (parts[parts.length - 1] === 'particle') {
+            direction = entity.member.get('direction');
+            entity.sprite.texture = entity.sprites[direction][0];
+            entity.sprites[direction].forEach(function(sprite, index) {
+                setTimeout(function() {
+                    entity.sprite.texture = sprite;
+                }, index * 100);
+            }, this);
+        }
+    },
     init: function() {
         this.projectileContainer.zIndex = 1;
         this.characterContainer.zIndex = 2;
-        this.pickupContainer.zIndex = 3;
-        this.tileContainer.zIndex = 4;
+        this.particleContainer.zIndex = 3;
+        this.pickupContainer.zIndex = 4;
+        this.tileContainer.zIndex = 5;
 
         this.stage.addChild(this.projectileContainer);
         this.stage.addChild(this.characterContainer);
+        this.stage.addChild(this.particleContainer);
         this.stage.addChild(this.pickupContainer);
         this.stage.addChild(this.tileContainer);
         this.updateLayersOrder();
@@ -142,6 +160,8 @@ var GameCanvas = {
         }
         GameCanvas.syncAllEntities('test_level_character');
         GameCanvas.syncAllEntities('test_level_pickup');
+        GameCanvas.syncAllEntities('test_level_projectile');
+        GameCanvas.syncAllEntities('test_level_particle');
         GameCanvas.renderer.render(GameCanvas.stage);
     },
     updateLayersOrder: function() {

@@ -52,7 +52,7 @@ defmodule Moongate.Pool do
   end
 
   def tagged(event, member, message) do
-    {:tagged, :drop, "#{member[:__moongate_pool_index]}"}
+    {:tagged, :drop, "pool_#{member[:__moongate_pool_name]}", "#{member[:__moongate_pool_index]}"}
   end
 
   def sync(event, pool, keys), do: sync(event.pools[pool], keys)
@@ -87,10 +87,20 @@ defmodule Moongate.Pool do
     GenServer.cast(stage, {:bubble, event, event.this[:__moongate_pool], key})
   end
 
+  def bubble(event, key, params) do
+    stage_name = Atom.to_string(event.stage)
+    stage = String.to_atom("stage_#{stage_name}")
+    GenServer.cast(stage, {:bubble, %{event | params: params}, event.this[:__moongate_pool], key})
+  end
+
   def echo(event, params) do
     stage_name = Atom.to_string(event.stage)
     stage = String.to_atom("stage_#{stage_name}")
     GenServer.cast(stage, {:echo, event, event.this[:__moongate_pool], params})
+  end
+
+  def echo_after(delay, event, params) do
+    :timer.apply_after(delay, __MODULE__, :echo, [event, params])
   end
 
   def tell(member, message) do
@@ -103,7 +113,7 @@ defmodule Moongate.Pool do
         else
           write_to(origin, :sync, Moongate.Packets.sync(message))
         end
-      {:tagged, tag, index} -> write_to(origin, tag, index)
+      {:tagged, tag, pool, index} -> write_to(origin, tag, pool, index)
       _ -> nil
     end
   end

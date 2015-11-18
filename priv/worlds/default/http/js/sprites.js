@@ -116,6 +116,38 @@ GameSprites = {
             return {};
         }
     },
+    particle: function(member) {
+        var h, w, type = member.get('type');
+
+        switch(type) {
+        case 'slash':
+            h = 32;
+            w = 30;
+
+            return this.generateSpritesheet(this.sheets['slash'], {
+                up: [
+                    [0, 100, h, w],
+                    [36, 100, h, w],
+                    [68, 100, h, w]
+                ],
+                left: [
+                    [0, 0, h, w],
+                    [36, 0, h, w],
+                    [68, 0, h, w]
+                ],
+                down: [
+                    [0, 66, h, w],
+                    [36, 66, h, w],
+                    [68, 66, h, w]
+                ],
+                right: [
+                    [0, 32, h, w],
+                    [36, 32, h, w],
+                    [68, 32, h, w]
+                ]
+            });
+        }
+    },
     pickup: function(member) {
         var item = member.get('item');
 

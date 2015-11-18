@@ -270,7 +270,10 @@ defmodule Moongate.Pools.Pool do
   end
 
   defp new_pool_member(attributes, state) do
-    [__moongate_pool_index: state.index, __moongate_pool: state.spec] ++ attributes
+    [__moongate_pool_index: state.index,
+     __moongate_pool_name: state.name,
+     __moongate_pool: state.spec
+    ] ++ attributes
   end
 
   # Call a function defined on the pool module with a member of
