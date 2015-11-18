@@ -24,6 +24,14 @@ defmodule Moongate.Stage do
     String.to_atom(name)
   end
 
+  def random(max) do
+    :random.uniform(max)
+  end
+
+  def random_from(items) do
+    elem(items, random(tuple_size(items)) - 1)
+  end
+
   defmacro call(event, target, callback, params) do
     quote do
       pool = pool_name(unquote(target)[:__moongate_pool])

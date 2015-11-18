@@ -115,10 +115,18 @@ defmodule Moongate.Pools.Pool do
     Handle a pool member mutation event.
   """
   def handle_cast({:mutate, target, attribute, delta, params}, state) do
-    member = Enum.find(state.members, &(&1[:origin] == target[:origin]))
+    member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
     members = List.delete(state.members, member)
     modified = %{state | members: members ++ [mutate(member, attribute, delta, params)]}
     publish_to(modified)
+    {:noreply, modified}
+  end
+
+  def handle_cast({:set, target, attribute, value}, state) do
+    member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
+    members = List.delete(state.members, member)
+    modified_member = set(member, attribute, value)
+    modified = %{state | members: members ++ [modified_member]}
     {:noreply, modified}
   end
 
@@ -262,7 +270,10 @@ defmodule Moongate.Pools.Pool do
   end
 
   defp new_pool_member(attributes, state) do
-    [__moongate_pool_index: state.index, __moongate_pool: state.spec] ++ attributes
+    [__moongate_pool_index: state.index,
+     __moongate_pool_name: state.name,
+     __moongate_pool: state.spec
+    ] ++ attributes
   end
 
   # Call a function defined on the pool module with a member of
@@ -291,6 +302,11 @@ defmodule Moongate.Pools.Pool do
     state.publish_to |> Enum.map(fn({pid, tag}) ->
       tell_pid_async(pid, {:publish, state.members, tag})
     end)
+  end
+
+  defp set(member, attribute, new_value) do
+    {old_value, mutations} = member[attribute]
+    Keyword.put(member, attribute, {new_value, mutations})
   end
 
   def touch_test({:box, these, those, {x, y, height, width}}) do

@@ -32,6 +32,11 @@ defmodule Moongate.Stages.Instance do
     {:noreply, state}
   end
 
+  def handle_cast({:echo, event, from, params}, state) do
+    apply(state.stage, :echo, [event, from, params])
+    {:noreply, state}
+  end
+
   @doc """
     Remove a Moongate.SocketOrigin from the stage.
   """

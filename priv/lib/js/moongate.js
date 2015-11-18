@@ -6,12 +6,13 @@
             keypress: function(e) {},
             keyup: function(e) {},
             poolMemberAdded: function(member, key, pool) {},
+            poolMemberUpdated: function(member, key, pool) {},
             poolMemberRemoved: function(member, key, pool) {},
             stageJoined: function(stage) {},
             tick: function() {}
         }, k = Object.keys(defaults), l = k.length;
 
-        while(l--) {
+        while (l--) {
             this[k[l]] = app[k[l]] || defaults[k[l]];
         }
     };
@@ -42,7 +43,11 @@
         console.log('%c ☪ moongate.js v0.01 ', 'background: #151718; color: #C065DB');
     };
     Moongate.prototype.addToPool = function(pool, keys, values, isNew) {
-        var i, l = values.length - 1, member = {}, value;
+        var i,
+            l = values.length - 1,
+            member = this.pools[pool].members[values[0]] || {},
+            params,
+            value;
 
         while (l--) {
             value = this.valueForType(values[l + 1], this.pools[pool].attributes[keys[l]]);
@@ -52,9 +57,9 @@
         member.get = this.getFromPoolMember.bind(this, pool, values[0]);
         this.pools[pool].members[values[0]] = member;
 
-        if (isNew) {
-            this.app.poolMemberAdded(member, values[0], pool);
-        }
+        params = [member, values[0], pool];
+        isNew ? this.app.poolMemberAdded.apply(this.app, params) : this.app.poolMemberUpdated.apply(this.app, params);
+
         return member;
     };
     Moongate.prototype.bindKeyboard = function() {
@@ -116,10 +121,12 @@
         }
         var value = this.pools[pool].members[index][attribute];
 
-        if (value.transforms && value.transforms.length > 0) {
+        if (value && value.transforms && value.transforms.length > 0) {
             return this.transformedValue(value);
         }
-        return value.precise;
+        if (value) {
+            return value.precise;
+        }
     };
     Moongate.prototype.keyIsDown = function(keyCode) {
         return this.state.keyboard.keysDown.indexOf(keyCode) > -1;
@@ -310,6 +317,13 @@
         case 'string':
             return {
                 precise: value,
+                started: Date.now(),
+                transforms: null
+            };
+        case 'origin':
+            return {
+                precise: value,
+                owned: value === this.state.authToken,
                 started: Date.now(),
                 transforms: null
             };
