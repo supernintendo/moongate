@@ -68,6 +68,8 @@ var GameCanvas = {
         }
     },
     init: function() {
+        this.renderer.backgroundColor = 0x002F21;
+
         this.projectileContainer.zIndex = 1;
         this.characterContainer.zIndex = 2;
         this.particleContainer.zIndex = 2;

@@ -63,7 +63,7 @@
         return member;
     };
     Moongate.prototype.bindKeyboard = function() {
-        var gate = this;
+        var done, gate = this;
 
         window.addEventListener('keyup', function(e) {
             if (gate.keyIsDown(e.keyCode)) {
@@ -75,9 +75,13 @@
             gate.app.keypress(e, e.keyCode);
         }.bind(this), false);
         window.addEventListener('keydown', function(e) {
-            gate.app.keydown(e, e.keyCode, !gate.keyIsDown(e.keyCode));
+            done = gate.app.keydown(e, e.keyCode, !gate.keyIsDown(e.keyCode));
             if (!gate.keyIsDown(e.keyCode)) {
                 gate.setKeyDownState(e.keyCode, true);
+            }
+            if (done) {
+                e.preventDefault();
+                return false;
             }
         }.bind(this), false);
     };
