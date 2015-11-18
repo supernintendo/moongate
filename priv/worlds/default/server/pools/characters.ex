@@ -28,7 +28,7 @@ defmodule Default.Pools.Character do
     rupees:       {:int, 0}
   }
   cascades [
-    {:sync_all, {:every, 200}},
+    {:sync_movement, {:every, 15}},
     {:sync_all, {:upon, Character, :sync}},
     {:check_if_hurt, {:upon, Character, :attack}},
     {:reset_stance, {:upon, Character, :reset_stance}},
@@ -50,7 +50,6 @@ defmodule Default.Pools.Character do
       set_direction(char, params)
       start_moving(char, params, speed)
       set(char, :stance, @walking)
-      bubble(event, :sync)
     end
   end
 
@@ -181,6 +180,13 @@ defmodule Default.Pools.Character do
   end
 
   # Sync
+
+  def sync_movement(event, params), do: sync_movement(event)
+  def sync_movement(event) do
+    if attr(event.this, :stance) == @walking do
+      bubble(event, :sync)
+    end
+  end
 
   def sync_all(event, params), do: sync_all(event)
   def sync_all(event) do
