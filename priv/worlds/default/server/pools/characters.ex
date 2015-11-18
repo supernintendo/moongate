@@ -38,9 +38,7 @@ defmodule Default.Pools.Character do
     {:sync_other, {:upon, Pickup, :sync}},
     {:sync_other, {:upon, Particle, :sync}}
   ]
-  touches [
-    {Projectile, :box, {:x, :y, :height, :width}}
-  ]
+  touches []
 
   def move(event, params) do
     char = event.this
