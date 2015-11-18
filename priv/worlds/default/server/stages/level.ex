@@ -2,7 +2,6 @@ defmodule Default.Stage.Level do
   import Moongate.Stage
 
   @playable_archetypes {"elf"}
-  # @playable_archetypes {"elf", "mage", "skeleton"}
   meta %{}
   pools [Character, Event, Particle, Pickup, Projectile]
   takes :move, :player_move, {:int, :int}
