@@ -154,6 +154,8 @@
     Moongate.prototype.parse = function(parts) {
         var namespace = parts[1].split('_');
 
+        this.state.ping = parts[0];
+
         return {
             action: parts[2],
             id: namespace.slice(1).join('_'),
@@ -238,15 +240,10 @@
         var precise = value.precise,
             transforms = value.transforms,
             added = 0,
-            l = transforms.length,
-            d = Date.now() - value.started;
+            l = transforms.length;
 
         while(l--) {
-            if (d > value.latency) {
-                added += (Date.now() + value.latency - value.started) * transforms[l][1];
-            } else {
-                added += (Date.now() - value.started) * transforms[l][1];
-            }
+            added += (Date.now() + value.latency - value.started) * transforms[l][1];
         }
         return precise + added;
     };
@@ -311,7 +308,6 @@
             precise = parts[0],
             transforms = this.transformsFrom(parts.slice(1));
 
-        console.log(transforms);
         switch (type) {
         case 'float':
             return {
