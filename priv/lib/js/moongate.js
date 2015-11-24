@@ -154,7 +154,7 @@
     Moongate.prototype.parse = function(parts) {
         var namespace = parts[1].split('_');
 
-        this.state.ping = parts[0];
+        this.state.ping = Date.now() - parts[0];
 
         return {
             action: parts[2],
