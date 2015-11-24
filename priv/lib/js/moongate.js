@@ -22,7 +22,8 @@
         this.connected = false;
         this.keyboard = {
             keysDown: []
-        },
+        };
+        this.ping = 0;
         this.stage = null;
         this.ticks = false;
     };
@@ -237,10 +238,15 @@
         var precise = value.precise,
             transforms = value.transforms,
             added = 0,
-            l = transforms.length;
+            l = transforms.length,
+            d = Date.now() - value.started;
 
         while(l--) {
-            added += (Date.now() + value.latency - value.started) * transforms[l][1];
+            if (d > value.latency) {
+                added += (Date.now() + value.latency - value.started) * transforms[l][1];
+            } else {
+                added += (Date.now() - value.started) * transforms[l][1];
+            }
         }
         return precise + added;
     };
@@ -305,6 +311,7 @@
             precise = parts[0],
             transforms = this.transformsFrom(parts.slice(1));
 
+        console.log(transforms);
         switch (type) {
         case 'float':
             return {
