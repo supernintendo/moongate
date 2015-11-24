@@ -42,7 +42,7 @@
         this.socket = null;
         console.log('%c ☪ moongate.js v0.01 ', 'background: #151718; color: #C065DB');
     };
-    Moongate.prototype.addToPool = function(pool, keys, values, isNew) {
+    Moongate.prototype.addToPool = function(pool, keys, values, isNew, latency) {
         var i,
             l = values.length - 1,
             member = this.pools[pool].members[values[0]] || {},
@@ -50,7 +50,7 @@
             value;
 
         while (l--) {
-            value = this.valueForType(values[l + 1], this.pools[pool].attributes[keys[l]]);
+            value = this.valueForType(values[l + 1], this.pools[pool].attributes[keys[l]], latency);
 
             member[keys[l]] = value;
         }
@@ -156,13 +156,13 @@
         return {
             action: parts[2],
             id: namespace.slice(1).join('_'),
+            latency: Date.now() - parts[0],
             from: namespace[0],
             params: parts.slice(3)
         };
     };
-    Moongate.prototype.send = function(message) {
-        var packet = this.state.authToken + ' ' + message,
-            length = packet.replace(/\s/g, '').length;
+    Moongate.prototype.send = function(packet) {
+        var length = packet.replace(/\s/g, '').length;
 
         this.socket.send(length + '{' + packet + '}');
     };
@@ -178,7 +178,7 @@
     Moongate.prototype.stageSend = function(message) {
         this.send(this.state.stage + ' ' + message);
     };
-    Moongate.prototype.sync = function(pool, params) {
+    Moongate.prototype.sync = function(pool, params, latency) {
         if (!this.pools[pool]) {
             return;
         }
@@ -197,7 +197,7 @@
 
             if (members[l].length - 1 === attributes.length) {
                 var isNew = !this.pools[pool].members[index];
-                this.addToPool(pool, attributes, members[l], isNew);
+                this.addToPool(pool, attributes, members[l], isNew, latency);
             }
         }
     };
@@ -240,7 +240,7 @@
             l = transforms.length;
 
         while(l--) {
-            added += (Date.now() - value.started) * transforms[l][1];
+            added += (Date.now() + value.latency - value.started) * transforms[l][1];
         }
         return precise + added;
     };
@@ -291,7 +291,7 @@
             this.removeFromPool(packet.id, packet.params[0]);
             break;
         case 'sync':
-            var update = this.sync(packet.id, packet.params[0]);
+            var update = this.sync(packet.id, packet.params[0], packet.latency);
             break;
         case 'describe':
             this.describePool(packet.id, packet.params[0]);
@@ -300,7 +300,7 @@
             break;
         }
     };
-    Moongate.prototype.valueForType = function(value, type) {
+    Moongate.prototype.valueForType = function(value, type, latency) {
         var parts = value.split('›'),
             precise = parts[0],
             transforms = this.transformsFrom(parts.slice(1));
@@ -308,24 +308,28 @@
         switch (type) {
         case 'float':
             return {
+                latency: latency,
                 precise: parseFloat(precise),
                 started: Date.now(),
                 transforms: transforms
             };
         case 'int':
             return {
+                latency: latency,
                 precise: Math.round(precise),
                 started: Date.now(),
                 transforms: transforms
             };
         case 'string':
             return {
+                latency: latency,
                 precise: value,
                 started: Date.now(),
                 transforms: null
             };
         case 'origin':
             return {
+                latency: latency,
                 precise: value,
                 owned: value === this.state.authToken,
                 started: Date.now(),
