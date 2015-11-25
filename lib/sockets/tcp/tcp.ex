@@ -61,7 +61,7 @@ defmodule Moongate.Sockets.TCP.Socket do
     case Moongate.Packets.parse(packet) do
       {:error, error} when valid -> Moongate.Say.pretty("Bad packet `#{safe_packet}`: #{error}.", :red)
       {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
-      {:ok, parsed} -> tell_async(:events, id, {:event, tl(parsed), hd(parsed), {port, :tcp}})
+      {:ok, parsed} -> tell_async(:events, id, {:event, parsed, {port, :tcp}})
     end
     ""
   end

@@ -43,7 +43,8 @@ defmodule Moongate.Sockets.Web.Socket do
         case Moongate.Packets.parse(packet) do
           {:error, error} when valid -> Moongate.Say.pretty("Bad packet #{safe_packet}: #{error}.", :red)
           {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
-          {:ok, parsed} -> tell_async(:events, "#{id}", {:event, tl(parsed), hd(parsed), {client, :web}})
+          {:ok, parsed} ->
+            tell_async(:events, "#{id}", {:event, parsed, {client, :web}})
         end
 
         handle(client, id)

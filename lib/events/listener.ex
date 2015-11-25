@@ -56,9 +56,9 @@ defmodule Moongate.Events.Listener do
   @doc """
     Accept an incoming message.
   """
-  def handle_cast({:event, message, token, socket}, state) do
-    authenticated = is_authenticated?(socket, state, token)
-    logged_in = is_logged_in?(state, token)
+  def handle_cast({:event, message, socket}, state) do
+    authenticated = is_authenticated?(socket, state)
+    logged_in = is_logged_in?(state)
 
     case message do
       [to | [cast | params]] when authenticated ->
@@ -67,8 +67,7 @@ defmodule Moongate.Events.Listener do
         Moongate.Scopes.Events.take(message)
       _ ->
         Moongate.Say.pretty """
-          Bad event: Authentication token #{token} does not match that
-          of event listener: #{state.origin.auth.identity}.
+          #{state.origin.auth.identity} - rejecting packet from socket I don't trust.
         """, :red
     end
 
@@ -103,15 +102,15 @@ defmodule Moongate.Events.Listener do
 
   # Check whether a socket is qualified to send messages
   # to this event listener.
-  defp is_authenticated?(socket, state, token) do
+  defp is_authenticated?(socket, state) do
     {port, protocol} = socket
 
-    state.origin.auth.identity == token and state.origin.port == port
+    state.origin.port == port
   end
 
   # Check whether the identity of the token matches that
   # of the origin of this event listener.
-  defp is_logged_in?(state, token) do
-    token != "anon" and state.origin.auth.identity == token
+  defp is_logged_in?(state) do
+    state.origin.auth.identity != "anon"
   end
 end

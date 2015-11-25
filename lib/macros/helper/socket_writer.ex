@@ -3,10 +3,10 @@ defmodule Moongate.Macros.SocketWriter do
     write_to(target, tag, Atom.to_string(Process.info(self())[:registered_name]), message)
   end
   def write_to(target, tag, name, message) do
-    auth_token = target.auth.identity
+    timestamp = Moongate.Time.current_ms
     tag = Atom.to_string(tag)
-    packet_length = String.length(auth_token <> name <> tag <> message)
-    parsed_message = "#{packet_length}{#{auth_token}░#{name}░#{tag}░#{String.strip(message)}}"
+    packet_length = String.length("#{timestamp}" <> name <> tag <> message)
+    parsed_message = "#{packet_length}{#{timestamp}░#{name}░#{tag}░#{String.strip(message)}}"
 
     pid = Process.whereis(String.to_atom("events_" <> target.id))
 

@@ -33,7 +33,7 @@ defmodule Moongate.Sockets.UDP.Socket do
             protocol: :udp
           })
         end
-        tell_async(:events, "#{port}", {:event, tl(parsed), hd(parsed), {server, :udp, ip}})
+        tell_async(:events, "#{port}", {:event, parsed, {server, :udp, ip}})
     end
 
     server |> udp_listen
