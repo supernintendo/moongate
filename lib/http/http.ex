@@ -27,7 +27,8 @@ defmodule Moongate.HTTP.Host do
   defp routes do
     [
       {"/", :cowboy_static, {:priv_file, :moongate, world_directory(:http) <> "/index.html"}},
-      {"/moongate.js", :cowboy_static, {:priv_file, :moongate, "lib/js/moongate.js"}},
+      {"/moongate.js", :cowboy_static, {:priv_file, :moongate, "js/public/app.js"}},
+      {"/moongate.min.js", :cowboy_static, {:priv_file, :moongate, "js/public/app.min.js"}},
       {"/[...]", :cowboy_static, {:priv_dir,  :moongate, world_directory(:http)}}
     ]
   end

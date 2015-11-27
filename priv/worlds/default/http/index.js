@@ -1,4 +1,5 @@
-var GameGate = new Moongate(Game);
+var Moongate = require('moongate'),
+    GameGate = new Moongate(Game);
 
 document.getElementById('canvas-container').appendChild(GameCanvas.renderer.view);
 
