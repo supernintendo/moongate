@@ -86,7 +86,7 @@ defmodule Default.Pools.Character do
   def stop_moving(char, {x_delta, y_delta}) do
     if (x_delta != 0), do: mutate(char, :x, 0, @move_transform)
     if (y_delta != 0), do: mutate(char, :y, 0, @move_transform)
-    if (x_delta != 0 && y_delta != 0), edo: set(char, :stance, @standing)
+    if (x_delta != 0 && y_delta != 0), do: set(char, :stance, @standing)
   end
 
   def attack(event) do
