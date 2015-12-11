@@ -1,0 +1,27 @@
+{
+    "name": "default",
+    "authors": [
+        "supernintendo"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/supernintendo/moongate",
+    "moduleType": [],
+    "private": true,
+    "dependencies": {
+        "howler.js": "1.1.28",
+        "jquery": "2.1.4",
+        "pixi.js": "3.0.8"
+    },
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ],
+    "overrides": {
+        "jquery": {
+            "main": "dist/jquery.js"
+        }
+    }
+}

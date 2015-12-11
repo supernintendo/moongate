@@ -27,10 +27,10 @@ class Packets {
     // Deconstruct a packet string to a packet array.
     static unravel(message) {
         let [length, contents] = message.split(/{(.*?)}/g),
-            parts = contents[1].split('░');
+            parts = contents.split('░');
 
         // Verify packet length
-        if (length === contents.replace(/░/g, '').length) {
+        if (Number(length) === parts.join('').length) {
             return parts;
         }
         return [];

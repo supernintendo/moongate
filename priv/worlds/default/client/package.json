@@ -1,0 +1,22 @@
+{
+    "name": "default",
+    "author": "supernintendo",
+    "version": "0.1.0",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/supernintendo/moongate"
+    },
+    "scripts": {
+        "start": "brunch watch --server"
+    },
+    "dependencies": {
+        "auto-reload-brunch": ">= 1.0 < 1.9",
+        "babel-brunch": "^5.1.2",
+        "clean-css-brunch": ">= 1.0 < 1.9",
+        "css-brunch": ">= 1.0 < 1.9",
+        "javascript-brunch": ">= 1.0 < 1.9",
+        "pixi.js": "3.0.8",
+        "uglify-js-brunch": ">= 1.0 < 1.9"
+    }
+}

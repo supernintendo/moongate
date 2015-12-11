@@ -12,8 +12,8 @@ defmodule Default.Stage.Level do
     new(event, Character, [
       origin: event.origin,
       archetype: random_from(@playable_archetypes),
-      x: random(640),
-      y: random(512)
+      x: random(128),
+      y: random(128)
     ])
     new(event, Event, [])
   end

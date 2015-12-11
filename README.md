@@ -11,11 +11,11 @@ This project is intended to be a platform for building multiplayer game servers.
 - *Pools* - Pools contain the objects that make up your game world. Members of a pool have attributes that can be mutated over time (for example, a `Character`'s movement).
 - *Stages* - Stages are essentially a collection of pools. Game clients can join stages, allowing them to send messages to the pools within as well as synchronize with their state.
 
-Moongate supports TCP, UDP and WebSockets. It includes a JavaScript library `moongate.js` as a reference for client-side communication with your server.
+Moongate supports TCP, UDP and WebSockets. It includes a JavaScript library `moongate.js` for web based games.
 
 ### Status ###
 
-Moongate is currently in early development. Things are changing and features may be missing or incomplete.
+Moongate is currently in early development. Things are in constant flux and features may be missing or incomplete.
 
 ### Dependencies ###
 
@@ -26,9 +26,9 @@ Moongate is currently in early development. Things are changing and features may
 
 This repository contains art from the following asset packs:
 
-* [Blowhard 2: Blow Harder](http://opengameart.org/content/blowhard-2-blow-harder)
-* [DENZI's 16x16 oblique tilesets](http://opengameart.org/content/denzis-16x16-oblique-tilesets)
-* [RogueLite](http://opengameart.org/content/roguelite)
+* [16x16 Oblique Tileset by DENZI](http://opengameart.org/content/denzis-16x16-oblique-tilesets)
+* [Blowhard 2: Blow Harder by Carl Olsson](http://opengameart.org/content/blowhard-2-blow-harder)
+* [RogueLite by LD](http://opengameart.org/content/roguelite)
 
 ### License ###
 

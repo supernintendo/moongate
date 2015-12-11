@@ -1,23 +1,14 @@
-class MoongateState {
-    constructor(params) {
-        let {bindings} = params;
+let Utils = require('./utils');
 
-        this.authToken = 'anon';
+class Bindings {
+    constructor(params) {
+        let {bindings, parent} = params;
+
+        this.parent = parent;
+        this.handlers = {};
         this.keysDown = [];
-        this.ticks = false;
-        this.bindingMap = this.defaults();
-        this.bindings(bindings);
-    }
-    addHandler(namespace, callback) {
-        this[this.handlerName(namespace)] = callback;
-    }
-    bindings(bindings) {
-        if (!bindings) {
-            return this.bindingMap;
-        }
-        this.bindingMap = Object.assign(this.bindingMap, bindings);
+        this.registered = Utils.deepExtend(this.defaults(), bindings);
         this.handleKeys();
-        return this.bindingMap;
     }
     defaults() {
         return {
@@ -26,6 +17,9 @@ class MoongateState {
             keypress: null,
             keyup: null,
             poolCreate: function(member, key, pool) {},
+            poolSync: function(created, updated, pool) {
+                this.poolSync.apply(this, arguments);
+            },
             poolUpdate: function(member, key, pool) {},
             poolDrop: function(member, key, pool) {},
             stageJoin: function(state) {},
@@ -35,37 +29,26 @@ class MoongateState {
     getKeyDown(keyCode) {
         return this.keysDown.indexOf(keyCode) > -1;
     }
-    handlerFor(namespace) {
-        let handlerName = this.handlerName(namespace);
-
-        if (this[handlerName] && this[handlerName] instanceof Function) {
-            return this[handlerName];
-        }
-        return false;
-    }
-    handlerName(namespace) {
-        return `${namespace}PacketHandled`;
-    }
     handleKeys() {
         ['keydown', 'keypress', 'keyup'].forEach((key) => {
-            if (this.bindingMap[key] instanceof Function) {
-                window.addEventListener(key, this[`${key}Handled`].bind(this));
-            } else if (this.windowBindings[key]) {
-                window.removeEventListener(key, this[`${key}Handled`].bind(this));
+            if (this.registered[key] instanceof Function) {
+                window.addEventListener(key, this[`${key}Handled`].bind(this, this.parent));
+            } else if (this.handlers[key]) {
+                window.removeEventListener(key, this[`${key}Handled`].bind(this, this.parent));
             }
         });
     }
-    keyupHandled(e) {
+    keyupHandled(parent, e) {
         if (this.getKeyDown(e.keyCode)) {
             this.setKeyDown(e.keyCode, false);
         }
-        return this.bindingMap.keyup(e, e.keyCode);
+        return this.registered.keyup.apply(this.parent, [e, e.keyCode]);
     }
-    keypressHandled(e) {
-        return this.bindingMap.keypress(e, e.keyCode);
+    keypressHandled(parent, e) {
+        return this.registered.keypress.apply(this.parent, [e, e.keyCode]);
     }
-    keydownHandled(e) {
-        let prevent = this.bindingMap.keydown(e, e.keyCode, !this.getKeyDown(e.keyCode));
+    keydownHandled(parent, e) {
+        let prevent = this.registered.keydown.apply(this.parent, [e, e.keyCode, !this.getKeyDown(e.keyCode)]);
 
         if (!this.getKeyDown(e.keyCode)) {
             this.setKeyDown(e.keyCode, true);
@@ -85,11 +68,11 @@ class MoongateState {
             });
         }
     }
-    eventPacketHandled(event) {
+    eventsPacketHandled(event) {
         switch (event.action) {
         case 'set_token':
             this.state.authToken = event.params[0];
-            return ['authenticated', []];
+            this.callback('authenticated', []);
         default:
             break;
         }
@@ -99,12 +82,13 @@ class MoongateState {
         case 'transaction':
             if (event.params[0] === 'join') {
                 this.state.stage = event.id;
-                return ['stageJoined', [event.id]];
+                this.callback('stageJoined', [event.id]);
             }
             return false;
         default:
             break;
         }
     }
-}
-export default MoongateState;
+};
+
+export default Bindings;
