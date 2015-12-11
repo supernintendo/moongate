@@ -6,6 +6,7 @@
         ]
     },
     "2594": {
+        "path": "client/public"
         "protocol": "HTTP"
     }
 }

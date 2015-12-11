@@ -1,20 +1,20 @@
-var GamePackets = {
-    keyup: function(key) {
+let GamePackets = {
+    keyup: function(key, gate) {
         switch (key) {
         case 87: // up
-            if (!GameGate.keyIsDown(83)) {
+            if (!gate.keysAreDown(83)) {
                 return 'stop 0 -1';
             }
         case 65: // left
-            if (!GameGate.keyIsDown(68)) {
+            if (!gate.keysAreDown(68)) {
                 return 'stop -1 0';
             }
         case 83: // down
-            if (!GameGate.keyIsDown(87)) {
+            if (!gate.keysAreDown(87)) {
                 return 'stop 0 1';
             }
         case 68: // right
-            if (!GameGate.keyIsDown(65)) {
+            if (!gate.keysAreDown(65)) {
                 return 'stop 1 0';
             }
         default:
@@ -38,3 +38,5 @@ var GamePackets = {
         }
     }
 };
+
+export default GamePackets;

@@ -76,7 +76,7 @@ defmodule Moongate.Stages.Instance do
       {:noreply, manipulation}
     end
   end
-  
+
   @doc """
     Receive a message from an event listener and if the origin on the
     event is qualified, call the callback defined on the stage

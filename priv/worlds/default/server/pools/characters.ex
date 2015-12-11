@@ -159,7 +159,7 @@ defmodule Default.Pools.Character do
       else
         set(char, :health, 0)
         set(char, :dead, 1)
-	
+
         rupees = attr(attacker, :rupees)
         speed = attr(attacker, :speed)
         set(attacker, :rupees, rupees + 1)

@@ -1,0 +1,20 @@
+{
+    "sprites": {
+        "elf": {
+            "image": "elf",
+            "spritesheet": "elf"
+        },
+        "mage": {
+            "image": "mage",
+            "spritesheet": "mage"
+        },
+        "skeleton": {
+            "image": "skeleton",
+            "spritesheet": "skeleton"
+        }
+    },
+    "sounds": [
+        "dead",
+        "slash"
+    ]
+}

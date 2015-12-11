@@ -12,6 +12,7 @@ defmodule Moongate.Macros.Worlds do
         Module.safe_concat(unquote(camel_world), "Game")
       end
 
+      defp world_directory, do: world_directory(nil)
       defp world_directory(key) do
         world = unquote(world)
 
@@ -19,7 +20,7 @@ defmodule Moongate.Macros.Worlds do
           :http ->
             "worlds/#{world}/http"
           _ ->
-            "priv/worlds/#{world}"
+            "worlds/#{world}"
         end
       end
     end
