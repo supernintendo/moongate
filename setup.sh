@@ -1,4 +1,5 @@
 #!/bin/bash
 
-mix ecto.rollback Moongate.Repo --all
+./priv/util/setup_db.sh
+mix deps.get
 mix ecto.migrate Moongate.Repo

@@ -8,7 +8,7 @@
   "idna": {:hex, :idna, "1.0.2"},
   "json": {:hex, :json, "0.3.2"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
-  "pbkdf2": {:git, "https://github.com/basho/erlang-pbkdf2.git", "7076584f5377e98600a7e2cb81980b2992fb2f71", []},
+  "pbkdf2": {:git, "git://github.com/basho/erlang-pbkdf2.git", "7076584f5377e98600a7e2cb81980b2992fb2f71", []},
   "poolboy": {:hex, :poolboy, "1.5.1"},
   "postgrex": {:hex, :postgrex, "0.9.1"},
   "ranch": {:hex, :ranch, "1.2.0"},
