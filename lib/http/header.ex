@@ -5,7 +5,6 @@ defmodule Moongate.HTTP.Headers do
     route = elem(:cowboy_req.path(req), 0)
     parts = String.split(route, ".")
 
-    IO.inspect route
     case List.last(parts) do
       "js" ->
         source_map = String.lstrip(route, ?/) <> ".map"

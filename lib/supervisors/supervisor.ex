@@ -11,7 +11,7 @@ defmodule Moongate.Supervisor do
   def init(world_supervisors) do
     children = [
       worker(Moongate.SupervisionTree, [], [id: :tree]),
-      worker(Moongate.Db.Repo, [], [id: :repo]),
+      worker(Moongate.Repo, [], [id: :repo]),
       worker(Moongate.Auth, [], [id: :auth]),
       supervisor(Moongate.Events.Supervisor, [], [id: :events]),
       supervisor(Moongate.Pools.Supervisor, [], [id: :pool]),
