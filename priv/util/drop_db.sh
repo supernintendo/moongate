@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [[ `psql -tAc "SELECT 1 FROM pg_database WHERE datname='moongate'"` != "1" ]]; then
   echo "ERROR: Database 'moongate' does not exist."
   exit

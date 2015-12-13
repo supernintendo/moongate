@@ -1,5 +1,5 @@
 defmodule Moongate.HTTP.Headers do
-  @behavior :cowboy_middlewar
+  @behavior :cowboy_middleware
 
   def execute(req, env) do
     route = elem(:cowboy_req.path(req), 0)
