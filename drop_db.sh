@@ -5,7 +5,7 @@ if [[ `psql -tAc "SELECT 1 FROM pg_database WHERE datname='moongate'"` != "1" ]]
   exit
 fi
 
-echo "WARNING: You are about to drop the database. Type \"OK\" to confirm."
+echo -e "\033[0;31mWARNING\033[0m: You are about to drop the Moongate database. Type \"OK\" to confirm."
 read should_drop
 
 if [ "$should_drop" != "OK" ]; then

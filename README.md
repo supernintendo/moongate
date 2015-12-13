@@ -25,7 +25,7 @@ Moongate is currently in early development. Things are in constant flux and feat
 ### Setup ###
 The easiest way to get Moongate up and running is by executing the setup script using `./setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations for your server. Once this is done, you should be able to start the server with `./run.sh` (or `iex -S mix` if you need a REPL).
 
-As of right now, the default project requires an account with the username `foo` and password `bar`. You can create this account by sending an account creation packet to your server while it is running: `./priv/util/socket_message.py "auth register foo bar"`.
+As of right now, the default project requires an account with the username `foo` and password `bar`. You can create this account by sending an account creation packet to your server while it is running: `./socket_message.py "auth register foo bar"`.
 
 ### Attribution ###
 
