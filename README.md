@@ -15,7 +15,7 @@ Moongate supports TCP, UDP and WebSockets. It includes a JavaScript library `moo
 
 ### Status ###
 
-Moongate is currently in early development. Things are in constant flux and features may be missing or incomplete.
+Moongate is **not production ready**. At this time, future versions are not guaranteed to be backwards compatible.
 
 ### Dependencies ###
 
