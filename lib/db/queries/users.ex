@@ -5,7 +5,7 @@ defmodule Moongate.Db.UserQueries do
 
   import Ecto.Query
 
-  alias Moongate.Db.Repo, as: Repo
+  alias Moongate.Repo, as: Repo
   alias Moongate.Db.User, as: User
 
   def create(params) do

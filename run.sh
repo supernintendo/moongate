@@ -1,2 +1,3 @@
-#/bin/bash
+#!/bin/bash
+
 MIX_ENV=prod mix
