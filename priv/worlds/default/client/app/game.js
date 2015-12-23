@@ -22,7 +22,7 @@ class Game extends Events {
         this.gate.tick(true, [this]);
     }
     login() {
-        this.gate.login('foo', 'bar');
+        this.gate.login('test', 'moongate');
     }
 }
 export default Game;

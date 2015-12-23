@@ -1,5 +1,5 @@
 defmodule Moongate.AuthSessions do
-  defstruct tokens: %{}
+  defstruct allowTestUser: false, tokens: %{}
 end
 
 defmodule Moongate.AuthToken do
@@ -11,8 +11,12 @@ defmodule Moongate.Auth do
   use GenServer
   use Moongate.Macros.Processes
 
-  def start_link do
-    link(%Moongate.AuthSessions{}, "auth")
+  def start_link(config) do
+    if config["allowTestUser"] do
+      link(%Moongate.AuthSessions{allowTestUser: true}, "auth")
+    else
+      link(%Moongate.AuthSessions{}, "auth")
+    end
   end
 
   @doc """
@@ -20,7 +24,12 @@ defmodule Moongate.Auth do
   """
   def handle_cast({:login, event}, state) do
     {email, password} = event.params
-    auth_status = authenticate(email, password)
+
+    if state.allowTestUser and email == "test" and password == "moongate" do
+      auth_status = {:ok, "test_user_allowed"}
+    else
+      auth_status = authenticate(email, password)
+    end
 
     case auth_status do
       {:ok, _} ->

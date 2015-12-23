@@ -6,6 +6,6 @@ defmodule Test.Game do
     test_stage: Test.Stage.TestStage
   }
   def connected(event) do
-    join event, :login_screen
+    arrive event, :login_screen
   end
 end
