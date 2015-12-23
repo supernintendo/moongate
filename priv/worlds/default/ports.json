@@ -1,4 +1,8 @@
 {
+    "2592": {
+        "protocol": "TCP",
+        "tags": []
+    },
     "2593": {
         "protocol": "WebSocket",
         "tags": [

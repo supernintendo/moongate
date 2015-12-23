@@ -1,11 +1,10 @@
 defmodule Moongate.HTTP.Headers do
-  @behavior :cowboy_middlewar
+  @behavior :cowboy_middleware
 
   def execute(req, env) do
     route = elem(:cowboy_req.path(req), 0)
     parts = String.split(route, ".")
 
-    IO.inspect route
     case List.last(parts) do
       "js" ->
         source_map = String.lstrip(route, ?/) <> ".map"

@@ -5,13 +5,13 @@ defmodule Moongate.Mixfile do
   def project do
     [app: :moongate,
      version: "0.1.0",
-     elixir: "~> 1.0.5",
+     elixir: ">= 1.0.5",
      deps: deps,
      default_task: "run"]
   end
 
   def application do
-    [applications: [:logger, :postgrex, :ecto],
+    [applications: [:logger, :postgrex, :ecto, :tzdata],
      mod: {Moongate.Application, []}]
   end
 
@@ -23,7 +23,7 @@ defmodule Moongate.Mixfile do
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
       {:postgrex, ">= 0.7.0"},
       {:socket, "~> 0.3.1"},
-      {:timex, "~> 0.13.1"},
+      {:timex, ">= 0.13.1"},
       {:uuid, "~> 1.1.0"}
     ]
   end
