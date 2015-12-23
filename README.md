@@ -23,9 +23,7 @@ Moongate is **not production ready**. At this time, future versions are not guar
 * PostgreSQL 9.3.5+
 
 ### Setup ###
-The easiest way to get Moongate up and running is by executing the setup script using `./setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations for your server. Once this is done, you should be able to start the server with `./run.sh` (or `iex -S mix` if you need a REPL).
-
-As of right now, the default project requires an account with the username `test` and password `moongate`. You can create this account by sending an account creation packet to your server while it is running: `./socket_message.py "auth register test moongate"`.
+The easiest way to get Moongate up and running is by executing the setup script using `./setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, start the server with `./run.sh` (or `iex -S mix` if you need a REPL). The `default` project runs on [localhost:2594](http://localhost:2594).
 
 ### Attribution ###
 

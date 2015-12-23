@@ -45,10 +45,10 @@ class Assets extends Events {
             let texture = image.texture.baseTexture,
                 x = offset[0],
                 y = offset[1],
-                h = offset[2],
-                w = offset[3];
+                w = offset[2],
+                h = offset[3];
 
-            return new PIXI.Texture(texture, new PIXI.Rectangle(x, y, h, w));
+            return new PIXI.Texture(texture, new PIXI.Rectangle(x, y, w, h));
         });
     }
     load() {

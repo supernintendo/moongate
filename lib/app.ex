@@ -17,15 +17,26 @@ defmodule Moongate.Application do
     :random.seed(:erlang.now())
     Moongate.Say.greeting
     IO.puts "Starting world #{world}..."
+    {:ok, config} = load_config(world)
     load_world(world)
     load_scopes(world)
-    supervisor = start_supervisor(world)
+    supervisor = start_supervisor(world, config)
     initialize_stages
     Moongate.Scopes.Start.on_load
     spawn_sockets(world)
 
     if Mix.env() == :prod, do: recur
     {:ok, supervisor}
+  end
+
+  # Load the server.json file for the world
+  defp load_config(world) do
+    if File.exists?("priv/worlds/#{world}/server.json") do
+      {:ok, read} = File.read "priv/worlds/#{world}/server.json"
+      {:ok, config} = JSON.decode(read)
+    else
+      {:ok, %{}}
+    end
   end
 
   # Load all modules for game world and set up macros using config files
@@ -54,10 +65,10 @@ defmodule Moongate.Application do
     ports |> Enum.map(&spawn_socket(&1))
   end
 
-  defp start_supervisor(world) do
+  defp start_supervisor(world, config) do
     {:ok, read} = File.read "priv/worlds/#{world}/supervisors.json"
     {:ok, world_supervisors} = JSON.decode(read)
-    {:ok, supervisor} = Moongate.Supervisor.start_link(world_supervisors)
+    {:ok, supervisor} = Moongate.Supervisor.start_link({world_supervisors, config})
     GenServer.call(:tree, {:register, supervisor})
     supervisor
   end
