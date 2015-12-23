@@ -1,5 +1,5 @@
 defmodule Moongate.AuthSessions do
-  defstruct allowTestUser: false, tokens: %{}
+  defstruct anonymous: false, tokens: %{}
 end
 
 defmodule Moongate.AuthToken do
@@ -8,12 +8,13 @@ end
 
 # The Auth module manages login and new account creation.
 defmodule Moongate.Auth do
+  import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
 
   def start_link(config) do
-    if config["allowTestUser"] do
-      link(%Moongate.AuthSessions{allowTestUser: true}, "auth")
+    if config["anonymous"] do
+      link(%Moongate.AuthSessions{anonymous: true}, "auth")
     else
       link(%Moongate.AuthSessions{}, "auth")
     end
@@ -25,14 +26,14 @@ defmodule Moongate.Auth do
   def handle_cast({:login, event}, state) do
     {email, password} = event.params
 
-    if state.allowTestUser and email == "test" and password == "moongate" do
-      auth_status = {:ok, "test_user_allowed"}
+    if state.anonymous do
+      auth_status = {:ok, "You have anonymously logged in."}
     else
       auth_status = authenticate(email, password)
     end
 
     case auth_status do
-      {:ok, _} ->
+      {:ok, message} ->
         token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
         state = %{state | tokens: Map.put(
           state.tokens,
@@ -40,10 +41,14 @@ defmodule Moongate.Auth do
           token.identity
         )}
         tell_async(:events, event.origin.id, {:auth, token})
+        write_to(event.origin, :sys_message, message)
         Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in.", :green)
         {:noreply, state}
-      _ ->
+      {:error, message} ->
+        write_to(event.origin, :sys_message, message)
         Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
+        {:noreply, state}
+      _ ->
         {:noreply, state}
     end
   end
@@ -56,9 +61,9 @@ defmodule Moongate.Auth do
     {status, _} = create_account(email, password)
 
     if status == :ok do
-      IO.puts "account created"
+      IO.puts "Account for #{email} created."
     else
-      IO.puts "error creating account"
+      IO.puts "Error creating account for #{email}."
     end
     {:noreply, state}
   end
@@ -84,15 +89,15 @@ defmodule Moongate.Auth do
     results = Moongate.Db.UserQueries.find_by_email(email)
 
     if length(results) == 0 do
-      {:error, "bad_email"}
+      {:error, "The email you entered is not associated with an account."}
     else
       record = hd(results)
       {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, record.password_salt, 4096)
 
       if :pbkdf2.to_hex(encrypted_pass) == record.password do
-        {:ok, "login_success"}
+        {:ok, "You have successfully logged in."}
       else
-        {:error, "bad_password"}
+        {:error, "The password you entered is incorrect."}
       end
     end
   end
