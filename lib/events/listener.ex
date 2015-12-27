@@ -95,6 +95,7 @@ defmodule Moongate.Events.Listener do
     case event do
       %{ cast: :login, to: :auth } when not logged_in -> tell_async(:auth, {:login, event})
       %{ cast: :register, to: :auth } when not logged_in -> tell_async(:auth, {:register, event})
+      %{ cast: :is_logged_in, to: :auth } -> tell_async(:auth, {:is_logged_in, event})
       %{ cast: any, to: stage} -> tell_async(:stage, stage, {:tunnel, event})
       _ -> Moongate.Scopes.Events.take(event)
     end

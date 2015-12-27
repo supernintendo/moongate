@@ -5,7 +5,7 @@ defmodule Test.Stage.TestStage do
   pools []
   takes :test_message, :test_callback
 
-  def joined(event) do
+  def arrival(event) do
     :ok
   end
 

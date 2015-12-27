@@ -18,6 +18,7 @@
         ]
     },
     "7596": {
+        "path": "http"
         "protocol": "HTTP"
     }
 }

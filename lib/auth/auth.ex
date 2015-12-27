@@ -21,6 +21,22 @@ defmodule Moongate.Auth do
   end
 
   @doc """
+    Check if a user is logged in by email.
+  """
+  def handle_cast({:is_logged_in, event}, state) do
+    {email} = event.params
+    logged_in = Enum.any?(state.tokens, fn({key, {token_email, identity}}) ->
+      token_email == email
+    end)
+    if logged_in do
+      write_to(event.origin, :sys_message, "User is logged in.")
+    else
+      write_to(event.origin, :sys_message, "User is not logged in.")
+    end
+    {:noreply, state}
+  end
+
+  @doc """
     Attempt to login with the provided credentials.
   """
   def handle_cast({:login, event}, state) do
@@ -38,7 +54,7 @@ defmodule Moongate.Auth do
         state = %{state | tokens: Map.put(
           state.tokens,
           String.to_atom(event.origin.id),
-          token.identity
+          {email, token.identity}
         )}
         tell_async(:events, event.origin.id, {:auth, token})
         write_to(event.origin, :sys_message, message)
@@ -62,8 +78,9 @@ defmodule Moongate.Auth do
 
     if status == :ok do
       IO.puts "Account for #{email} created."
+      write_to(event.origin, :sys_message, "Your account has been created.")
     else
-      IO.puts "Error creating account for #{email}."
+      write_to(event.origin, :sys_message, "Error creating account for #{email}.")
     end
     {:noreply, state}
   end
@@ -76,9 +93,10 @@ defmodule Moongate.Auth do
     origin_logged_in = Map.has_key?(origin.auth, :identity)
 
     if has_id and origin_logged_in do
-      id_authenticated = Map.get(state.tokens, String.to_atom(origin.id)) == origin.auth.identity
+      {email, identity} = Map.get(state.tokens, String.to_atom(origin.id))
+      is_authenticated = identity == origin.auth.identity
 
-      {:reply, {:ok, id_authenticated}, state}
+      {:reply, {:ok, is_authenticated}, state}
     else
       {:reply, {:ok, false}, state}
     end
@@ -89,7 +107,7 @@ defmodule Moongate.Auth do
     results = Moongate.Db.UserQueries.find_by_email(email)
 
     if length(results) == 0 do
-      {:error, "The email you entered is not associated with an account."}
+      {:error, "The user account for that email doesn't exist."}
     else
       record = hd(results)
       {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, record.password_salt, 4096)
