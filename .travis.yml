@@ -9,7 +9,3 @@ services:
 
 before_script:
   - ./scripts/setup.sh
-
-after_script:
-  - mix deps.get --only docs
-  - MIX_ENV=docs mix inch.report

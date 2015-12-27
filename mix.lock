@@ -8,7 +8,6 @@
   "ex_doc": {:hex, :ex_doc, "0.11.2"},
   "hackney": {:hex, :hackney, "1.4.7"},
   "idna": {:hex, :idna, "1.0.2"},
-  "inch_ex": {:hex, :inch_ex, "0.4.0"},
   "json": {:hex, :json, "0.3.2"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
   "pbkdf2": {:git, "git://github.com/basho/erlang-pbkdf2.git", "7076584f5377e98600a7e2cb81980b2992fb2f71", []},
