@@ -19,6 +19,7 @@ defmodule Moongate.Mixfile do
     [
       {:cowboy, "1.0.3"},
       {:ecto, "~> 1.0.2"},
+      {:inch_ex, only: :docs},
       {:json, "~> 0.3.2"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
       {:postgrex, ">= 0.7.0"},
