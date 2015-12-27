@@ -2,6 +2,8 @@
 
 ![Moongate](https://i.giphy.com/3o85xqvMA3Clzv4zw4.gif)
 
+[![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
+
 A framework for multiplayer game servers written in Elixir.
 
 ### Overview ###
