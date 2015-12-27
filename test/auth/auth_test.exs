@@ -4,8 +4,10 @@ defmodule Moongate.Tests.Auth do
 
   test "attempting to log in to an account that doesn't exist" do
     client = Helper.connect(self)
-    Helper.send_packet(client, "auth login bad_email bad_password")
-    Helper.expect_packet(client, "doesn't exist", self)
+    Helper.transaction client, %{
+      send: "auth login bad_email bad_password",
+      expect: "doesn't exist"
+    }
     assert_receive({:ok, message}, Helper.defaults.timeout)
 
     Helper.disconnect(client)
@@ -20,24 +22,32 @@ defmodule Moongate.Tests.Auth do
     Moongate.Tests.Helper.clean({:user, login})
 
     # Register
-    Helper.send_packet(client, "auth register #{login} #{password}")
-    Helper.expect_packet(client, "been created", self)
-    assert_receive({:ok, message}, Helper.defaults.timeout)
+    Helper.transaction client, %{
+      send: "auth register #{login} #{password}",
+      expect: "been created"
+    }
+    assert_receive({:ok, _}, Helper.defaults.timeout)
 
     # Make sure user is not logged in
-    Helper.send_packet(client, "auth is_logged_in #{login}")
-    Helper.expect_packet(client, "is not logged in", self)
-    assert_receive({:ok, message}, Helper.defaults.timeout)
+    Helper.transaction client, %{
+      send: "auth is_logged_in #{login}",
+      expect: "is not logged in"
+    }
+    assert_receive({:ok, _}, Helper.defaults.timeout)
 
     # Login
-    Helper.send_packet(client, "auth login #{login} #{password}")
-    Helper.expect_packet(client, "logged in", self)
-    assert_receive({:ok, message}, Helper.defaults.timeout)
+    Helper.transaction client, %{
+      send: "auth login #{login} #{password}",
+      expect: "logged in"
+    }
+    assert_receive({:ok, _}, Helper.defaults.timeout)
 
     # Make sure user is logged in
-    Helper.send_packet(client, "auth is_logged_in #{login}")
-    Helper.expect_packet(client, "is logged in", self)
-    assert_receive({:ok, message}, Helper.defaults.timeout)
+    Helper.transaction client, %{
+      send: "auth is_logged_in #{login}",
+      expect: "is logged in"
+    }
+    assert_receive({:ok, _}, Helper.defaults.timeout)
 
     Helper.disconnect(client)
   end

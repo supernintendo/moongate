@@ -80,6 +80,11 @@ defmodule Moongate.Tests.Helper do
     end
     socket |> Socket.Stream.send! packet
   end
+
+  def transaction(client, params) do
+    send_packet(client, params.send)
+    expect_packet(client, params.expect, self)
+  end
 end
 
 # Run tests with ExUnit
