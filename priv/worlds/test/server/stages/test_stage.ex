@@ -1,5 +1,6 @@
 defmodule Test.Stage.TestStage do
   import Moongate.Stage
+  import Moongate.Macros.SocketWriter
 
   meta %{}
   pools []
@@ -9,7 +10,8 @@ defmodule Test.Stage.TestStage do
     :ok
   end
 
-  def test_callback(event, params) do
+  def test_callback(event, _) do
+    write_to(event.origin, :test_stage, "Hear you, loud and clear!")
     :ok
   end
 end

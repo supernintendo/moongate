@@ -1,12 +1,11 @@
 # Moongate #
 
-![Moongate](./logo.gif)
+[![Moongate](./logo.gif "Moongate")](https://github.com/supernintendo/moongate)
+
+A framework for multiplayer game servers written in Elixir.
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![Inline docs](http://inch-ci.org/github/supernintendo/moongate.svg)](http://inch-ci.org/github/supernintendo/moongate)
-
-A framework for multiplayer game servers written in Elixir.
 
 ### Overview ###
 
