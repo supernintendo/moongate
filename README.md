@@ -23,7 +23,7 @@ Moongate is **not production ready**. At this time, future versions are not guar
 * PostgreSQL 9.3.5+
 
 ### Setup ###
-The easiest way to get Moongate up and running is by executing the setup script using `./setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, start the server with `./run.sh` (or `iex -S mix` if you need a REPL). The `default` project runs on [localhost:2594](http://localhost:2594).
+The easiest way to get Moongate up and running is by executing the setup script using `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, start the server with `./moongate.sh` (or `iex -S mix` if you need a REPL). The `default` project runs on [localhost:2594](http://localhost:2594).
 
 ### Attribution ###
 
