@@ -1,6 +1,6 @@
 # Moongate #
 
-![Moongate](https://i.giphy.com/3o85xqvMA3Clzv4zw4.gif)
+![Moongate](./logo.gif)
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
