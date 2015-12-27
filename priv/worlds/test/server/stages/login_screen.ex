@@ -5,7 +5,7 @@ defmodule Test.Stage.LoginScreen do
   pools []
   takes :proceed, :check_authenticated
 
-  def joined(_) do
+  def arrival(_) do
   end
 
   defp check_authenticated(event, _) do
@@ -13,7 +13,7 @@ defmodule Test.Stage.LoginScreen do
 
     if auth do
       depart event
-      join event, :test_stage
+      arrive event, :test_stage
     end
   end
 end
