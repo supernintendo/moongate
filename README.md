@@ -1,6 +1,6 @@
 # Moongate #
 
-![Moongate](./logo.gif)
+[![Moongate](./logo.gif "Moongate")](https://github.com/supernintendo/moongate)
 
 A framework for multiplayer game servers written in Elixir.
 
