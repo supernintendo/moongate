@@ -34,3 +34,4 @@ bower_components/
 # Elixir stuff.
 _build/
 deps/
+doc/
