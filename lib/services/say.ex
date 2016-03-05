@@ -4,10 +4,14 @@ defmodule Moongate.Say do
   """
   def greeting do
     IO.puts ""
+    pretty(" )\/)  _   _   _   _   _  _)_ _", :blue, [suppress_timestamp: true])
+    pretty("(  ( (_) (_) ) ) (_( (_( (_ )_)", :blue, [suppress_timestamp: true])
+    pretty("                   _)      (_", :blue, [suppress_timestamp: true])
+    IO.puts ""
     IO.puts(
       IO.chardata_to_string(["☪ "] ++
         IO.ANSI.format_fragment(
-          [:inverse, "moongate" <> IO.ANSI.reset <> " v#{Moongate.Mixfile.project[:version]}"], true)))
+          [:inverse, "v#{Moongate.Mixfile.project[:version]}" <> IO.ANSI.reset <> " #{Moongate.Mixfile.project[:codename]}"], true)))
     IO.puts ""
   end
 
@@ -45,7 +49,7 @@ defmodule Moongate.Say do
     if o.auth != nil and o.auth.email != nil do
       o.auth.email
     else
-      o.id
+      "Anonymous (#{o.id})"
     end
   end
 end

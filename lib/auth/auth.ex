@@ -1,17 +1,33 @@
 defmodule Moongate.AuthSessions do
-  defstruct anonymous: false, tokens: %{}
+  @moduledoc """
+    Represents the state of the Moongate.Auth GenServer.
+    `sessions` is a map of Moongate.AuthSessions with the ids
+    of Moongate.SocketOrigins as keys.
+  """
+  defstruct anonymous: false, sessions: %{}
 end
 
-defmodule Moongate.AuthToken do
+defmodule Moongate.AuthSession do
+  @moduledoc """
+    Represents a single auth session.
+  """
   defstruct email: nil, identity: "anon"
 end
 
-# The Auth module manages login and new account creation.
 defmodule Moongate.Auth do
+  @moduledoc """
+    Provides the behavior for the Moongate Auth GenServer. A
+    %Moongate.AuthSessions is kept as state. This module
+    primarily deals with authenticating users and allowing
+    account creation.
+  """
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
 
+  @doc """
+    Start the Moongate.Auth GenServer.
+  """
   def start_link(config) do
     if config["anonymous"] do
       link(%Moongate.AuthSessions{anonymous: true}, "auth")
@@ -21,25 +37,9 @@ defmodule Moongate.Auth do
   end
 
   @doc """
-    Check if a user is logged in by email.
-  """
-  def handle_cast({:is_logged_in, event}, state) do
-    {email} = event.params
-    logged_in = Enum.any?(state.tokens, fn({key, {token_email, identity}}) ->
-      token_email == email
-    end)
-    if logged_in do
-      write_to(event.origin, :sys_message, "User is logged in.")
-    else
-      write_to(event.origin, :sys_message, "User is not logged in.")
-    end
-    {:noreply, state}
-  end
-
-  @doc """
     Attempt to login with the provided credentials.
   """
-  def handle_cast({:login, event}, state) do
+  def handle_call({:login, event}, _from, state) do
     {email, password} = event.params
 
     if state.anonymous do
@@ -50,23 +50,54 @@ defmodule Moongate.Auth do
 
     case auth_status do
       {:ok, message} ->
-        token = %Moongate.AuthToken{email: email, identity: UUID.uuid4(:hex)}
-        state = %{state | tokens: Map.put(
-          state.tokens,
-          String.to_atom(event.origin.id),
-          {email, token.identity}
+        session = %Moongate.AuthSession{email: email, identity: UUID.uuid4(:hex)}
+        state = %{state | sessions: Map.put(
+          state.sessions,
+          event.origin.id,
+          {email, session.identity}
         )}
-        tell_async(:events, event.origin.id, {:auth, token})
-        write_to(event.origin, :sys_message, message)
-        Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in.", :green)
-        {:noreply, state}
+        tell_async(:events, event.origin.id, {:auth, session})
+        write_to(event.origin, :info, message)
+        Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in as #{email}.", :green)
+        {:reply, :ok, state}
       {:error, message} ->
-        write_to(event.origin, :sys_message, message)
+        write_to(event.origin, :info, message)
         Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
-        {:noreply, state}
+        {:reply, :ok, state}
       _ ->
-        {:noreply, state}
+        {:reply, :ok, state}
     end
+  end
+
+  @doc """
+    Check whether a Moongate.SocketOrigin is authenticated.
+  """
+  def handle_call({:check_auth, origin}, _from, state) do
+    has_id = Map.has_key?(state.sessions, origin.id)
+    origin_logged_in = Map.has_key?(origin.auth, :identity)
+
+    if has_id and origin_logged_in do
+      {_email, identity} = Map.get(state.sessions, origin.id)
+      is_authenticated = identity == origin.auth.identity
+
+      {:reply, {:ok, is_authenticated}, state}
+    else
+      {:reply, {:ok, false}, state}
+    end
+  end
+
+  @doc """
+    Check if a user is logged in by email.
+  """
+  def handle_cast({:is_logged_in, event}, state) do
+    {email} = event.params
+    logged_in = Map.has_key?(state.sessions, email)
+    if logged_in do
+      write_to(event.origin, :info, "User is logged in.")
+    else
+      write_to(event.origin, :info, "User is not logged in.")
+    end
+    {:noreply, state}
   end
 
   @doc """
@@ -78,28 +109,11 @@ defmodule Moongate.Auth do
 
     if status == :ok do
       IO.puts "Account for #{email} created."
-      write_to(event.origin, :sys_message, "Your account has been created.")
+      write_to(event.origin, :info, "Your account has been created.")
     else
-      write_to(event.origin, :sys_message, "Error creating account for #{email}.")
+      write_to(event.origin, :info, "Error creating account for #{email}.")
     end
     {:noreply, state}
-  end
-
-  @doc """
-    Check whether a Moongate.SocketOrigin is authenticated.
-  """
-  def handle_call({:check_auth, origin}, _from, state) do
-    has_id = Map.has_key?(state.tokens, String.to_atom(origin.id))
-    origin_logged_in = Map.has_key?(origin.auth, :identity)
-
-    if has_id and origin_logged_in do
-      {email, identity} = Map.get(state.tokens, String.to_atom(origin.id))
-      is_authenticated = identity == origin.auth.identity
-
-      {:reply, {:ok, is_authenticated}, state}
-    else
-      {:reply, {:ok, false}, state}
-    end
   end
 
   # Check if the requested login is correct.

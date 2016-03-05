@@ -1,4 +1,4 @@
-let Characters = require('characters');
+let Characters = require('./characters');
 
 class Canvas {
     constructor(params) {

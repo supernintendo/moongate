@@ -1,6 +1,13 @@
 defmodule Moongate.HTTP.Headers do
-  @behavior :cowboy_middleware
+  @moduledoc """
+    Provides a Cowboy middleware for inspecting outgoing payloads
+    and including the correct headers when necessary.
+  """
+  @behaviour :cowboy_middleware
 
+  @doc """
+    Accept the request and modify the headers if necessary.
+  """
   def execute(req, env) do
     route = elem(:cowboy_req.path(req), 0)
     parts = String.split(route, ".")

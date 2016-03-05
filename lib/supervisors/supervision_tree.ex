@@ -1,22 +1,27 @@
+defmodule Moongate.SupervisionTreeState do
+  defstruct table: nil
+end
+
 defmodule Moongate.SupervisionTree do
   use GenServer
   use Moongate.Macros.Processes
 
   def start_link do
-    link(%{}, "tree")
+    table = :ets.new(:supervision_tree, [:set, :protected])
+    link(%Moongate.SupervisionTreeState{ table: table }, "tree")
   end
 
-  def init(registry) do
-    {:ok, registry}
+  def init(state) do
+    {:ok, state}
   end
 
   @doc """
     Cast on all children of a supervisor.
   """
-  def handle_cast({:tell_async_all_children, supervisor, cast}, registry) do
-    children = Supervisor.which_children(registry[supervisor])
+  def handle_cast({:tell_async_all_children, supervisor, cast}, state) do
+    children = Supervisor.which_children(state[supervisor])
     Enum.map(children, &tell_pid_async(elem(&1, 1), cast))
-    {:noreply, registry}
+    {:noreply, state}
   end
 
   @doc """
@@ -34,20 +39,20 @@ defmodule Moongate.SupervisionTree do
   @doc """
     Kill a child process given its PID.
   """
-  def handle_call({:kill_by_pid, supervisor, pid}, _from, registry) do
-    :ok = Supervisor.terminate_child(registry[supervisor], pid)
+  def handle_call({:kill_by_pid, supervisor, pid}, _from, state) do
+    :ok = Supervisor.terminate_child(state[supervisor], pid)
 
-    {:reply, {:ok, nil}, registry}
+    {:reply, {:ok, nil}, state}
   end
 
   @doc """
     Spawn a new child within the requested supervisor.
   """
-  def handle_call({:spawn, supervisor, params}, _from, registry) do
-    {:ok, child} = Supervisor.start_child(registry[supervisor], [params])
+  def handle_call({:spawn, supervisor, params}, _from, state) do
+    {:ok, child} = Supervisor.start_child(state[supervisor], [params])
     tell_pid_async(child, {:init})
 
-    {:reply, {:ok, child}, registry}
+    {:reply, {:ok, child}, state}
   end
 
   # Accumulate child processes.

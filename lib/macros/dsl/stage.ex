@@ -1,14 +1,18 @@
 defmodule Moongate.Stage do
+  alias Moongate.Service.Stages, as: Stages
   use Moongate.Macros.Processes
 
-  def arrive(event, stage_name) do
-    tell_pid_async(event.origin.events_listener, {:arrive, stage_name})
-    tell_async(:stage, stage_name, {:arrive, event.origin})
+  def arrive(event, stage_name), do: Stages.arrive(event, stage_name)
+  def arrive!(event, stage_name), do: Stages.arrive!(event, stage_name)
+  def depart(event), do: Stages.depart(event)
+
+  def travel(event, stage_name) do
+    depart(event)
+    arrive!(event, stage_name)
   end
 
-  def depart(event) do
-    tell_pid_async(event.origin.events_listener, {:depart, event.from})
-    tell_async(event.from, {:depart, event})
+  def subscribe(origin, pool) do
+    IO.puts "TODO: Subscribe"
   end
 
   def is_authenticated?(t) do
@@ -32,21 +36,21 @@ defmodule Moongate.Stage do
     elem(items, random(tuple_size(items)) - 1)
   end
 
-  defmacro call(event, target, callback, params) do
+  defmacro call(_event, target, callback, params) do
     quote do
       pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.call(pool, {:cause, unquote(callback), unquote(target), unquote(params)})
     end
   end
 
-  defmacro cast(event, target, callback) do
+  defmacro cast(_event, target, callback) do
     quote do
       pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.cast(pool, {:cause, unquote(callback), unquote(target)})
     end
   end
 
-  defmacro cast(event, target, callback, params) do
+  defmacro cast(_event, target, callback, params) do
     quote do
       pool = pool_name(unquote(target)[:__moongate_pool])
       GenServer.cast(pool, {:cause, unquote(callback), unquote(target), unquote(params)})

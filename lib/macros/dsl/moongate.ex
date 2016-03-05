@@ -1,5 +1,9 @@
 defmodule Moongate do
+  alias Moongate.Service.Stages, as: Stages
   use Moongate.Macros.Processes
+
+  def arrive(event, stage_name), do: Stages.arrive(event, stage_name)
+  def depart(event), do: Stages.depart(event)
 
   defmacro stages(stage_map) do
     quote do
@@ -16,13 +20,5 @@ defmodule Moongate do
         unquote(stage_name)
       end
     end
-  end
-
-  def depart(event) do
-    tell_async(:stage, event.from, {:depart, event.origin})
-  end
-
-  def arrive(event, stage_name) do
-    tell_async(:stage, stage_name, {:arrive, event.origin})
   end
 end

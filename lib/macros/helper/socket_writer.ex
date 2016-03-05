@@ -5,8 +5,16 @@ defmodule Moongate.Macros.SocketWriter do
   def write_to(target, tag, name, message) do
     timestamp = Moongate.Time.current_ms
     tag = Atom.to_string(tag)
-    packet_length = String.length("#{timestamp}" <> name <> tag <> message)
-    parsed_message = "#{packet_length}{#{timestamp}░#{name}░#{tag}░#{String.strip(message)}}"
+
+    if is_list(message) do
+      parts = Enum.map(message, &Moongate.Atoms.to_strings/1)
+      parsed_parts = String.strip(Enum.join(parts, "·"))
+      packet_length = byte_size("#{timestamp}" <> name <> tag <> List.to_string(parts))
+      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{parsed_parts}}"
+    else
+      packet_length = byte_size("#{timestamp}" <> name <> tag <> message)
+      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{String.strip(message)}}"
+    end
 
     pid = Process.whereis(String.to_atom("events_" <> target.id))
 

@@ -10,7 +10,7 @@ defmodule Moongate.Tests.Stages do
     # Login and wait until we've joined a stage.
     Helper.transaction client, %{
       send: "auth login #{login} #{password}",
-      expect: "stage_test_stage░transaction░join"
+      expect: "stage_test_stage·transaction·join"
     }
     assert_receive({:ok, _}, Helper.defaults.timeout)
 

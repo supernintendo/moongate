@@ -1,4 +1,7 @@
 defmodule Moongate.Db.User do
+  @moduledoc """
+    This is the User model.
+  """
   use Ecto.Model
 
   schema "users" do

@@ -79,7 +79,6 @@ defmodule Moongate.Macros.Processes do
       defp tell_async(name, message) do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
-
         if capabilites.can_be_cast_to, do: GenServer.cast(name, message)
         if capabilites.can_receive, do: send(pid, message)
       end
@@ -87,7 +86,6 @@ defmodule Moongate.Macros.Processes do
       defp tell_async(namespace, id, message) do
         pid = pid_for_name(namespace, id)
         capabilites = capabilities_for(pid)
-
         if capabilites.can_be_cast_to, do: GenServer.cast(pid, message)
         if capabilites.can_receive, do: send(pid, message)
       end

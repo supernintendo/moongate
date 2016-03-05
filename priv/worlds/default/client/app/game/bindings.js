@@ -2,23 +2,23 @@ let GamePackets = require('./game-packets');
 
 let Bindings = {
     authenticated() {
-        this.stageSend('proceed');
+        this.send('proceed');
     },
     keydown(e, key, first) {
         if (first) {
             let packet = GamePackets.keydown(key);
 
             if (packet) {
-                this.stageSend(packet);
+                this.send.apply(this, packet);
                 return true;
             }
         }
     },
     keyup(e, key) {
         if (this.keysAreNotDown(87, 65, 83, 68)) {
-            this.stageSend('stop 1 1');
+            this.send('Player.Movement', 'stop', 1, 1);
         } else {
-            this.stageSend(GamePackets.keyup(key, this));
+            this.send.apply(this, GamePackets.keyup(key, this));
         }
     },
     poolCreate(member, key, pool) {

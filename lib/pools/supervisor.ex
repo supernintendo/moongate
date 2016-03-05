@@ -1,4 +1,9 @@
 defmodule Moongate.Pools.Supervisor do
+  @moduledoc """
+    This is a supervisor for Moongate.Pools.Pool only. It uses
+    the simple_one_for_one strategy, which allows supervised
+    processes to be dynamically added and killed.
+  """
   use Supervisor
 
   def start_link do

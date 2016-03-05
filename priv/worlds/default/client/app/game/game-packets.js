@@ -3,19 +3,19 @@ let GamePackets = {
         switch (key) {
         case 87: // up
             if (!gate.keysAreDown(83)) {
-                return 'stop 0 -1';
+                return ['Player', 'stop', -1, 0];
             }
         case 65: // left
             if (!gate.keysAreDown(68)) {
-                return 'stop -1 0';
+                return ['Player', 'stop', -1, 0];
             }
         case 83: // down
             if (!gate.keysAreDown(87)) {
-                return 'stop 0 1';
+                return ['Player', 'stop', 0, 1];
             }
         case 68: // right
             if (!gate.keysAreDown(65)) {
-                return 'stop 1 0';
+                return ['Player', 'stop', 1, 0];
             }
         default:
             return null;
@@ -24,15 +24,15 @@ let GamePackets = {
     keydown: function(key) {
         switch (key) {
         case 32: // space
-            return 'attack';
+            return ['Player', 'attack'];
         case 87: // up
-            return 'move 0 -1';
+            return ['Player', 'move', 0, -1];
         case 65: // left
-            return 'move -1 0';
+            return ['Player', 'move', -1, 0];
         case 83: // down
-            return 'move 0 1';
+            return ['Player', 'move', 0, 1];
         case 68: // right
-            return 'move 1 0';
+            return ['Player', 'move', 1, 0];
         default:
             return null;
         }

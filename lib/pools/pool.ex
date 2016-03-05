@@ -9,19 +9,18 @@ end
 defmodule Moongate.PoolState do
   defstruct(
     attributes: %{},
-    cascades: [],
     index: 0,
     members: [],
     name: nil,
-    publish_to: [],
     spec: nil,
     stage: nil,
-    touches: [],
-    touch_state: []
+    subscribers: []
   )
 end
 
 defmodule Moongate.Pools.Pool do
+  alias Moongate.Service.Deeds, as: Deeds
+  alias Moongate.Service.Pools, as: Pools
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.ExternalResources
@@ -29,19 +28,15 @@ defmodule Moongate.Pools.Pool do
 
   def start_link({name, stage, pool}) do
     state = %Moongate.PoolState{
-      attributes: get_attributes(pool),
-      cascades: get_cascades(pool),
+      attributes: Pools.get_attributes(pool),
       name: name,
       spec: pool,
-      stage: stage,
-      touches: get_touches(pool)
+      stage: stage
     }
     link(state, "pool", name)
   end
 
   def handle_cast({:init}, state) do
-    Enum.map(state.cascades, &initialize_cascade/1)
-    Enum.map(state.touches, &(initialize_touch(&1, state)))
     {:noreply, state}
   end
 
@@ -54,7 +49,7 @@ defmodule Moongate.Pools.Pool do
     state = %{state | members: state.members ++ [new_pool_member(attributes, state)]}
     stage_name = Atom.to_string(state.stage)
     stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:bubble, event, state.spec, :create})
+    GenServer.cast(stage, {:relay, event, state.spec, :create})
     modified = %{state | index: state.index + 1}
     publish_to(modified)
     {:noreply, modified}
@@ -65,18 +60,35 @@ defmodule Moongate.Pools.Pool do
     members = List.delete(state.members, member)
     stage_name = Atom.to_string(state.stage)
     stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:bubble, %{event | params: {target}}, state.spec, :drop})
+    GenServer.cast(stage, {:relay, %{event | params: {target}}, state.spec, :drop})
     modified = %{state | members: members}
     publish_to(modified)
     {:noreply, modified}
   end
 
-  def handle_cast({:bubble, event, from, key}, state) do
-    cascaded = state.cascades |> Enum.map(fn(cascade) ->
-      if elem(cascade, 1) == {:upon, from, key} do
-        Enum.map(state.members, &(pool_callback(elem(cascade, 0), &1, state, event.params)))
-      end
+  def handle_cast({:use_all_deeds, event}, state) do
+    deeds = Enum.map(Pools.get_deeds(state.spec), fn deed ->
+      Moongate.Atoms.to_strings(deed)
     end)
+    Enum.map(deeds, &(tell_pid_async(self, {:use_deed, %{event | use_deed: &1}})))
+    {:noreply, state}
+  end
+
+  def handle_cast({:use_deed, event}, state) do
+    member = find_owned_member(event.origin, state)
+
+    if member !=nil do
+      if event.use_deed != nil do
+        valid = Enum.any?(Pools.get_deeds(state.spec), fn deed ->
+          Moongate.Atoms.to_strings(deed) == event.use_deed
+        end)
+        if valid do
+          if (Deeds.has_function?(Deeds.deed_module(event.use_deed), event.cast)) do
+            apply(Deeds.deed_module(event.use_deed), String.to_atom(event.cast), [member, event.params, event])
+          end
+        end
+      end
+    end
     {:noreply, state}
   end
 
@@ -99,7 +111,7 @@ defmodule Moongate.Pools.Pool do
   def handle_cast({:describe, origin}, state) do
     attributes = Enum.map(state.attributes, fn(attribute) ->
       case attribute do
-        {key, {type, value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
+        {key, {type, _value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
         {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
       end
     end)
@@ -107,7 +119,7 @@ defmodule Moongate.Pools.Pool do
     {:noreply, state}
   end
 
-  def handle_cast({:publish_to, pid, tag}, state) do
+  def handle_cast({:publish, pid, tag}, state) do
     {:noreply, %{state | publish_to: state.publish_to ++ [{pid, tag}]}}
   end
 
@@ -128,18 +140,6 @@ defmodule Moongate.Pools.Pool do
     modified_member = set(member, attribute, value)
     modified = %{state | members: members ++ [modified_member]}
     {:noreply, modified}
-  end
-
-  def handle_cast({:touch_state, results}, state) do
-    results |> Enum.map(fn(result) ->
-      case result do
-        {this, touching} ->
-          touching |> Enum.map(fn(that) ->
-            pool_callback(:touches, this, state, {that[:__moongate_pool], that})
-          end)
-      end
-    end)
-    {:noreply, state}
   end
 
   @doc """
@@ -165,17 +165,6 @@ defmodule Moongate.Pools.Pool do
     {:reply, result, state}
   end
 
-  @doc """
-    Given a callback and a number of milliseconds, cascade that
-    callback as it is defined on the pool module on a timer
-    set to the interval provided.
-  """
-  def handle_info({:cascade, callback, {:every, time}}, state) do
-    Enum.map(state.members, &(pool_callback(callback, &1, state)))
-    Process.send_after(self(), {:cascade, callback, {:every, time}}, time)
-    {:noreply, state}
-  end
-
   # Return the default value given the type of a default member
   # attribute.
   defp default_value_for_type(type) do
@@ -186,29 +175,16 @@ defmodule Moongate.Pools.Pool do
     end
   end
 
-  # Get the member attributes as they are defined on the pool
-  # module.
-  defp get_attributes(module_name) do
-    world = String.to_atom(String.capitalize(world_name))
-    pool_module = Module.safe_concat([world, Pools, module_name])
-    attributes = apply(pool_module, :__moongate__pool_attributes, [])
-    attributes
-  end
-
-  # Get the cascades as they are defined on the pool module.
-  defp get_cascades(module_name) do
-    world = String.to_atom(String.capitalize(world_name))
-    pool_module = Module.safe_concat([world, Pools, module_name])
-    cascades = apply(pool_module, :__moongate__pool_cascades, [])
-    cascades
-  end
-
-  # Get the cascades as they are defined on the pool module.
-  defp get_touches(module_name) do
-    world = String.to_atom(String.capitalize(world_name))
-    pool_module = Module.safe_concat([world, Pools, module_name])
-    touches = apply(pool_module, :__moongate__pool_touches, [])
-    touches
+  defp find_owned_member(origin, state) do
+    results = Enum.filter(state.members, fn (member) ->
+      {member_origin, _} = member[:origin]
+      origin.id == member_origin.id
+    end)
+    if length(results) > 0 do
+      hd(results)
+    else
+      nil
+    end
   end
 
   # Return an initial attribute for a member when a default is
@@ -219,27 +195,8 @@ defmodule Moongate.Pools.Pool do
 
   # Return an initial attribute for a member with any params
   # passed to the construction of the member taking prescendence.
-  defp initial_attributes_for_member({key, {type, initial_value}}, params) do
+  defp initial_attributes_for_member({key, {_type, initial_value}}, params) do
     {key, {params[key] || initial_value, []}}
-  end
-
-  # Initialize a cascade defined on the pool module.
-  defp initialize_cascade({cascade, condition}) do
-    case condition do
-      {:every, time} -> Process.send_after(self(), {:cascade, cascade, condition}, time)
-      _ -> nil
-    end
-  end
-
-  defp initialize_touch({pool, :box, keys}, state) do
-    recursive = %Moongate.RecursiveSwitch{
-      arguments: {:box, [], [], keys},
-      callback: &touch_test/1,
-      response: {self, :touch_state}
-    }
-    {:ok, pid} = spawn_new(:recursive, {recursive, "#{UUID.uuid4(:hex)}"})
-    tell_async(:stage, state.stage, {:pool_publish, state.spec, pid, :this})
-    tell_async(:stage, state.stage, {:pool_publish, pool, pid, :that})
   end
 
   # Return a mutated pool member.
@@ -299,35 +256,13 @@ defmodule Moongate.Pools.Pool do
   end
 
   defp publish_to(state) do
-    state.publish_to |> Enum.map(fn({pid, tag}) ->
-      tell_pid_async(pid, {:publish, state.members, tag})
+    state.subscribers |> Enum.map(fn({pid, tag}) ->
+      tell_pid_async(pid, {:publish, state.subscribers, tag})
     end)
   end
 
   defp set(member, attribute, new_value) do
-    {old_value, mutations} = member[attribute]
+    {_old_value, mutations} = member[attribute]
     Keyword.put(member, attribute, {new_value, mutations})
-  end
-
-  def touch_test({:box, these, those, {x, y, height, width}}) do
-    touching = these |> Enum.map(fn(this) ->
-      matches = Enum.filter(those, fn(that) ->
-        this_x = Moongate.Data.pool_member_attr(this, x)
-        this_y = Moongate.Data.pool_member_attr(this, y)
-        that_x = Moongate.Data.pool_member_attr(that, x)
-        that_y = Moongate.Data.pool_member_attr(that, y)
-        this_height = Moongate.Data.pool_member_attr(this, height)
-        this_width = Moongate.Data.pool_member_attr(this, width)
-        that_height = Moongate.Data.pool_member_attr(that, height)
-        that_width = Moongate.Data.pool_member_attr(that, width)
-
-        this[:__moongate_pool_index] != that[:__moongate_pool_index] &&
-          this_x < that_x + that_width &&
-          this_x + this_width > that_x &&
-          this_y < that_y + that_height &&
-          this_y + this_height > that_y
-      end)
-      {this, matches}
-    end)
   end
 end

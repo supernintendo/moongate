@@ -7,14 +7,14 @@ defmodule Moongate.Application do
   @doc """
     Initialize the game server.
   """
-  def start(_type, args) do
+  def start(_type, _args) do
     if Mix.env() == :test do
       world = "test"
     else
       world = Application.get_env(:moongate, :world) || "default"
     end
 
-    :random.seed(:erlang.now())
+    :random.seed(:os.system_time())
     Moongate.Say.greeting
     IO.puts "Starting world #{world}..."
     {:ok, config} = load_config(world)
@@ -33,7 +33,7 @@ defmodule Moongate.Application do
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/server.json") do
       {:ok, read} = File.read "priv/worlds/#{world}/server.json"
-      {:ok, config} = JSON.decode(read)
+      {:ok, _config} = JSON.decode(read)
     else
       {:ok, %{}}
     end

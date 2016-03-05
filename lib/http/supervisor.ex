@@ -1,12 +1,25 @@
 defmodule Moongate.Sockets.HTTP.Supervisor do
+  @moduledoc """
+    This is a supervisor for Moongate.HTTP.Host only. It uses
+    the simple_one_for_one strategy, which allows supervised
+    processes to be dynamically added and killed.
+
+    When Moongate starts, the ports.json of the active world is
+    loaded and a Moongate.HTTP.Host is added to this supervisor
+    for every object with `protocol` set to `"HTTP"`. The key of
+    the object is used as the process' port.
+  """
   use Supervisor
 
+  @doc """
+    Start the HTTP listener supervisor.
+  """
   def start_link do
     Supervisor.start_link(__MODULE__, nil, [name: :http_hosts])
   end
 
   @doc """
-    Prepare the HTTP server supervisor.
+    This is called after start_link has resolved.
   """
   def init(_) do
     children = [worker(Moongate.HTTP.Host, [], [])]

@@ -211,21 +211,23 @@ class Pool {
 
     // Given an event, perform an action on a pool.
     static use(event, pools) {
-        if (event.id && !pools[event.id]) {
-            pools[event.id] = new Pool();
-        }
+        console.log(event);
+
+        // if (event.id && !pools[event.id]) {
+        //     pools[event.id] = new Pool();
+        // }
         switch (event.action) {
         case 'drop':
             break;
         case 'sync':
-            let results = pools[event.id].sync(event);
-            return {
-                callback: 'poolSync',
-                params: [results.created, results.updated, event.id]
-            };
+            // let results = pools[event.id].sync(event);
+            // return {
+            //     callback: 'poolSync',
+            //     params: [results.created, results.updated, event.id]
+            // };
             break;
         case 'describe':
-            pools[event.id].describe(event.params[0]);
+            // pools[event.id].describe(event.params[0]);
             break;
         default:
             break;

@@ -1,15 +1,17 @@
 let Bindings = require('./moongate/bindings'),
+    Console = require('./moongate/console'),
     Packets = require('./moongate/packets'),
     Pools = require('./moongate/pools'),
     Pool = require('./moongate/pool'),
+    Stages = require('./moongate/stages'),
     State = require('./moongate/state');
 
 class Moongate {
     constructor(bindings, extensions = {}) {
         this['🔮'] = 'v0.1.0';
         this.status = 'disconnected';
-        this.pools = new Pools();
         this.state = new State();
+        this.stages = new Stages();
         this.bindings = new Bindings({
             bindings: bindings,
             parent: this
@@ -23,6 +25,7 @@ class Moongate {
                 this[key] = value;
             }
         });
+        this.log('welcome', this['🔮']);
     }
 
     // Execute a State callback if it exists.
@@ -35,10 +38,13 @@ class Moongate {
 
     // Close the socket and cleanup.
     close() {
-        this.socket.close();
-        delete this.socket;
+        if (this.socket) {
+            this.socket.close();
+            delete this.socket;
+        }
         this.ping = null;
         this.status = 'disconnected';
+        this.log('disconnected');
 
         return true;
     }
@@ -46,7 +52,7 @@ class Moongate {
     // Given an ip and port, connect with WebSocket.
     connect(ip, port, callback) {
         this.socket = new WebSocket(`ws://${ip}:${port}`);
-        this.socket.onclose = this.close;
+        this.socket.onclose = this.close.bind(this);
         this.socket.onopen = this.connected.bind(this, callback);
         this.socket.onmessage = this.receive.bind(this);
 
@@ -56,6 +62,7 @@ class Moongate {
     // Once connected, set status and execute callback.
     connected(callback) {
         this.status = 'connected';
+        this.log('connected');
 
         if (callback instanceof Function) {
             return callback();
@@ -63,9 +70,19 @@ class Moongate {
         return true;
     }
 
+    log(label, ...params) {
+        if (Console.dictionary[label]) {
+            if (this.logs && (this.logs[label] || this.logs.all)) {
+                Console.message(label, params);
+            }
+        } else {
+            console.log.apply(console, arguments);
+        }
+    }
+
     // Given a username and password, send a login request.
     login(username, password) {
-        this.send(`auth login ${username} ${password}`);
+        this.send('auth', 'login', username, password);
     }
 
     // Fast loop
@@ -111,14 +128,17 @@ class Moongate {
     }
 
     // Send a prepared packet to the server.
-    send(packet) {
-        return this.socket.send(Packets.outgoing(packet));
-    }
+    send(...parts) {
+        if (this.status !== 'connected') {
+            return console.warn('Moongate is not connected. Please refresh the page to reconnect.');
+        }
+        let delimiter = this.delimiter || '·',
+            outgoing = Packets.outgoing(delimiter, parts);
 
-    // Send a prepared packet to the server, targeting a stage.
-    stageSend(message) {
-        if (message) {
-            this.send(`${this.state.stage} ${message}`);
+        if (outgoing) {
+            this.log('outgoingPacket', outgoing);
+
+            return this.socket.send(outgoing);
         }
     }
 
@@ -132,6 +152,7 @@ class Moongate {
             this.updatePing(time);
             this.use(parts);
         }
+        this.log('incomingPacket', e.data);
     }
 
     // Execute a callback on tick.
@@ -155,6 +176,7 @@ class Moongate {
     use(parts) {
         let event = Packets.parse(parts, {authToken: this.state.authToken});
 
+        console.log(this.stages);
         switch (event.from) {
         case 'events':
         case 'stage':
@@ -170,5 +192,4 @@ class Moongate {
         }
     }
 };
-
 export default Moongate;

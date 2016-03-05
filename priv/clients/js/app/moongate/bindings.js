@@ -1,4 +1,5 @@
-let Utils = require('./utils');
+let Stage = require('./stage'),
+    Utils = require('./utils');
 
 class Bindings {
     constructor(params) {
@@ -81,7 +82,7 @@ class Bindings {
         switch (event.action) {
         case 'transaction':
             if (event.params[0] === 'join') {
-                this.state.stage = event.id;
+                this.stages[event.id] = new Stage();
                 this.callback('stageJoined', [event.id]);
             }
             return false;
