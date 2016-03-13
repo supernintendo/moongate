@@ -17,8 +17,6 @@ class Moongate {
             bindings: bindings,
             parent: this
         });
-        this.register('events', this.bindings.eventsPacketHandled);
-        this.register('stage', this.bindings.stagePacketHandled);
         this.loop(extensions, (value, key) => {
             if (this[key]) {
                 throw new Error(`key \`${key}\` is already implemented on Moongate and cannot be overriden.`);
@@ -141,7 +139,7 @@ class Moongate {
             callbackName = Moongate.callbackNameForEvent(event);
 
         if (this.bindings[callbackName] && this.bindings[callbackName] instanceof Function) {
-            this.bindings[callbackName].apply(this, event.params);
+            this.bindings[callbackName].apply(this, [event.id].concat(event.params));
         }
     }
 

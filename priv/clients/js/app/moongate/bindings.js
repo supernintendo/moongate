@@ -9,7 +9,6 @@ class Bindings {
 
         while (l--) {
             let key = k[l];
-
             this[key] = bindings[key];
         }
         this.__proto__.getKeyDown = this.getKeyDown.bind(this, parent);
@@ -53,13 +52,15 @@ class Bindings {
             });
         }
     }
-    eventsSetToken(token) {
+    eventsSetToken(id, token) {
         this.state.authToken = token;
         this.callback('authenticated', []);
     }
-    stageTransaction(action) {
+    poolDescribe(id, parts) {}
+    stageTransaction(id, action) {
         switch (action) {
         case 'define':
+            this.stages[Utils.camelize(id)] = new Stage();
             return;
         default:
             break;
