@@ -1,4 +1,6 @@
 const Stage = require('./stage'),
+      Stages = require('./stages'),
+      Pools = require('./pools'),
       Utils = require('./utils');
 
 class Bindings {
@@ -56,11 +58,22 @@ class Bindings {
         this.state.authToken = token;
         this.callback('authenticated', []);
     }
-    poolDescribe(id, parts) {}
+    poolDescribe(id, parts) {
+        let [stageName, poolName] = id.split('__');
+
+        if (stageName && poolName) {
+            Stages.addStage.apply(this, [stageName]);
+
+            let stage = this.stages[Utils.camelize(stageName)],
+                schema = Pools.parseDescribe(parts);
+
+            Stage.addPool.apply(stage, [poolName, schema]);
+        }
+    }
     stageTransaction(id, action) {
         switch (action) {
         case 'define':
-            this.stages[Utils.camelize(id)] = new Stage();
+            Stages.addStage.apply(this, [id]);
             return;
         default:
             break;

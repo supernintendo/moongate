@@ -21,6 +21,6 @@ defmodule Moongate.Service.Pools do
   end
 
   def pool_process(stage_name, module_name) do
-    String.to_atom("pool_#{stage_name}_#{String.downcase(module_name)}")
+    String.to_atom("pool_#{stage_name}__#{String.downcase(module_name)}")
   end
 end

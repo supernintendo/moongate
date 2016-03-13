@@ -5,7 +5,7 @@ const Bindings = require('./moongate/bindings'),
       Pool = require('./moongate/pool'),
       Stages = require('./moongate/stages'),
       State = require('./moongate/state'),
-      Utils = require('./moongate/utils')
+      Utils = require('./moongate/utils');
 
 class Moongate {
     constructor(bindings = {}, extensions = {}) {

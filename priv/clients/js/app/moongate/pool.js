@@ -1,6 +1,7 @@
 class Pool {
-    constructor() {
+    constructor(schema) {
         this.members = {};
+        this.schema = schema;
     }
 
     // Default attributes for a pool member.
@@ -9,29 +10,6 @@ class Pool {
             new: true,
             values: {}
         };
-    }
-
-    /*
-     A describe packet contains information about what types of
-     properties members of this pool may contain. An example of
-     a string passed to this function might be:
-
-     name:string¦x:float¦y:float¦origin:origin¦
-
-     Here, each property is delimited by a '¦'. Keyname and type
-     are delimited by ':'.
-     */
-    describe(description) {
-        let schema = {}, parts = [];
-
-        description.split('¦').forEach((attribute) => {
-            let [key, value] = attribute.split(':');
-
-            if (key && value) {
-                schema[key] = value;
-            }
-        });
-        this.schema = schema;
     }
 
     // Get a value from a member of this pool by index.

@@ -89,6 +89,7 @@ defmodule Moongate.Stages.Instance do
         origin: origin
       }
       apply(state.stage, :arrival, [event])
+
       Enum.map(state.pools, &(tell_async(:pool, &1, {:describe, origin})))
       pools = apply(state.stage, :__moongate__stage_pools, [])
       write_to(origin, :transaction, ["define"] ++ pools)
@@ -113,7 +114,7 @@ defmodule Moongate.Stages.Instance do
     prefix = Atom.to_string(state.id)
     suffix_parts = tl(String.split(Atom.to_string(pool_module), "."))
     suffix = List.to_string(Enum.map(suffix_parts, &("_" <> String.downcase(&1))))
-    process_name = prefix <> suffix
+    process_name = prefix <> "_" <> suffix
     {:ok, _pid} = spawn_new(:pool, {process_name, state.id, pool_module})
     String.to_atom(process_name)
   end
