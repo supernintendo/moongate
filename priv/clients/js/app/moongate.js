@@ -4,7 +4,8 @@ const Bindings = require('./moongate/bindings'),
       Pools = require('./moongate/pools'),
       Pool = require('./moongate/pool'),
       Stages = require('./moongate/stages'),
-      State = require('./moongate/state');
+      State = require('./moongate/state'),
+      Utils = require('./moongate/utils')
 
 class Moongate {
     constructor(bindings = {}, extensions = {}) {
@@ -136,9 +137,16 @@ class Moongate {
 
     // Execute the appropriate callback for a packet.
     use(parts) {
-        let event = Packets.parse(parts, {authToken: this.state.authToken});
+        let event = Packets.parse(parts, {authToken: this.state.authToken}),
+            callbackName = Moongate.callbackNameForEvent(event);
 
-        console.log(event);
+        if (this.bindings[callbackName] && this.bindings[callbackName] instanceof Function) {
+            this.bindings[callbackName].apply(this, event.params);
+        }
+    }
+
+    static callbackNameForEvent(event) {
+        return Utils.camelize(`${event.from}${Utils.uppercase(event.action)}`);
     }
 
     static connected(callback) {

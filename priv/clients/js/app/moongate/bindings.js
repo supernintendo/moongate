@@ -53,23 +53,14 @@ class Bindings {
             });
         }
     }
-    eventsPacketHandled(event) {
-        switch (event.action) {
-        case 'set_token':
-            this.state.authToken = event.params[0];
-            this.callback('authenticated', []);
-        default:
-            break;
-        }
+    eventsSetToken(token) {
+        this.state.authToken = token;
+        this.callback('authenticated', []);
     }
-    stagePacketHandled(event) {
-        switch (event.action) {
-        case 'transaction':
-            if (event.params[0] === 'join') {
-                this.stages[event.id] = new Stage();
-                this.callback('stageJoined', [event.id]);
-            }
-            return false;
+    stageTransaction(action) {
+        switch (action) {
+        case 'define':
+            return;
         default:
             break;
         }

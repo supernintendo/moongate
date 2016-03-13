@@ -20,6 +20,14 @@ const Utils = {
             }
         }
         return out;
+    },
+    camelize(str) {
+        return str.replace(/(\_\w)/g, (part) => {
+            return part[1].toUpperCase();
+        });
+    },
+    uppercase(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 }
 export default Utils
