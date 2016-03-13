@@ -234,4 +234,4 @@ class Pool {
         }
     }
 }
-export default Pool;
+export default Pool

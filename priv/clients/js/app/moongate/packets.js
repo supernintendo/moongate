@@ -57,6 +57,5 @@ class Packets {
         }
         return s;
     }
-};
-
-export default Packets;
+}
+export default Packets

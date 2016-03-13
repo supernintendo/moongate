@@ -20,7 +20,7 @@ Make sure you have the following dependencies:
 * Elixir 1.0.5+
 * PostgreSQL 9.3.5+
 
-Once you do, simply clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, start the server with `./moongate.sh` (or `iex -S mix` if you need a REPL). The `default` project runs on [localhost:2594](http://localhost:2594).
+Once you do, simply clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations.
 
 ### Status ###
 

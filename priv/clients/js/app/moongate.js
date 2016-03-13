@@ -1,13 +1,13 @@
-let Bindings = require('./moongate/bindings'),
-    Console = require('./moongate/console'),
-    Packets = require('./moongate/packets'),
-    Pools = require('./moongate/pools'),
-    Pool = require('./moongate/pool'),
-    Stages = require('./moongate/stages'),
-    State = require('./moongate/state');
+const Bindings = require('./moongate/bindings'),
+      Console = require('./moongate/console'),
+      Packets = require('./moongate/packets'),
+      Pools = require('./moongate/pools'),
+      Pool = require('./moongate/pool'),
+      Stages = require('./moongate/stages'),
+      State = require('./moongate/state');
 
 class Moongate {
-    constructor(bindings, extensions = {}) {
+    constructor(bindings = {}, extensions = {}) {
         this['🔮'] = 'v0.1.0';
         this.status = 'disconnected';
         this.state = new State();
@@ -30,8 +30,8 @@ class Moongate {
 
     // Execute a State callback if it exists.
     callback(name, args) {
-        if (this.bindings.registered[name] instanceof Function) {
-            return this.bindings.registered[name].apply(this, args);
+        if (this.bindings[name] instanceof Function) {
+            return this.bindings[name].apply(this, args);
         }
         return false;
     }
@@ -53,20 +53,9 @@ class Moongate {
     connect(ip, port, callback) {
         this.socket = new WebSocket(`ws://${ip}:${port}`);
         this.socket.onclose = this.close.bind(this);
-        this.socket.onopen = this.connected.bind(this, callback);
-        this.socket.onmessage = this.receive.bind(this);
+        this.socket.onopen = Moongate.connected.bind(this, callback);
+        this.socket.onmessage = Moongate.receive.bind(this);
 
-        return true;
-    }
-
-    // Once connected, set status and execute callback.
-    connected(callback) {
-        this.status = 'connected';
-        this.log('connected');
-
-        if (callback instanceof Function) {
-            return callback();
-        }
         return true;
     }
 
@@ -95,36 +84,27 @@ class Moongate {
         }
     }
 
-    keysAreDown(...keys) {
-        let keysDown = this.bindings.keysDown;
+    keysPressed(...keys) {
+        let keysPressed = this.state.keysPressed;
 
-        return keys.some((key) => keysDown.indexOf(key) > -1);
+        return keys.some((key) => keysPressed.indexOf(key) > -1);
     }
 
-    keysAreAllDown(...keys) {
-        let keysDown = this.bindings.keysDown;
+    keysAllPressed(...keys) {
+        let keysPressed = this.state.keysPressed;
 
-        return keys.every((key) => keysDown.indexOf(key) > -1);
+        return keys.every((key) => keysPressed.indexOf(key) > -1);
     }
 
-    keysAreNotDown(...keys) {
-        let keysDown = this.bindings.keysDown;
+    keysNotPressed(...keys) {
+        let keysPressed = this.state.keysPressed;
 
-        return keys.every((key) => keysDown.indexOf(key) === -1);
-    }
-
-    poolSync(created, updated, pool) {
-        this.loop(created, (member, key) => {
-            this.bindings.registered.poolCreate.apply(this, [member, key, pool]);
-        });
-        this.loop(updated, (member, key) => {
-            this.bindings.registered.poolUpdate.apply(this, [member, key, pool]);
-        });
+        return keys.every((key) => keysPressed.indexOf(key) === -1);
     }
 
     // Assign a name in the binding map to a callback.
     register(namespace, callback) {
-        this.bindings.registered[namespace] = callback;
+        this.bindings[namespace] = callback;
     }
 
     // Send a prepared packet to the server.
@@ -142,19 +122,6 @@ class Moongate {
         }
     }
 
-    // Receive a packet from the server, making use of the parts.
-    receive(e) {
-        let parts = Packets.unravel(e.data);
-
-        if (parts.length > 0) {
-            let [time, target, action, ...params] = parts;
-
-            this.updatePing(time);
-            this.use(parts);
-        }
-        this.log('incomingPacket', e.data);
-    }
-
     // Execute a callback on tick.
     tick(tick, params = []) {
         this.callback('tick', params);
@@ -167,29 +134,39 @@ class Moongate {
         }
     }
 
-    // Update ping with calculated latency.
-    updatePing(time) {
-        this.ping = Date.now() - time;
-    }
-
     // Execute the appropriate callback for a packet.
     use(parts) {
         let event = Packets.parse(parts, {authToken: this.state.authToken});
 
-        console.log(this.stages);
-        switch (event.from) {
-        case 'events':
-        case 'stage':
-            return this.callback(event.from, [event]);
-        case 'pool':
-            let results = Pool.use(event, this.pools);
-
-            if (results) {
-                return this.callback(results.callback, results.params);
-            }
-        default:
-            return false;
-        }
+        console.log(event);
     }
-};
-export default Moongate;
+
+    static connected(callback) {
+        this.status = 'connected';
+        this.log('connected');
+
+        if (callback instanceof Function) {
+            return callback();
+        }
+        return true;
+    }
+
+    // Receive a packet from the server, making use of the parts.
+    static receive(e) {
+        let parts = Packets.unravel(e.data);
+
+        if (parts.length > 0) {
+            let [time, target, action, ...params] = parts;
+
+            Moongate.updatePing(time);
+            this.use(parts);
+        }
+        this.log('incomingPacket', e.data);
+    }
+
+    // Update ping with calculated latency.
+    static updatePing(time) {
+        this.ping = Date.now() - time;
+    }
+}
+export default Moongate

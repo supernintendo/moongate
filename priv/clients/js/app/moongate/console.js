@@ -1,4 +1,4 @@
-let Console = {
+const Console = {
     message(term, ...args) {
         let dictTerm = this.dictionary[term],
             params = [];
@@ -47,5 +47,5 @@ let Console = {
             ];
         }
     }
-};
-export default Console;
+}
+export default Console

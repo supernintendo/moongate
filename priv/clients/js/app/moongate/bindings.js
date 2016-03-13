@@ -1,58 +1,42 @@
-let Stage = require('./stage'),
-    Utils = require('./utils');
+const Stage = require('./stage'),
+      Utils = require('./utils');
 
 class Bindings {
     constructor(params) {
-        let {bindings, parent} = params;
+        let {bindings, parent} = params,
+            k = Object.keys(bindings),
+            l = k.length;
 
-        this.parent = parent;
-        this.handlers = {};
-        this.keysDown = [];
-        this.registered = Utils.deepExtend(this.defaults(), bindings);
-        this.handleKeys();
+        while (l--) {
+            let key = k[l];
+
+            this[key] = bindings[key];
+        }
+        this.__proto__.getKeyDown = this.getKeyDown.bind(this, parent);
+        Bindings.registerKeys.call(this, parent);
     }
-    defaults() {
-        return {
-            authenticated: function() {},
-            keydown: null,
-            keypress: null,
-            keyup: null,
-            poolCreate: function(member, key, pool) {},
-            poolSync: function(created, updated, pool) {
-                this.poolSync.apply(this, arguments);
-            },
-            poolUpdate: function(member, key, pool) {},
-            poolDrop: function(member, key, pool) {},
-            stageJoin: function(state) {},
-            tick: function() {}
-        };
-    }
-    getKeyDown(keyCode) {
-        return this.keysDown.indexOf(keyCode) > -1;
-    }
-    handleKeys() {
-        ['keydown', 'keypress', 'keyup'].forEach((key) => {
-            if (this.registered[key] instanceof Function) {
-                window.addEventListener(key, this[`${key}Handled`].bind(this, this.parent));
-            } else if (this.handlers[key]) {
-                window.removeEventListener(key, this[`${key}Handled`].bind(this, this.parent));
-            }
-        });
+    authenticated() {}
+    keydown() {}
+    keypress() {}
+    keyup() {}
+    tick() {}
+    getKeyDown(parent, keyCode) {
+        return parent.state.keysPressed.indexOf(keyCode) > -1;
     }
     keyupHandled(parent, e) {
         if (this.getKeyDown(e.keyCode)) {
-            this.setKeyDown(e.keyCode, false);
+            this.setKeyDown(e.keyCode, parent, false);
         }
-        return this.registered.keyup.apply(this.parent, [e, e.keyCode]);
+        return this.keyup.apply(parent, [e, e.keyCode]);
     }
     keypressHandled(parent, e) {
-        return this.registered.keypress.apply(this.parent, [e, e.keyCode]);
+        return this.keypress.apply(parent, [e, e.keyCode]);
     }
     keydownHandled(parent, e) {
-        let prevent = this.registered.keydown.apply(this.parent, [e, e.keyCode, !this.getKeyDown(e.keyCode)]);
+        let prevent = this.keydown.apply(parent, [e, e.keyCode, !this.getKeyDown(e.keyCode)]);
 
         if (!this.getKeyDown(e.keyCode)) {
-            this.setKeyDown(e.keyCode, true);
+            this.setKeyDown(e.keyCode, parent, true);
         }
         if (prevent) {
             e.preventDefault();
@@ -60,11 +44,11 @@ class Bindings {
         }
         return true;
     }
-    setKeyDown(keyCode, isDown) {
+    setKeyDown(keyCode, parent, isDown) {
         if (isDown) {
-            this.keysDown.push(keyCode);
+            parent.state.keysPressed.push(keyCode);
         } else {
-            this.keysDown = this.keysDown.filter((code) => {
+            parent.state.keysPressed = parent.state.keysPressed.filter((code) => {
                 return code !== keyCode;
             });
         }
@@ -90,6 +74,14 @@ class Bindings {
             break;
         }
     }
-};
-
-export default Bindings;
+    static registerKeys(parent) {
+        ['keydown', 'keypress', 'keyup'].forEach((key) => {
+            if (this[key] instanceof Function) {
+                window.addEventListener(key, this[`${key}Handled`].bind(this, parent));
+            } else {
+                window.removeEventListener(key, this[`${key}Handled`].bind(this, parent));
+            }
+        });
+    }
+}
+export default Bindings

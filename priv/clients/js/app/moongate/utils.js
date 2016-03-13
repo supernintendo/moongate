@@ -1,4 +1,4 @@
-let Utils = {
+const Utils = {
     deepExtend(out) {
         let l = arguments.length;
         out = out || {};
@@ -21,6 +21,5 @@ let Utils = {
         }
         return out;
     }
-};
-
-export default Utils;
+}
+export default Utils

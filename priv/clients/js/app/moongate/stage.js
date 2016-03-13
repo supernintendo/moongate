@@ -2,4 +2,4 @@ class Stage {
     constructor() {
     }
 }
-export default Stage;
+export default Stage

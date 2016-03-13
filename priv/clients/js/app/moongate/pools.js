@@ -2,4 +2,4 @@ class Pools {
     constructor() {
     }
 }
-export default Pools;
+export default Pools
