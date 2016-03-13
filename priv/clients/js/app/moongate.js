@@ -9,7 +9,7 @@ const Bindings = require('./moongate/bindings'),
 
 class Moongate {
     constructor(bindings = {}, extensions = {}) {
-        this['🔮'] = 'v0.1.0';
+        this['🔮'] = 'v0.1.1';
         this.status = 'disconnected';
         this.state = new State();
         this.stages = new Stages();
