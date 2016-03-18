@@ -51,7 +51,6 @@ defmodule Moongate.Pools.Pool do
     stage = String.to_atom("stage_#{stage_name}")
     GenServer.cast(stage, {:relay, event, state.spec, :create})
     modified = %{state | index: state.index + 1}
-    publish_to(modified)
     {:noreply, modified}
   end
 
@@ -62,7 +61,6 @@ defmodule Moongate.Pools.Pool do
     stage = String.to_atom("stage_#{stage_name}")
     GenServer.cast(stage, {:relay, %{event | params: {target}}, state.spec, :drop})
     modified = %{state | members: members}
-    publish_to(modified)
     {:noreply, modified}
   end
 
@@ -119,10 +117,6 @@ defmodule Moongate.Pools.Pool do
     {:noreply, state}
   end
 
-  def handle_cast({:publish, pid, tag}, state) do
-    {:noreply, %{state | publish_to: state.publish_to ++ [{pid, tag}]}}
-  end
-
   @doc """
     Handle a pool member mutation event.
   """
@@ -130,7 +124,6 @@ defmodule Moongate.Pools.Pool do
     member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
     members = List.delete(state.members, member)
     modified = %{state | members: members ++ [mutate(member, attribute, delta, params)]}
-    publish_to(modified)
     {:noreply, modified}
   end
 
@@ -152,7 +145,6 @@ defmodule Moongate.Pools.Pool do
         elem(member[key], 0) == value
       end)
     end)
-    publish_to(state)
     {:reply, members, state}
   end
 
@@ -163,6 +155,12 @@ defmodule Moongate.Pools.Pool do
   def handle_call({:cause, callback, member, params}, _from, state) do
     result = pool_callback(callback, member, state, params)
     {:reply, result, state}
+  end
+
+  def handle_call({:subscribe, origin}, _from, state) do
+    modified = %{state | subscribers: state.subscribers ++ [origin]}
+    # Enum.map(state.members, &(publish_all(&1, origin)))
+    {:reply, :ok, state}
   end
 
   # Return the default value given the type of a default member
@@ -253,12 +251,6 @@ defmodule Moongate.Pools.Pool do
     else
       apply(pool_module, callback, [event])
     end
-  end
-
-  defp publish_to(state) do
-    state.subscribers |> Enum.map(fn({pid, tag}) ->
-      tell_pid_async(pid, {:publish, state.subscribers, tag})
-    end)
   end
 
   defp set(member, attribute, new_value) do

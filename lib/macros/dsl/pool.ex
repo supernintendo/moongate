@@ -46,15 +46,6 @@ defmodule Moongate.Pool do
     end
   end
 
-  defmacro private(private_list) do
-    quote do
-      def __moongate__pool_privates(_), do: __moongate__pool_privates
-      def __moongate__pool_privates do
-        unquote(private_list)
-      end
-    end
-  end
-
   defmacro publishes(publish_list) do
     quote do
       def __moongate__pool_publishes(_), do: __moongate__pool_publishes

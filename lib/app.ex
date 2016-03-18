@@ -1,4 +1,5 @@
 defmodule Moongate.Application do
+  alias Moongate.Worlds, as: Worlds
   use Application
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes
@@ -8,45 +9,37 @@ defmodule Moongate.Application do
     Initialize the game server.
   """
   def start(_type, _args) do
-    if Mix.env() == :test do
-      world = "test"
-    else
-      world = Application.get_env(:moongate, :world) || "default"
-    end
-
-    :random.seed(:os.system_time())
+    :random.seed :os.system_time
     Moongate.Say.greeting
-    IO.puts "Starting world #{world}..."
-    {:ok, config} = load_config(world)
-    load_world(world)
-    load_scopes(world)
-    supervisor = start_supervisor(world, config)
+    load_world
+    load_scopes
+    supervisor = load_config |> start_supervisor
     initialize_stages
     Moongate.Scopes.Start.on_load
-    spawn_sockets(world)
+    spawn_sockets(Worlds.get_world)
 
     if Mix.env() == :prod, do: recur
     {:ok, supervisor}
   end
 
   # Load the server.json file for the world
+  defp load_config, do: load_config(Worlds.get_world)
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/server.json") do
       {:ok, read} = File.read "priv/worlds/#{world}/server.json"
-      {:ok, _config} = JSON.decode(read)
+      {:ok, config} = JSON.decode(read)
+      config
     else
-      {:ok, %{}}
+      {:error, nil}
     end
   end
 
   # Load all modules for game world and set up macros using config files
-  defp load_world(world) do
-    load_world(world, "#{world}/server")
-  end
-
+  defp load_world, do: load_world(Worlds.get_world, "#{Worlds.get_world}/server")
   defp load_world(world, path) do
     dir = File.ls("priv/worlds/#{path}")
     load_all_in_directory(dir, world, path)
+    world
   end
 
   defp load_all_in_directory({:ok, dir}, world, path) do
@@ -65,8 +58,8 @@ defmodule Moongate.Application do
     ports |> Enum.map(&spawn_socket(&1))
   end
 
-  defp start_supervisor(world, config) do
-    {:ok, read} = File.read "priv/worlds/#{world}/supervisors.json"
+  defp start_supervisor(config) do
+    {:ok, read} = File.read "priv/worlds/#{Worlds.get_world}/supervisors.json"
     {:ok, world_supervisors} = JSON.decode(read)
     {:ok, supervisor} = Moongate.Supervisor.start_link({world_supervisors, config})
     GenServer.call(:tree, {:register, supervisor})
@@ -84,14 +77,16 @@ defmodule Moongate.Application do
 
   defp load_world_module(filename) do
     Code.eval_file(filename)
-    Moongate.Say.pretty "Compiled #{filename}.", :green, [suppress_timestamp: true]
+    Moongate.Say.pretty("Compiled #{filename}.", :green, [suppress_timestamp: true])
   end
 
+  defp load_scopes, do: load_scopes(Worlds.get_world)
   defp load_scopes(world) do
     if File.dir?("priv/worlds/#{world}/server/scopes") do
       {:ok, files} = File.ls("priv/worlds/#{world}/server/scopes")
-      Enum.map(files, &load_scope(&1, world))
+      files |> Enum.map(&load_scope(&1, world))
     end
+    world
   end
 
   defp load_scope(filename, world) do
@@ -99,8 +94,8 @@ defmodule Moongate.Application do
   end
 
   defp initialize_stages do
-    stages = apply(world_module, :__moongate_stages, [])
-    Enum.map(stages, &initialize_stage(&1))
+    apply(world_module, :__moongate_stages, [])
+    |> Enum.map(&initialize_stage(&1))
   end
 
   defp initialize_stage({id, stage}) do

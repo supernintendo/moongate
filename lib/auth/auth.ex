@@ -20,7 +20,7 @@ defmodule Moongate.Auth do
     %Moongate.AuthSessions is kept as state. This module
     primarily deals with authenticating users and allowing
     account creation.
-  """
+    """
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
@@ -36,37 +36,45 @@ defmodule Moongate.Auth do
     end
   end
 
+  defp create_session(state, {email, _}, id) do
+    session = %Moongate.AuthSession{
+      email: email,
+      identity: UUID.uuid4(:hex)
+    }
+    %{state | sessions: Map.put(state.sessions, id, {email, session})}
+  end
+
+  defp tell_player(state, event, message) do
+    write_to(event.origin, :info, message)
+    tell_async(:events, event.origin.id, {:auth, state.sessions[event.origin.id]})
+    # Moongate.Say.pretty("#{Moongate.Say.origin(event.origin.id)} logged in.", :green)
+    state
+  end
+
+  defp finalize_login(result, event, state) do
+    case result do
+      {:ok, message} ->
+        state
+        |> create_session(event.params, event.origin.id)
+        |> tell_player(event, message)
+      {:error, message} ->
+        write_to(event.origin, :info, message)
+        # Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
+        state
+      _ ->
+        state
+    end
+  end
+
   @doc """
     Attempt to login with the provided credentials.
   """
   def handle_call({:login, event}, _from, state) do
-    {email, password} = event.params
+    state = event.params
+    |> authenticate(state)
+    |> finalize_login(event, state)
 
-    if state.anonymous do
-      auth_status = {:ok, "You have anonymously logged in."}
-    else
-      auth_status = authenticate(email, password)
-    end
-
-    case auth_status do
-      {:ok, message} ->
-        session = %Moongate.AuthSession{email: email, identity: UUID.uuid4(:hex)}
-        state = %{state | sessions: Map.put(
-          state.sessions,
-          event.origin.id,
-          {email, session.identity}
-        )}
-        tell_async(:events, event.origin.id, {:auth, session})
-        write_to(event.origin, :info, message)
-        Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} logged in as #{email}.", :green)
-        {:reply, :ok, state}
-      {:error, message} ->
-        write_to(event.origin, :info, message)
-        Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
-        {:reply, :ok, state}
-      _ ->
-        {:reply, :ok, state}
-    end
+    {:reply, {:ok}, state}
   end
 
   @doc """
@@ -117,16 +125,29 @@ defmodule Moongate.Auth do
   end
 
   # Check if the requested login is correct.
-  defp authenticate(email, password) do
-    results = Moongate.Db.UserQueries.find_by_email(email)
+  defp authenticate({email, password}, state) do
+    if state.anonymous do
+      auth_status = {:ok, "You have anonymously logged in."}
+    else
+      email
+      |> find_emails_that_match
+      |> List.first
+      |> validate(password)
+    end
+  end
 
-    if length(results) == 0 do
+  defp find_emails_that_match(email) do
+    Moongate.Db.UserQueries.find_by_email(email)
+  end
+
+  # Given an email and password, validate an email using the email's salt.
+  defp validate(email, password) do
+    if email == nil do
       {:error, "The user account for that email doesn't exist."}
     else
-      record = hd(results)
-      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, record.password_salt, 4096)
+      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, email.password_salt, 4096)
 
-      if :pbkdf2.to_hex(encrypted_pass) == record.password do
+      if :pbkdf2.to_hex(encrypted_pass) == email.password do
         {:ok, "You have successfully logged in."}
       else
         {:error, "The password you entered is incorrect."}

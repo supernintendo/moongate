@@ -12,7 +12,7 @@ defmodule Moongate.Stage do
   end
 
   def subscribe(origin, pool) do
-    IO.puts "TODO: Subscribe"
+    tell_sync(pool_name(pool), {:subscribe, origin})
   end
 
   def is_authenticated?(t) do

@@ -1,7 +1,3 @@
-defmodule Moongate.SyncEvent do
-  defstruct keys: [], pool: nil, values: []
-end
-
 defmodule Moongate.Deed do
   @moduledoc """
     Provides macros and functions related to Moongate Deeds.

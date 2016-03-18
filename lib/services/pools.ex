@@ -23,4 +23,7 @@ defmodule Moongate.Service.Pools do
   def pool_process(stage_name, module_name) do
     String.to_atom("pool_#{stage_name}__#{String.downcase(module_name)}")
   end
+
+  def publish_to_subscriber(member, subscriber, attributes) do
+  end
 end
