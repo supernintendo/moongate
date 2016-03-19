@@ -12,6 +12,11 @@ defmodule Moongate.Say do
       IO.chardata_to_string(["☪ "] ++
         IO.ANSI.format_fragment(
           [:inverse, "v#{Moongate.Mixfile.project[:version]}" <> IO.ANSI.reset <> " #{Moongate.Mixfile.project[:codename]}"], true)))
+    IO.puts(
+      IO.chardata_to_string(["Your current world is: "] ++
+        IO.ANSI.format_fragment(
+          [:magenta, "#{Moongate.Worlds.get_world}" <> IO.ANSI.reset], true)))
+
     IO.puts ""
   end
 

@@ -6,6 +6,7 @@ defmodule Default.Game do
     test_level: Default.Stage.Level
   }
   def connected(event) do
-    arrive event, :login_screen
+    event
+    |> arrive(:login_screen)
   end
 end

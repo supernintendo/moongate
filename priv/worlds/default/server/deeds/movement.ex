@@ -8,36 +8,36 @@ defmodule Default.Deeds.Movement do
     y: :float
   }
   def move(this, {x, y}, event) do
-    set_direction this, x, y
-    start_moving this, x, y
+    this |> set_direction(x, y)
+    this |> start_moving(x, y)
   end
 
   def stop(this, {x, y}, event) do
-    stop_moving this, x, y
+    this |> stop_moving(x, y)
   end
 
   defp start_moving(char, x, y) do
     speed = attr char, :speed
 
     cond do
-      x < 0 -> mutate(char, :x, -speed, transform)
-      y < 0 -> mutate(char, :y, -speed, transform)
-      x > 0 -> mutate(char, :x, speed, transform)
-      y > 0 -> mutate(char, :y, speed, transform)
+      x < 0 -> char |> mutate(:x, -speed, transform)
+      y < 0 -> char |> mutate(:y, -speed, transform)
+      x > 0 -> char |> mutate(:x, speed, transform)
+      y > 0 -> char |> mutate(:y, speed, transform)
     end
   end
 
   defp stop_moving(char, x, y) do
-    if (x != 0), do: mutate(char, :x, 0, transform)
-    if (y != 0), do: mutate(char, :y, 0, transform)
+    if (x != 0), do: char |> mutate(:x, 0, transform)
+    if (y != 0), do: char |> mutate(:y, 0, transform)
   end
 
   defp set_direction(char, x, y) do
     cond do
-      x < 0 -> set(char, :direction, "left")
-      y < 0 -> set(char, :direction, "up")
-      x > 0 -> set(char, :direction, "right")
-      y > 0 -> set(char, :direction, "down")
+      x < 0 -> char |> set(:direction, "left")
+      y < 0 -> char |> set(:direction, "up")
+      x > 0 -> char |> set(:direction, "right")
+      y > 0 -> char |> set(:direction, "down")
     end
   end
 

@@ -10,6 +10,8 @@ defmodule Moongate.Db.UserQueries do
   alias Moongate.Db.User, as: User
   import Ecto.Query
 
+  ### Public
+
   @doc """
     Creates a new user with the given email address if a user with
     that email does not exist.
@@ -78,6 +80,8 @@ defmodule Moongate.Db.UserQueries do
 
     Enum.shuffle(salt_characters) |> Enum.slice(0..15) |> Enum.join("")
   end
+
+  ### Private
 
   # Concatenates characters used for salt generation.
   defp salt_characters do

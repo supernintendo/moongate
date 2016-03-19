@@ -13,15 +13,6 @@ defmodule Moongate.Macros.ExternalResources do
       end
     end)
 
-    if File.dir?("priv/worlds/#{world}/server/scopes/") do
-      {:ok, scopes} = File.ls("priv/worlds/#{world}/server/scopes/")
-      Enum.map(scopes, fn(resource) ->
-        quote do
-          @external_resource "priv/worlds/#{unquote(world)}/server/scopes/#{unquote(resource)}"
-        end
-      end)
-    end
-
     quote do
       def world_name do
         unquote(world)

@@ -25,6 +25,8 @@ defmodule Moongate.Auth do
   use GenServer
   use Moongate.Macros.Processes
 
+  ### Public
+
   @doc """
     Start the Moongate.Auth GenServer.
   """
@@ -36,34 +38,35 @@ defmodule Moongate.Auth do
     end
   end
 
-  defp create_session(state, {email, _}, id) do
-    session = %Moongate.AuthSession{
-      email: email,
-      identity: UUID.uuid4(:hex)
-    }
-    %{state | sessions: Map.put(state.sessions, id, {email, session})}
-  end
+  @doc """
+    Check whether a Moongate.SocketOrigin is authenticated.
+  """
+  def handle_call({:check_auth, origin}, _from, state) do
+    has_id = Map.has_key?(state.sessions, origin.id)
+    origin_logged_in = Map.has_key?(origin.auth, :identity)
 
-  defp tell_player(state, event, message) do
-    write_to(event.origin, :info, message)
-    tell_async(:events, event.origin.id, {:auth, state.sessions[event.origin.id]})
-    # Moongate.Say.pretty("#{Moongate.Say.origin(event.origin.id)} logged in.", :green)
-    state
-  end
+    if has_id and origin_logged_in do
+      {_email, identity} = Map.get(state.sessions, origin.id)
 
-  defp finalize_login(result, event, state) do
-    case result do
-      {:ok, message} ->
-        state
-        |> create_session(event.params, event.origin.id)
-        |> tell_player(event, message)
-      {:error, message} ->
-        write_to(event.origin, :info, message)
-        # Moongate.Say.pretty("Failed log in attempt from anonymous #{Moongate.Say.origin(event.origin)} connection.", :red)
-        state
-      _ ->
-        state
+      {:reply, {:ok, (identity == origin.auth.identity)}, state}
+    else
+      {:reply, {:ok, false}, state}
     end
+  end
+
+  @doc """
+    Check if a user is logged in by email.
+  """
+  def handle_cast({:is_logged_in, event}, state) do
+    {email} = event.params
+
+    if Map.has_key?(state.sessions, email) do
+      write_to(event.origin, :info, "User is logged in.")
+    else
+      write_to(event.origin, :info, "User is not logged in.")
+    end
+
+    {:noreply, state}
   end
 
   @doc """
@@ -78,37 +81,6 @@ defmodule Moongate.Auth do
   end
 
   @doc """
-    Check whether a Moongate.SocketOrigin is authenticated.
-  """
-  def handle_call({:check_auth, origin}, _from, state) do
-    has_id = Map.has_key?(state.sessions, origin.id)
-    origin_logged_in = Map.has_key?(origin.auth, :identity)
-
-    if has_id and origin_logged_in do
-      {_email, identity} = Map.get(state.sessions, origin.id)
-      is_authenticated = identity == origin.auth.identity
-
-      {:reply, {:ok, is_authenticated}, state}
-    else
-      {:reply, {:ok, false}, state}
-    end
-  end
-
-  @doc """
-    Check if a user is logged in by email.
-  """
-  def handle_cast({:is_logged_in, event}, state) do
-    {email} = event.params
-    logged_in = Map.has_key?(state.sessions, email)
-    if logged_in do
-      write_to(event.origin, :info, "User is logged in.")
-    else
-      write_to(event.origin, :info, "User is not logged in.")
-    end
-    {:noreply, state}
-  end
-
-  @doc """
     Create a new account with the given params if we're allowed.
   """
   def handle_cast({:register, event}, state) do
@@ -117,49 +89,106 @@ defmodule Moongate.Auth do
 
     if status == :ok do
       IO.puts "Account for #{email} created."
+
       write_to(event.origin, :info, "Your account has been created.")
     else
       write_to(event.origin, :info, "Error creating account for #{email}.")
     end
+
     {:noreply, state}
   end
 
-  # Check if the requested login is correct.
+  ### Private
+
+  # Attempt authentication, allowing anonymous
+  # authentication if the current world config.json
+  # permits it.
   defp authenticate({email, password}, state) do
     if state.anonymous do
       auth_status = {:ok, "You have anonymously logged in."}
     else
       email
-      |> find_emails_that_match
-      |> List.first
+      |> find_email
       |> validate(password)
     end
   end
 
-  defp find_emails_that_match(email) do
-    Moongate.Db.UserQueries.find_by_email(email)
-  end
-
-  # Given an email and password, validate an email using the email's salt.
-  defp validate(email, password) do
-    if email == nil do
-      {:error, "The user account for that email doesn't exist."}
-    else
-      {:ok, encrypted_pass} = :pbkdf2.pbkdf2(:sha256, password, email.password_salt, 4096)
-
-      if :pbkdf2.to_hex(encrypted_pass) == email.password do
-        {:ok, "You have successfully logged in."}
-      else
-        {:error, "The password you entered is incorrect."}
-      end
-    end
-  end
-
-  # Attempt to create an account with the given params.
+  # Attempt to create a %Moongate.Db.User with the
+  # given params.
   defp create_account(email, password) do
     Moongate.Db.UserQueries.create([
       email: email,
       password: password
     ])
+  end
+
+  # Mutates state by assigning a new %Moongate.AuthSession
+  # to its sessions map, using the %Moongate.EventListener
+  # id as the key.
+  defp create_session(state, {email, _}, id) do
+    session = %Moongate.AuthSession{
+      email: email,
+      identity: UUID.uuid4(:hex)
+    }
+
+    %{state | sessions: Map.put(state.sessions, id, {email, session})}
+  end
+
+  # Given the result of a login attempt from `authenticate`,
+  # return a message indicating whether or not the
+  # login attempt was successful.
+  defp finalize_login(result, event, state) do
+    case result do
+      {:ok, message} ->
+        state
+        |> create_session(event.params, event.origin.id)
+        |> tell_player(event, message)
+      {:error, message} ->
+        write_to(event.origin, :info, message)
+        state
+      _ ->
+        state
+    end
+  end
+
+  # Takes an email and returns the %Moongate.Db.User
+  # with that email.
+  defp find_email(email) do
+    Moongate.Db.UserQueries.find_by_email(email)
+    |> List.first
+  end
+
+  # Takes a %Moongate.Db.User and a password,
+  # returning an authentication message depending
+  # on the result of `hash`
+  defp validate(user, password) do
+    cond do
+      user == nil ->
+        {:error, "The user account for that email doesn't exist."}
+      hash(user, password) == user.password ->
+        {:ok, "You have successfully logged in."}
+      true ->
+        {:error, "The password you entered is incorrect."}
+    end
+  end
+
+  # Takes a %Moongate.Db.User and a password,
+  # hashing the password using the salt on the
+  # user record, and matching it against the
+  # password on the user record.
+  defp hash(user, password) do
+    :pbkdf2.pbkdf2(:sha256, password, user.password_salt, 4096)
+  end
+
+  # Tell the Moongate.Events.Listener assigned to
+  # the player that authentication was successful.
+  # Also, send a message to the origin socket
+  # indicating successful authentication.
+  defp tell_player(state, event, message) do
+    write_to(event.origin, :info, message)
+    {email, session} = state.sessions[event.origin.id]
+    tell_async(:events, event.origin.id, {:auth, session})
+
+    state
   end
 end

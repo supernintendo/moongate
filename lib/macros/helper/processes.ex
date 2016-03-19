@@ -105,6 +105,12 @@ defmodule Moongate.Macros.Processes do
         if capabilites.can_be_cast_to, do: GenServer.cast(pid, message)
         if capabilites.can_receive, do: send(pid, message)
       end
+
+      # A shortcut for {:noreply, state} that is easier
+      # to pipe into.
+      defp no_reply(state) do
+        {:noreply, state}
+      end
     end
   end
 end
