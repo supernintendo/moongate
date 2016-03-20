@@ -3,6 +3,6 @@ defmodule Mix.Tasks.Moongate.Current do
   use Mix.Task
 
   def run(_) do
-    Mix.shell.info Application.get_env(:moongate, :world)
+    Application.get_env(:moongate, :world) |> Mix.shell.info
   end
 end

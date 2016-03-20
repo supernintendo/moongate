@@ -8,6 +8,7 @@ defmodule Moongate.SupervisionTree do
 
   def start_link do
     table = :ets.new(:supervision_tree, [:set, :protected])
+
     link(%Moongate.SupervisionTreeState{ table: table }, "tree")
   end
 
@@ -18,9 +19,11 @@ defmodule Moongate.SupervisionTree do
   @doc """
     Cast on all children of a supervisor.
   """
-  def handle_cast({:tell_async_all_children, supervisor, cast}, state) do
-    children = Supervisor.which_children(state[supervisor])
-    Enum.map(children, &tell_pid_async(elem(&1, 1), cast))
+  def handle_cast({:tell_all, supervisor, cast}, state) do
+    state[supervisor]
+    |> Supervisor.which_children
+    |> Enum.map(&tell_pid(cast, elem(&1, 1)))
+
     {:noreply, state}
   end
 
@@ -50,7 +53,7 @@ defmodule Moongate.SupervisionTree do
   """
   def handle_call({:spawn, supervisor, params}, _from, state) do
     {:ok, child} = Supervisor.start_child(state[supervisor], [params])
-    tell_pid_async(child, {:init})
+    tell_pid({:init}, child)
 
     {:reply, {:ok, child}, state}
   end

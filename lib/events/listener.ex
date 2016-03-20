@@ -53,7 +53,7 @@ defmodule Moongate.Events.Listener do
       origin: state.origin
     }
     |> Moongate.Worlds.world_apply(:connected)
-    |> elem(1)              # TODO: remove this by eliminating tuple pipeline.
+    |> elem(1)          # TODO: remove this by eliminating tuple from last ret
     |> initialize_state(state)
     |> no_reply
   end
@@ -71,11 +71,10 @@ defmodule Moongate.Events.Listener do
   """
   def handle_cast({:event, message, socket}, state) do
     authenticated = is_authenticated?(socket, state)
-    logged_in = is_logged_in?(state)
 
     case message do
       ["auth" | [cast | params]] when authenticated ->
-        handle_auth_message(state.origin, cast, params, logged_in)
+        handle_auth_message(state, cast, params)
       message when is_list(message) ->
         handle_message(message, state)
       _ ->
@@ -106,7 +105,7 @@ defmodule Moongate.Events.Listener do
       origin: state.origin
     }
     Enum.map(state.stages, fn(stage) ->
-      tell_async(String.to_atom("stage_#{Atom.to_string(stage)}"), {:depart, event})
+      tell({:depart, event}, String.to_atom("stage_#{Atom.to_string(stage)}"))
     end)
     {:reply, nil, state}
   end
@@ -134,20 +133,22 @@ defmodule Moongate.Events.Listener do
   end
 
   # Handle an incoming, trusted message.
-  defp handle_auth_message(origin, cast, params, logged_in) do
+  defp handle_auth_message(state, cast, params) do
     event = %Moongate.ClientEvent{
       cast: String.to_atom(cast),
       to: :auth,
       params: List.to_tuple(params),
-      origin: origin
+      origin: state.origin
     }
+    logged_in = is_logged_in?(state)
+
     case event do
       %{ cast: :login, to: :auth } when not logged_in ->
-        tell_sync(:auth, {:login, event})
+        tell!({:login, event}, :auth)
       %{ cast: :register, to: :auth } when not logged_in ->
-        tell_async(:auth, {:register, event})
+        tell({:register, event}, :auth)
       %{ cast: :is_logged_in, to: :auth } ->
-        tell_async(:auth, {:is_logged_in, event})
+        tell({:is_logged_in, event}, :auth)
       _ ->
         nil
     end
@@ -181,44 +182,46 @@ defmodule Moongate.Events.Listener do
   end
 
   # Do nothing.
-  defp use_message({:none}, state) do
+  defp use_message({:none}, _state) do
   end
 
   # Pass the message off to the target pool
   # to be used for functions within a specific
   # deed.
   defp use_message({:deed, message}, state) do
-    event = %Moongate.ClientEvent{
+    {:use_deed, %Moongate.ClientEvent{
       cast: message |> tl |> hd,
       to: message |> target_process(state),
       params: message |> tl |> tl |> List.to_tuple,
       origin: state.origin,
       use_deed: message |> hd |> String.split(".") |> tl |> hd
-    }
-    tell_async(event.to, {:use_deed, event})
+    }}
+    |> tell(message |> target_process(state))
   end
 
   # Pass the message off to the target pool
   # to be used for functions within all deeds.
   defp use_message({:pool, message}, state) do
-    event = %Moongate.ClientEvent{
-      cast: message |> tl |> hd,
-      to: message |> target_process(state),
-      params: message |> tl |> tl |> List.to_tuple,
-      origin: state.origin
-    }
-    tell_async(event.to, {:use_all_deeds, event})
+    {:use_all_deeds,
+     %Moongate.ClientEvent{
+       cast: message |> tl |> hd,
+       to: message |> target_process(state),
+       params: message |> tl |> tl |> List.to_tuple,
+       origin: state.origin
+     }}
+    |> tell(message |> target_process(state))
   end
 
   # Pass the message off to the current
   # target stage.
   defp use_message({:stage, message}, state) do
-    event = %Moongate.ClientEvent{
-      cast: message |> hd,
-      to: state.target_stage,
-      params: message |> tl |> List.to_tuple,
-      origin: state.origin
-    }
-    tell_async(state.target_stage, {:tunnel, event})
+    {:tunnel,
+     %Moongate.ClientEvent{
+       cast: message |> hd,
+       to: state.target_stage,
+       params: message |> tl |> List.to_tuple,
+       origin: state.origin
+     }}
+    |> tell(state.target_stage)
   end
 end

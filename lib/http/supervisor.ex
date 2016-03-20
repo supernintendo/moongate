@@ -22,7 +22,7 @@ defmodule Moongate.Sockets.HTTP.Supervisor do
     This is called after start_link has resolved.
   """
   def init(_) do
-    children = [worker(Moongate.HTTP.Host, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.HTTP.Host, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end

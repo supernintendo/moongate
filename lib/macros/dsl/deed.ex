@@ -37,10 +37,9 @@ defmodule Moongate.Deed do
     quote do
       def __moongate__pool_attributes(_), do: __moongate__pool_attributes
       def __moongate__pool_attributes do
-        attributes = Map.merge(unquote(attribute_map), %{
+        Map.merge(unquote(attribute_map), %{
           origin: {:origin}
         })
-        attributes
       end
     end
   end

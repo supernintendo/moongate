@@ -68,7 +68,7 @@ defmodule Moongate.Pools.Pool do
     deeds = Enum.map(Pools.get_deeds(state.spec), fn deed ->
       Moongate.Atoms.to_strings(deed)
     end)
-    Enum.map(deeds, &(tell_pid_async(self, {:use_deed, %{event | use_deed: &1}})))
+    Enum.map(deeds, &(tell_pid({:use_deed, %{event | use_deed: &1}}, self)))
     {:noreply, state}
   end
 
@@ -158,9 +158,9 @@ defmodule Moongate.Pools.Pool do
   end
 
   def handle_call({:subscribe, origin}, _from, state) do
-    modified = %{state | subscribers: state.subscribers ++ [origin]}
-    # Enum.map(state.members, &(publish_all(&1, origin)))
-    {:reply, :ok, state}
+    {:reply, :ok, %{state |
+      subscribers: state.subscribers ++ [origin]
+    }}
   end
 
   # Return the default value given the type of a default member
@@ -235,7 +235,6 @@ defmodule Moongate.Pools.Pool do
   # the pool designated as a target. That member, along with
   # a list of all members and any provided params will be
   # passed to the callback function.
-  defp pool_callback(callback, member, state), do: pool_callback(callback, member, state, nil)
   defp pool_callback(callback, member, state, params) do
     world = String.to_atom(String.capitalize(world_name))
     pool_module = Module.safe_concat([world, Pools, state.spec])

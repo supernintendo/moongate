@@ -7,12 +7,12 @@ defmodule Default.Deeds.Movement do
     x: :float,
     y: :float
   }
-  def move(this, {x, y}, event) do
+  def move(this, {x, y}, _event) do
     this |> set_direction(x, y)
     this |> start_moving(x, y)
   end
 
-  def stop(this, {x, y}, event) do
+  def stop(this, {x, y}, _event) do
     this |> stop_moving(x, y)
   end
 

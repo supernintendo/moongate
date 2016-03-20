@@ -55,6 +55,17 @@ defmodule Moongate.Auth do
   end
 
   @doc """
+    Attempt to login with the provided credentials.
+  """
+  def handle_call({:login, event}, _from, state) do
+    state = event.params
+    |> authenticate(state)
+    |> finalize_login(event, state)
+
+    {:reply, {:ok}, state}
+  end
+
+  @doc """
     Check if a user is logged in by email.
   """
   def handle_cast({:is_logged_in, event}, state) do
@@ -67,17 +78,6 @@ defmodule Moongate.Auth do
     end
 
     {:noreply, state}
-  end
-
-  @doc """
-    Attempt to login with the provided credentials.
-  """
-  def handle_call({:login, event}, _from, state) do
-    state = event.params
-    |> authenticate(state)
-    |> finalize_login(event, state)
-
-    {:reply, {:ok}, state}
   end
 
   @doc """
@@ -105,7 +105,7 @@ defmodule Moongate.Auth do
   # permits it.
   defp authenticate({email, password}, state) do
     if state.anonymous do
-      auth_status = {:ok, "You have anonymously logged in."}
+      {:ok, "You have anonymously logged in."}
     else
       email
       |> find_email
@@ -186,9 +186,8 @@ defmodule Moongate.Auth do
   # indicating successful authentication.
   defp tell_player(state, event, message) do
     write_to(event.origin, :info, message)
-    {email, session} = state.sessions[event.origin.id]
-    tell_async(:events, event.origin.id, {:auth, session})
-
+    {_email, session} = state.sessions[event.origin.id]
+    tell({:auth, session}, :events, event.origin.id)
     state
   end
 end

@@ -14,7 +14,7 @@ defmodule Moongate.Pools.Supervisor do
     Prepare the pools listener supervisor.
   """
   def init(_) do
-    children = [worker(Moongate.Pools.Pool, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.Pools.Pool, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end

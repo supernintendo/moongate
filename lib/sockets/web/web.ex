@@ -44,13 +44,13 @@ defmodule Moongate.Sockets.Web.Socket do
           {:error, error} when valid -> Moongate.Say.pretty("Bad packet #{safe_packet}: #{error}.", :red)
           {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
           {:ok, parsed} ->
-            tell_async(:events, "#{id}", {:event, parsed, {client, :web}})
+            tell({:event, parsed, {client, :web}}, :events, "#{id}")
         end
 
         handle(client, id)
       _ ->
         Moongate.Say.pretty("Socket with id #{id} disconnected.", :magenta)
-        tell_sync(:events, id, :cleanup)
+        tell!(:cleanup, :events, id)
         kill_by_id(:events, id)
     end
   end

@@ -28,11 +28,11 @@ defmodule Moongate.Macros.SocketWriter do
   end
 
   def write_to_tcp(target, message) do
-    target.port |> Socket.Stream.send! message
+    target.port |> Socket.Stream.send!(message)
   end
 
   def write_to_udp(target, message) do
-    target.port |> Socket.Datagram.send! message, {target.ip, String.to_integer(target.id)}
+    target.port |> Socket.Datagram.send!(message, {target.ip, String.to_integer(target.id)})
   end
 
   def write_to_web(target, message) do

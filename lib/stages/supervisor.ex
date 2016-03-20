@@ -9,7 +9,7 @@ defmodule Moongate.Stages.Supervisor do
     Prepare the events listener supervisor.
   """
   def init(_) do
-    children = [worker(Moongate.Stages.Instance, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.Stages.Instance, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end

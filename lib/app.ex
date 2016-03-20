@@ -54,15 +54,17 @@ defmodule Moongate.Application do
   # Load all files within a world subdirectory.
   defp load_all_in_directory({:ok, dir}, world, path) do
     # Evaluate all .ex files.
-    dir |> Enum.filter(&(Regex.match?(~r/.ex\b/, &1)))
-        |> Enum.map(&("priv/worlds/#{path}/#{&1}"))
-        |> Enum.map(&Code.eval_file(&1))
+    dir
+    |> Enum.filter(&(Regex.match?(~r/.ex\b/, &1)))
+    |> Enum.map(&("priv/worlds/#{path}/#{&1}"))
+    |> Enum.map(&Code.eval_file(&1))
 
     # Pass subdirectories back into the pipeline to
     # facilitate deep loading of a world's directory
     # tree.
-    dir |> Enum.filter(&(File.dir?(Path.expand("priv/worlds/#{path}/#{&1}"))))
-        |> Enum.map(&(load_world(world, "#{path}/#{&1}")))
+    dir
+    |> Enum.filter(&(File.dir?(Path.expand("priv/worlds/#{path}/#{&1}"))))
+    |> Enum.map(&(load_world(world, "#{path}/#{&1}")))
   end
 
   # Spawn socket listeners as they are defined in

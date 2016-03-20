@@ -3,11 +3,11 @@ defmodule Default.Deeds.Test do
 
   attributes %{}
 
-  def foo(this, params, event) do
+  def foo(_this, _params, _event) do
     {:relay, "foo"}
   end
 
-  def bar(this, params, event) do
+  def bar(_this, _params, _event) do
     IO.puts "bar."
     {:ok}
   end

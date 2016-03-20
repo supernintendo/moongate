@@ -52,7 +52,7 @@ defmodule Moongate.Macros.Processes do
         GenServer.call(:tree, {:spawn, namespace, params})
       end
 
-      defp tell_sync(name, message) do
+      defp tell!(message, name) do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
 
@@ -62,7 +62,7 @@ defmodule Moongate.Macros.Processes do
         result
       end
 
-      defp tell_sync(namespace, id, message) do
+      defp tell!(message, namespace, id) do
         pid = pid_for_name(namespace, id)
         capabilites = capabilities_for(pid)
 
@@ -72,25 +72,25 @@ defmodule Moongate.Macros.Processes do
         result
       end
 
-      defp tell_all_async(namespace, message) do
-        GenServer.cast(:tree, {:tell_async_all_children, namespace, message})
+      defp tell_all(message, namespace) do
+        GenServer.cast(:tree, {:tell_all, namespace, message})
       end
 
-      defp tell_async(name, message) do
+      defp tell(message, name) do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
         if capabilites.can_be_cast_to, do: GenServer.cast(name, message)
         if capabilites.can_receive, do: send(pid, message)
       end
 
-      defp tell_async(namespace, id, message) do
+      defp tell(message, namespace, id) do
         pid = pid_for_name(namespace, id)
         capabilites = capabilities_for(pid)
         if capabilites.can_be_cast_to, do: GenServer.cast(pid, message)
         if capabilites.can_receive, do: send(pid, message)
       end
 
-      defp tell_pid(pid, message) do
+      defp tell_pid!(message, pid) do
         capabilites = capabilities_for(pid)
 
         if capabilites.can_be_called, do: result = GenServer.call(pid, message)
@@ -99,7 +99,7 @@ defmodule Moongate.Macros.Processes do
         result
       end
 
-      defp tell_pid_async(pid, message) do
+      defp tell_pid(message, pid) do
         capabilites = capabilities_for(pid)
 
         if capabilites.can_be_cast_to, do: GenServer.cast(pid, message)

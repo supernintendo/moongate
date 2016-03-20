@@ -28,12 +28,11 @@ defmodule Moongate.HTTP.Host do
   end
 
   defp routes(path) do
-    public = "#{world_directory}/#{path}"
     [
-      {"/", :cowboy_static, {:priv_file, :moongate, public <> "/index.html"}},
+      {"/", :cowboy_static, {:priv_file, :moongate, "#{world_directory}/#{path}/index.html"}},
       {"/moongate.js", :cowboy_static, {:priv_file, :moongate, "clients/js/public/app.js"}},
       {"/moongate.js.map", :cowboy_static, {:priv_file, :moongate, "clients/js/public/app.js.map"}},
-      {"/[...]", :cowboy_static, {:priv_dir,  :moongate, public}}
+      {"/[...]", :cowboy_static, {:priv_dir,  :moongate, "#{world_directory}/#{path}"}}
     ]
   end
 end

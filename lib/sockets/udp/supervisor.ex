@@ -19,7 +19,7 @@ defmodule Moongate.Sockets.UDP.Supervisor do
     Prepare the sockets listener supervisor.
   """
   def init(_) do
-    children = [worker(Moongate.Sockets.UDP.Socket, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.Sockets.UDP.Socket, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end

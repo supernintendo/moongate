@@ -17,7 +17,7 @@ defmodule Moongate.Events.Supervisor do
     This is called after start_link has resolved.
   """
   def init(_) do
-    children = [worker(Moongate.Events.Listener, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.Events.Listener, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end
