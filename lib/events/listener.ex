@@ -196,7 +196,7 @@ defmodule Moongate.Events.Listener do
       origin: state.origin,
       use_deed: message |> hd |> String.split(".") |> tl |> hd
     }}
-    |> tell(message |> target_process(state))
+    |> tell(target_process(message, state))
   end
 
   # Pass the message off to the target pool
@@ -209,7 +209,7 @@ defmodule Moongate.Events.Listener do
        params: message |> tl |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell(message |> target_process(state))
+    |> tell(target_process(message, state))
   end
 
   # Pass the message off to the current

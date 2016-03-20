@@ -29,6 +29,10 @@ defmodule Moongate.Stages.Instance do
     {:noreply, state |> init_pools}
   end
 
+  def handle_cast({:relay, _event, _from, _key}, state) do
+    {:noreply, state}
+  end
+
   @doc """
     Receive a message from an event listener and if the origin on the
     event is qualified, call the callback defined on the stage
@@ -91,7 +95,6 @@ defmodule Moongate.Stages.Instance do
       state.pools |> Enum.map(&(tell({:describe, origin}, :pool, &1)))
       write_to(origin, :transaction, ["define"] ++ apply(state.stage, :__moongate__stage_pools, []))
       Moongate.Say.pretty("#{Moongate.Say.origin(origin)} joined stage #{state.id}.", :cyan)
-
       {:reply, {:ok, event}, %{state |
         members: Enum.uniq(state.members ++ [origin.id])
       }}

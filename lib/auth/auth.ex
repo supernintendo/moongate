@@ -20,7 +20,7 @@ defmodule Moongate.Auth do
     %Moongate.AuthSessions is kept as state. This module
     primarily deals with authenticating users and allowing
     account creation.
-    """
+  """
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
@@ -46,9 +46,9 @@ defmodule Moongate.Auth do
     origin_logged_in = Map.has_key?(origin.auth, :identity)
 
     if has_id and origin_logged_in do
-      {_email, identity} = Map.get(state.sessions, origin.id)
+      {_email, session} = Map.get(state.sessions, origin.id)
 
-      {:reply, {:ok, (identity == origin.auth.identity)}, state}
+      {:reply, {:ok, (session.identity == origin.auth.identity)}, state}
     else
       {:reply, {:ok, false}, state}
     end

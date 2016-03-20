@@ -36,7 +36,7 @@ defmodule Moongate.Stage do
     |> List.to_string
 
     {"stage_", pool_name} = String.split_at(process_name, 6)
-    "pool_#{pool_name}#{suffix}" |> String.to_atom |> IO.inspect
+    "pool_#{pool_name}#{suffix}" |> String.to_atom
   end
 
   def random(max) do
