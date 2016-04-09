@@ -3,12 +3,12 @@ defmodule Default.Deeds.Test do
 
   attributes %{}
 
-  def foo(_this, _params, _event) do
-    {:relay, "foo"}
+  def foo(this) do
+    this
+    |> announce(:foo)
   end
 
-  def bar(_this, _params, _event) do
-    IO.puts "bar."
-    {:ok}
+  def announced({Player, :foo}, this) do
+    this
   end
 end

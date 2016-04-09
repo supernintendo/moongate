@@ -2,11 +2,11 @@ defmodule Moongate.Supervisor do
   use Supervisor
 
   def start_link({world_supervisors}) do
-    Supervisor.start_link(__MODULE__, {world_supervisors, %{}})
+    Supervisor.start_link(__MODULE__, {world_supervisors, %{}}, [name: :supervisor])
   end
 
   def start_link({world_supervisors, config}) do
-    Supervisor.start_link(__MODULE__, {world_supervisors, config})
+    Supervisor.start_link(__MODULE__, {world_supervisors, config}, [name: :supervisor])
   end
 
   @doc """

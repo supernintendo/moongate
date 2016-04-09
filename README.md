@@ -1,6 +1,6 @@
 # Moongate #
 
-A framework for multiplayer game servers written in Elixir.
+_A game server for the modern era_.
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -8,7 +8,7 @@ A framework for multiplayer game servers written in Elixir.
 
 ### Overview ###
 
-Moongate is a platform for building multiplayer game servers. It contains an Elixir DSL for managing game state and communicating with clients, providing a simple backbone for your serverside code.
+Moongate is a multiplayer game server written in Elixir. It contains a DSL for managing game state and communicating with clients, providing a simple backbone for your serverside code.
 
 Moongate supports TCP, UDP and WebSockets. A JavaScript client is included, allowing you to write multiplayer web games out of the box.
 
@@ -22,9 +22,12 @@ Make sure you have the following dependencies:
 
 Once you do, simply clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations.
 
+### Running ###
+Simply use `iex -S mix` for now. Deployment and running in production is not currently supported.
+
 ### Status ###
 
-Moongate is **not production ready**. At this time, future versions are not guaranteed to be backwards compatible.
+Moongate is **early software**. At this time, future versions are not guaranteed to be backwards compatible.
 
 ### Attribution ###
 

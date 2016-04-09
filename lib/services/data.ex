@@ -8,6 +8,23 @@ defmodule Moongate.Data do
     member |> Keyword.delete(:__moongate_pool)
   end
 
+  def into(original) do
+    {original, fn
+      map, {:cont, {k, v}} ->
+        :maps.put(k, v, map)
+      map, :done -> map
+    _, :halt -> :ok
+    end}
+  end
+
+  @doc """
+    Takes a map and a value and returns the same map
+    that value added to the end of its `mutations` list.
+  """
+  def mutate(map, value) do
+    %{map | mutations: map.mutations ++ [value]}
+  end
+
   def pool_member_attr(member, key) do
     mutations = elem(member[key], 1)
 

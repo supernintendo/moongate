@@ -1,9 +1,12 @@
 defmodule Moongate do
-  alias Moongate.Service.Stages, as: Stages
+  alias Moongate.Data, as: Data
   use Moongate.Macros.Processes
 
-  def arrive(event, stage_name), do: Stages.arrive(event, stage_name)
-  def depart(event), do: Stages.depart(event)
+  def arrive!(event, stage_name) do
+    event
+    |> Data.mutate({:join_stage, stage_name})
+    |> Data.mutate({:set_target_stage, stage_name})
+  end
 
   defmacro stages(stage_map) do
     quote do

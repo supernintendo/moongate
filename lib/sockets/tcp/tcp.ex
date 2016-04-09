@@ -30,7 +30,7 @@ defmodule Moongate.Sockets.TCP.Socket do
       port: socket,
       protocol: :tcp
     }
-    {:ok, child} = spawn_new(:events, origin)
+    child = spawn_new(:events, origin)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
     Moongate.Say.pretty("Socket with id #{uuid} connected.", :magenta)
     accept(listener)

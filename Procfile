@@ -1,3 +1,2 @@
-moongate: MIX_ENV=prod mix
-moongate-js: brunch watch ./priv/clients/js
-default-project-js: brunch watch ./priv/worlds/default/client
+moongate-client-js: brunch watch ./priv/clients/js
+default-js: brunch watch ./priv/worlds/default/client

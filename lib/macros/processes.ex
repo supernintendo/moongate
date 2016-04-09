@@ -23,8 +23,12 @@ defmodule Moongate.Macros.Processes do
         end
       end
 
+      defp link(params) do
+        GenServer.start_link(__MODULE__, params)
+      end
+
       defp link(params, name) do
-        link(params, "", name)
+        GenServer.start_link(__MODULE__, params, [name: String.to_atom(name)])
       end
 
       defp link(params, namespace, name) do
@@ -56,7 +60,9 @@ defmodule Moongate.Macros.Processes do
         pid = Process.whereis(name)
         capabilites = capabilities_for(pid)
 
-        if capabilites.can_be_called, do: result = GenServer.call(name, message)
+        if capabilites.can_be_called do
+          result = GenServer.call(name, message)
+        end
         if capabilites.can_receive, do: result = send(pid, message)
 
         result
@@ -110,6 +116,12 @@ defmodule Moongate.Macros.Processes do
       # to pipe into.
       defp no_reply(state) do
         {:noreply, state}
+      end
+
+      # A shortcut for {:noreply, state} that is easier
+      # to pipe into.
+      defp reply(state, reply) do
+        {:reply, reply, state}
       end
     end
   end

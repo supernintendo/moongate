@@ -1,5 +1,13 @@
 defmodule Moongate.StageEvent do
-  defstruct from: nil, origin: nil, params: nil
+  defstruct(
+    from: nil,
+    mutations: [],
+    origin: nil,
+    params: nil
+  )
+  defimpl Collectable do
+    defdelegate into(original), to: Moongate.Data, as: :into
+  end
 end
 
 defmodule Moongate.StageInstance do
@@ -10,9 +18,13 @@ defmodule Moongate.StageInstance do
     pools: [],
     stage: nil
   )
+  defimpl Collectable do
+    defdelegate into(original), to: Moongate.Data, as: :into
+  end
 end
 
 defmodule Moongate.Stages.Instance do
+  alias Moongate.Data, as: Data
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
@@ -39,13 +51,9 @@ defmodule Moongate.Stages.Instance do
     module.
   """
   def handle_cast({:tunnel, event}, state) do
-    exports = state.stage.__info__(:functions)
-
-    if exports[:takes] == 2 do
-      apply(state.stage, :takes, [{event.cast, event.params}, event])
-    end
-
-    {:noreply, state}
+    apply(state.stage, :takes, [{event.cast, event.params}, %{ event | from: state.id }])
+    |> mutations(state)
+    |> no_reply
   end
 
   def handle_cast({:pool_publish, pool, pid, tag}, state) do
@@ -60,45 +68,51 @@ defmodule Moongate.Stages.Instance do
     {:noreply, state}
   end
 
-  @doc """
-    Remove a Moongate.SocketOrigin from the stage.
-  """
   def handle_cast({:depart, event}, state) do
-    if Enum.any?(state.members, &(&1 == event.origin.id)) do
-      write_to(event.origin, :transaction, "leave")
-      Moongate.Say.pretty("#{Moongate.Say.origin(event.origin)} left stage #{state.id}.", :blue)
-      apply(state.stage, :departure, [event])
-
-      {:noreply, %{state |
-        members: state.members |> Enum.filter(&(&1 != event.origin.id))
-      }}
-    else
-      {:noreply, state}
-    end
+    apply(state.stage, :departure, [event])
+    |> mutations(state)
+    |> no_reply
   end
 
-  @doc """
-    Add a Moongate.SocketOrigin to the stage and subscribe it to
-    all pools.
-  """
   def handle_call({:arrive, origin}, _from, state) do
-    is_member_of = Enum.any?(state.members, &(&1 == origin.id))
-
-    if is_member_of do
-      {:reply, :ok, state}
-    else
-      event = %Moongate.StageEvent{
-        from: Process.info(self())[:registered_name],
+    apply(state.stage, :arrival, [
+      %Moongate.StageEvent{
+        from: Process.info(self)[:registered_name],
         origin: origin
-      }
-      apply(state.stage, :arrival, [event])
-      state.pools |> Enum.map(&(tell({:describe, origin}, :pool, &1)))
-      write_to(origin, :transaction, ["define"] ++ apply(state.stage, :__moongate__stage_pools, []))
-      Moongate.Say.pretty("#{Moongate.Say.origin(origin)} joined stage #{state.id}.", :cyan)
-      {:reply, {:ok, event}, %{state |
-        members: Enum.uniq(state.members ++ [origin.id])
-      }}
-    end
+      }])
+    |> Data.mutate({:join_this_stage, origin})
+    |> mutations(state)
+    |> reply(:ok)
+  end
+
+  defp mutations(event, state) do
+    (for mut <- event.mutations, do: mutation(mut, event, state))
+    |> Enum.filter(&(&1 != nil))
+    |> Enum.into(state)
+  end
+
+  defp mutation({:join_stage, stage_name}, event, state) do
+    tell_pid!({:mutations, event}, event.origin.events_listener)
+    nil
+  end
+
+  defp mutation({:join_this_stage, origin}, _event, state) do
+    {:members, state.members ++ [origin]}
+  end
+
+  defp mutation({:leave_from, origin}, _event, state) do
+    {:members, Enum.filter(state.members, &(&1.id != origin.id))}
+  end
+
+  defp mutation({:subscribe_to_pool, pool}, event, state) do
+    process = Moongate.Service.Pools.pool_process(state.id Moongate.Atoms.to_strings(pool))
+    tell({:subscribe, event}, process)
+    nil
+  end
+
+  defp mutation({:create_in_pool, pool, params}, _event, state) do
+    IO.puts "TODO: Create in pool"
+    nil
   end
 
   @doc """
@@ -124,8 +138,9 @@ defmodule Moongate.Stages.Instance do
         |> Enum.map(&("_" <> String.downcase(&1)))
         |> List.to_string)
 
-    {:ok, _pid} = spawn_new(:pool, {process_name, state.id, pool})
+    spawn_new(:pool, {process_name, state.id, pool})
 
     String.to_atom(process_name)
   end
 end
+B

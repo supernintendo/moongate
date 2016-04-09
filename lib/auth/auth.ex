@@ -46,7 +46,7 @@ defmodule Moongate.Auth do
     origin_logged_in = Map.has_key?(origin.auth, :identity)
 
     if has_id and origin_logged_in do
-      {_email, session} = Map.get(state.sessions, origin.id)
+      session = Map.get(state.sessions, origin.id)
 
       {:reply, {:ok, (session.identity == origin.auth.identity)}, state}
     else
@@ -57,12 +57,25 @@ defmodule Moongate.Auth do
   @doc """
     Attempt to login with the provided credentials.
   """
-  def handle_call({:login, event}, _from, state) do
+  def handle_cast({"login", event}, state) do
     state = event.params
     |> authenticate(state)
     |> finalize_login(event, state)
 
-    {:reply, {:ok}, state}
+    if Map.has_key?(state.sessions, event.origin.id) do
+      {:auth, state.sessions[event.origin.id]}
+      |> tell_pid(event.origin.events_listener)
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:deauth, id}, state) do
+    if Map.has_key?(state.sessions, id) do
+      {:noreply, %{ state | sessions: state.sessions |> Map.delete(id) }}
+    else
+      {:noreply, state}
+    end
   end
 
   @doc """
@@ -130,8 +143,7 @@ defmodule Moongate.Auth do
       email: email,
       identity: UUID.uuid4(:hex)
     }
-
-    %{state | sessions: Map.put(state.sessions, id, {email, session})}
+    %{state | sessions: Map.put(state.sessions, id, session)}
   end
 
   # Given the result of a login attempt from `authenticate`,
@@ -142,7 +154,6 @@ defmodule Moongate.Auth do
       {:ok, message} ->
         state
         |> create_session(event.params, event.origin.id)
-        |> tell_player(event, message)
       {:error, message} ->
         write_to(event.origin, :info, message)
         state
@@ -178,16 +189,5 @@ defmodule Moongate.Auth do
   # password on the user record.
   defp hash(user, password) do
     :pbkdf2.pbkdf2(:sha256, password, user.password_salt, 4096)
-  end
-
-  # Tell the Moongate.Events.Listener assigned to
-  # the player that authentication was successful.
-  # Also, send a message to the origin socket
-  # indicating successful authentication.
-  defp tell_player(state, event, message) do
-    write_to(event.origin, :info, message)
-    {_email, session} = state.sessions[event.origin.id]
-    tell({:auth, session}, :events, event.origin.id)
-    state
   end
 end

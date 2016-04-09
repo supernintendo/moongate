@@ -70,7 +70,7 @@ class Moongate {
 
     // Given a username and password, send a login request.
     login(username, password) {
-        this.send('auth', 'login', username, password);
+        this.send(':auth', 'login', username, password);
     }
 
     // Fast loop
@@ -115,8 +115,6 @@ class Moongate {
             outgoing = Packets.outgoing(delimiter, parts);
 
         if (outgoing) {
-            this.log('outgoingPacket', outgoing);
-
             return this.socket.send(outgoing);
         }
     }
@@ -167,7 +165,6 @@ class Moongate {
             Moongate.updatePing(time);
             this.use(parts);
         }
-        this.log('incomingPacket', e.data);
     }
 
     // Update ping with calculated latency.
@@ -175,4 +172,5 @@ class Moongate {
         this.ping = Date.now() - time;
     }
 }
+
 export default Moongate

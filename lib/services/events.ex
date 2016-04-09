@@ -1,10 +1,18 @@
 defmodule Moongate.Events do
+  @whitelist ["auth"]
+
   def scope_message(message) do
     cond do
       List.first(message) == nil ->
         {:none}
       is_uppercase(message) ->
         message |> to_pool_or_deed
+      ":" == message |> hd |> String.codepoints |> hd ->
+        if whitelisted(hd(message)) do
+          {:process, [String.lstrip(hd(message), ?:)] ++ tl(message)}
+        else
+          {:none}
+        end
       true ->
         {:stage, message}
     end
@@ -34,5 +42,12 @@ defmodule Moongate.Events do
       true ->
         {:pool, message}
     end
+  end
+
+  def whitelisted(message) do
+    @whitelist
+    |> Enum.any?(fn(name) ->
+      name == String.lstrip(message, ?:)
+    end)
   end
 end

@@ -1,5 +1,6 @@
 defmodule Moongate.Macros.SocketWriter do
   def write_to(target, tag, message) do
+    IO.inspect self
     write_to(target, tag, Atom.to_string(Process.info(self())[:registered_name]), message)
   end
   def write_to(target, tag, name, message) do
@@ -16,14 +17,10 @@ defmodule Moongate.Macros.SocketWriter do
       parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{String.strip(message)}}"
     end
 
-    pid = Process.whereis(String.to_atom("events_" <> target.id))
-
-    if pid do
-      case target.protocol do
-        :tcp -> write_to_tcp(target, parsed_message)
-        :udp -> write_to_udp(target, parsed_message)
-        :web -> write_to_web(target, parsed_message)
-      end
+    case target.protocol do
+      :tcp -> write_to_tcp(target, parsed_message)
+      :udp -> write_to_udp(target, parsed_message)
+      :web -> write_to_web(target, parsed_message)
     end
   end
 

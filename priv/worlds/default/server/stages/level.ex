@@ -4,17 +4,17 @@ defmodule Default.Stage.Level do
   meta %{}
   pools [Player]
 
-  def arrival(event) do
-    new(event, Player, [
-      origin: event.origin,
+  def arrival(client) do
+    attributes = %{
       x: random(128),
       y: random(128)
-    ])
-    subscribe(event.origin, Player)
+    }
+    client
+    |> subscribe(Player)
+    |> create(Player, attributes)
   end
 
-  def departure(event) do
-    player = first Player, [origin: event.origin]
-    drop(event, player)
+  def departure(client) do
+    client |> depart
   end
 end

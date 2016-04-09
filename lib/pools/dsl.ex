@@ -45,7 +45,7 @@ defmodule Moongate.Pool do
     end
   end
 
-  defmacro publishes(publish_list) do
+  defmacro public(publish_list) do
     quote do
       def __moongate__pool_publishes(_), do: __moongate__pool_publishes
       def __moongate__pool_publishes do
@@ -54,11 +54,11 @@ defmodule Moongate.Pool do
     end
   end
 
-  defmacro subscribes(subscribe_list) do
+  defmacro listens(listener_list) do
     quote do
-      def __moongate__pool_subscribes(_), do: __moongate__pool_subscribes
-      def __moongate__pool_subscribes do
-        unquote(subscribe_list)
+      def __moongate__pool_listens(_), do: __moongate__pool_listens
+      def __moongate__pool_listens do
+        unquote(listener_list)
       end
     end
   end

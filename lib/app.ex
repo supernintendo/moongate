@@ -11,7 +11,6 @@ defmodule Moongate.Application do
     Initialize the game server.
   """
   def start(_type, _args) do
-    :random.seed :os.system_time
     Moongate.Say.greeting
     load_world
     supervisor = load_config |> start_supervisor

@@ -1,18 +1,42 @@
 defmodule Moongate.Stage do
-  alias Moongate.Service.Stages, as: Stages
+  alias Moongate.Data, as: Data
   use Moongate.Macros.Processes
 
-  def arrive(event, stage_name), do: Stages.arrive(event, stage_name)
-  def arrive!(event, stage_name), do: Stages.arrive!(event, stage_name)
-  def depart(event), do: Stages.depart(event)
-
-  def travel(event, stage_name) do
-    depart(event)
-    arrive!(event, stage_name)
+  def arrive(event, stage_name) do
+    event
+    |> Data.mutate({:join_stage, stage_name})
   end
 
-  def subscribe(origin, pool) do
-    tell!({:subscribe, origin}, pool_name(pool))
+  def arrive!(event, stage_name) do
+    event
+    |> Data.mutate({:join_stage, stage_name})
+    |> Data.mutate({:set_target_stage, stage_name})
+  end
+
+  def clean(event) do
+    event
+    |> Data.mutate({:clean_from_all_pools})
+  end
+
+  def create(event, pool_name, attributes) do
+    event
+    |> Data.mutate({:create_in_pool, pool_name, attributes})
+  end
+
+  def depart(event) do
+    event
+    |> Data.mutate({:leave_from, event.origin})
+  end
+
+  def travel(event, stage_name) do
+    event
+    |> depart
+    |> Data.mutate({:join_stage, stage_name})
+  end
+
+  def subscribe(event, pool_name) do
+    event
+    |> Data.mutate({:subscribe_to_pool, pool_name})
   end
 
   def is_authenticated?(t) do
@@ -44,7 +68,12 @@ defmodule Moongate.Stage do
   end
 
   def random_from(items) do
-    items |> elem((items |> tuple_size |> random) - 1)
+    items
+    |> elem((items |> tuple_size |> random) - 1)
+  end
+
+  def takes({_, _}, client) do
+    client
   end
 
   defmacro call(_event, target, callback, params) do
@@ -68,13 +97,6 @@ defmodule Moongate.Stage do
     end
   end
 
-  defmacro drop(event, target) do
-    quote do
-      pool_name(unquote(target)[:__moongate_pool])
-      |> GenServer.cast({:remove_from_pool, unquote(event), unquote(target)})
-    end
-  end
-
   defmacro find(module_name, params) do
     quote do
       pool_name(unquote(module_name))
@@ -95,13 +117,6 @@ defmodule Moongate.Stage do
       def __moongate__stage_meta do
         unquote(stage_meta)
       end
-    end
-  end
-
-  defmacro new(event, module_name, params) do
-    quote do
-      pool_name(unquote(module_name))
-      |> GenServer.cast({:add_to_pool, unquote(event), unquote(params)})
     end
   end
 

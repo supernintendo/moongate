@@ -4,19 +4,21 @@ defmodule Default.Stage.LoginScreen do
   meta %{}
   pools []
 
-  def arrival(_) do
+  def arrival(client) do
+    client
   end
 
-  def departure(_) do
+  def departure(client) do
+    client |> depart
   end
 
-  def takes({"proceed", _params}, event) do
-    authenticate(event)
+  def takes({"proceed", _params}, client) do
+    client |> authenticate
   end
 
-  def authenticate(event) do
-    if is_authenticated?(event) do
-      travel event, :test_level
+  def authenticate(client) do
+    if is_authenticated?(client) do
+      client |> travel(:test_level)
     end
   end
 end

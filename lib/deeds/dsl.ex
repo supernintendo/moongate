@@ -11,7 +11,13 @@ defmodule Moongate.Deed do
     <ProjectName>.Deeds.<NameOfPool>
   """
 
-  def attr(member, key) do
+  def announce(member, message) do
+  end
+
+  def announce(member, message, params) do
+  end
+
+  def get(member, key) do
     Moongate.Data.pool_member_attr(member, key)
   end
 

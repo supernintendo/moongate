@@ -5,8 +5,8 @@ defmodule Default.Game do
     login_screen: Default.Stage.LoginScreen,
     test_level: Default.Stage.Level
   }
+
   def connected(event) do
-    event
-    |> arrive(:login_screen)
+    event |> arrive!(:login_screen)
   end
 end

@@ -10,10 +10,6 @@ defmodule Default.Pools.Player do
     direction:    {:string, "up"}
   }
   deeds [Movement, Test]
-  publishes [:name, :x, :y, :direction]
-  subscribes %{
-    Player: [
-      "foo": {Test, :bar}
-    ]
-  }
+  public [:name, :x, :y, :direction]
+  listens [:foo]
 end

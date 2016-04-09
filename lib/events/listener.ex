@@ -7,6 +7,8 @@ defmodule Moongate.ClientEvent do
   defstruct(
     cast: nil,
     error: nil,
+    from: nil,
+    mutations: [],
     origin: nil,
     params: nil,
     to: nil,
@@ -20,13 +22,15 @@ defmodule Moongate.EventListener do
     GenServer.
   """
   defstruct id: nil, origin: nil, stages: [], target_stage: nil
+  defimpl Collectable do
+    defdelegate into(original), to: Moongate.Data, as: :into
+  end
 end
 
 defmodule Moongate.Events.Listener do
   @moduledoc """
     Provides functionality for a Moongate Event Listener.
   """
-  alias Moongate.Service.Pools, as: Pools
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
@@ -42,7 +46,7 @@ defmodule Moongate.Events.Listener do
       id: origin.id,
       origin: origin
     }
-    |> link("events", "#{origin.id}")
+    |> link
   end
 
   @doc """
@@ -53,8 +57,8 @@ defmodule Moongate.Events.Listener do
       origin: state.origin
     }
     |> Moongate.Worlds.world_apply(:connected)
-    |> elem(1)          # TODO: remove this by eliminating tuple from last ret
-    |> initialize_state(state)
+    |> mutations(state)
+    |> Map.put(:origin, %{ state.origin | events_listener: self })
     |> no_reply
   end
 
@@ -62,7 +66,7 @@ defmodule Moongate.Events.Listener do
     Authenticate with the given params.
   """
   def handle_cast({:auth, token}, state) do
-    write_to(state.origin, :set_token, "#{token.identity}")
+    write_to(state.origin, :set_token, "events", "#{token.identity}")
     {:noreply, %{ state | origin: %{ state.origin | auth: token } }}
   end
 
@@ -73,28 +77,12 @@ defmodule Moongate.Events.Listener do
     authenticated = is_authenticated?(socket, state)
 
     case message do
-      ["auth" | [cast | params]] when authenticated ->
-        handle_auth_message(state, cast, params)
       message when is_list(message) ->
         handle_message(message, state)
       _ ->
         Moongate.Say.pretty("#{state.origin.auth.identity} - rejecting packet from socket I don't trust.", :red)
     end
     {:noreply, state}
-  end
-
-  @doc """
-    Received whenever a player joins a stage.
-  """
-  def handle_call({:arrive, stage_name, :set_as_target}, _from, state) do
-    handle_call({:arrive, stage_name}, _from, %{state | target_stage: stage_name})
-  end
-
-  @doc """
-    Received whenever a player joins a stage.
-  """
-  def handle_call({:arrive, stage_name}, _from, state) do
-    {:reply, :ok, %{state | stages: state.stages ++ [stage_name]}}
   end
 
   @doc """
@@ -107,14 +95,18 @@ defmodule Moongate.Events.Listener do
     Enum.map(state.stages, fn(stage) ->
       tell({:depart, event}, String.to_atom("stage_#{Atom.to_string(stage)}"))
     end)
-    {:reply, nil, state}
+    tell({:deauth, state.origin.id}, :auth)
+
+    {:reply, :ok, state}
   end
 
   @doc """
-    Received whenever a player leaves a stage.
+    Handle mutations.
   """
-  def handle_call({:depart, stage_name}, _from, state) do
-    {:reply, :ok, %{state | stages: Enum.filter(state.stages, &(&1 != stage_name))}}
+  def handle_call({:mutations, event}, _from, state) do
+    event
+    |> mutations(state)
+    |> reply(:ok)
   end
 
   ### Private
@@ -123,48 +115,14 @@ defmodule Moongate.Events.Listener do
   defp handle_message(message, state) do
     message
     |> Moongate.Events.scope_message
+    |> IO.inspect
     |> use_message(state)
   end
 
   # Get the target process for the message.
   def target_process(message, state) do
     state.target_stage
-    |> Pools.pool_process(message |> Moongate.Events.delimited_values |> hd)
-  end
-
-  # Handle an incoming, trusted message.
-  defp handle_auth_message(state, cast, params) do
-    event = %Moongate.ClientEvent{
-      cast: String.to_atom(cast),
-      to: :auth,
-      params: List.to_tuple(params),
-      origin: state.origin
-    }
-    logged_in = is_logged_in?(state)
-
-    case event do
-      %{ cast: :login, to: :auth } when not logged_in ->
-        tell!({:login, event}, :auth)
-      %{ cast: :register, to: :auth } when not logged_in ->
-        tell({:register, event}, :auth)
-      %{ cast: :is_logged_in, to: :auth } ->
-        tell({:is_logged_in, event}, :auth)
-      _ ->
-        nil
-    end
-  end
-
-  # Mutate state with the result of the &connected/1
-  # function being called within the entry module of
-  # the current world. This happens on server start.
-  defp initialize_state(result, state) do
-    %{ state |
-       stages: [result.from],
-       target_stage: result.from,
-       origin: %{
-         state.origin | events_listener: self
-       }
-     }
+    |> Moongate.Service.Pools.pool_process(message |> Moongate.Events.delimited_values |> hd)
   end
 
   # Check whether a socket is qualified to send messages
@@ -179,6 +137,25 @@ defmodule Moongate.Events.Listener do
   # of the origin of this event listener.
   defp is_logged_in?(state) do
     state.origin.auth.identity != "anon"
+  end
+
+  defp mutations(event, state) do
+    (for mut <- event.mutations, do: mutation(mut, event, state))
+    |> Enum.into(state)
+  end
+
+  defp mutation({:join_stage, stage_name}, event, state) do
+    Moongate.Service.Stages.arrive(event.origin, stage_name)
+
+    {:stages, state.stages ++ [stage_name]}
+  end
+
+  defp mutation({:leave_from, origin}, event, state) do
+    {:stages, Enum.filter(state.stages, &(&1 != event.from)) }
+  end
+
+  defp mutation({:set_target_stage, stage_name}, _event, state) do
+    {:target_stage, stage_name}
   end
 
   # Do nothing.
@@ -212,6 +189,19 @@ defmodule Moongate.Events.Listener do
     |> tell(target_process(message, state))
   end
 
+  defp use_message({:process, message}, state) do
+    target = message |> hd |> String.to_atom
+
+    {message |> tl |> hd,
+     %Moongate.ClientEvent{
+       cast: message |> tl |> hd,
+       to: target,
+       params: message |> tl |> tl |> List.to_tuple,
+       origin: state.origin
+     }}
+    |> tell(target)
+  end
+
   # Pass the message off to the current
   # target stage.
   defp use_message({:stage, message}, state) do
@@ -222,6 +212,6 @@ defmodule Moongate.Events.Listener do
        params: message |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell(state.target_stage)
+    |> tell("stage", state.target_stage)
   end
 end

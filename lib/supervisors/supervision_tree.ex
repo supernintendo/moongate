@@ -7,9 +7,10 @@ defmodule Moongate.SupervisionTree do
   use Moongate.Macros.Processes
 
   def start_link do
-    table = :ets.new(:supervision_tree, [:set, :protected])
-
-    link(%Moongate.SupervisionTreeState{ table: table }, "tree")
+    %Moongate.SupervisionTreeState{
+      table: :ets.new(:supervision_tree, [:set, :protected])
+    }
+    |> link("tree")
   end
 
   def init(state) do
@@ -55,7 +56,7 @@ defmodule Moongate.SupervisionTree do
     {:ok, child} = Supervisor.start_child(state[supervisor], [params])
     tell_pid({:init}, child)
 
-    {:reply, {:ok, child}, state}
+    {:reply, child, state}
   end
 
   # Accumulate child processes.
