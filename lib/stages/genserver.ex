@@ -1,5 +1,4 @@
 defmodule Moongate.Stage.GenServer do
-  alias Moongate.Data, as: Data
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
@@ -55,7 +54,7 @@ defmodule Moongate.Stage.GenServer do
         from: Process.info(self)[:registered_name],
         origin: origin
       }])
-    |> Data.mutate({:join_this_stage, origin})
+    |> Moongate.Data.mutate({:join_this_stage, origin})
     |> mutations(state)
     |> reply(:ok)
   end

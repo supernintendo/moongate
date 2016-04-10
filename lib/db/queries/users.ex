@@ -6,8 +6,6 @@ defmodule Moongate.Db.UserQueries do
   @capital_letters    ?A..?Z |> Enum.map(&String.Chars.to_string([&1]))
   @lowercase_letters  ?a..?z |> Enum.map(&String.Chars.to_string([&1]))
   @numbers            0..9 |> Enum.map fn (n) -> "#{n}" end
-  alias Moongate.Repo, as: Repo
-  alias Moongate.Db.User, as: User
   import Ecto.Query
 
   ### Public
@@ -21,8 +19,8 @@ defmodule Moongate.Db.UserQueries do
   """
   def create(params) do
    if (length(find_by_email(params[:email])) == 0) do
-     user = struct(User, generate_user(params))
-     {:ok, Repo.insert(user)}
+     user = struct(Moongate.Db.User, generate_user(params))
+     {:ok, Moongate.Repo.insert(user)}
    else
      {:error, "User with email #{params[:email]} exists."}
    end
@@ -32,8 +30,8 @@ defmodule Moongate.Db.UserQueries do
     Deletes a user with the given id.
   """
   def delete(id) do
-    user = Repo.get(User, id)
-    Repo.delete(user)
+    user = Moongate.Repo.get(Moongate.Db.User, id)
+    Moongate.Repo.delete(user)
   end
 
   @doc """
@@ -41,11 +39,11 @@ defmodule Moongate.Db.UserQueries do
     always be one).
   """
   def find_by_email(email) do
-    query = from u in User,
+    query = from u in Moongate.Db.User,
           where: u.email == ^email,
           select: u
 
-    Repo.all(query)
+    Moongate.Repo.all(query)
   end
 
   @doc """

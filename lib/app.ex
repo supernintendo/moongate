@@ -1,5 +1,4 @@
 defmodule Moongate.Application do
-  alias Moongate.Worlds, as: Worlds
   use Application
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes
@@ -15,7 +14,7 @@ defmodule Moongate.Application do
     load_world
     registry = load_config |> start_supervisor
     initialize_stages
-    spawn_sockets(Worlds.get_world)
+    spawn_sockets(Moongate.Worlds.get_world)
 
     if Mix.env() == :prod, do: recur
 
@@ -25,7 +24,7 @@ defmodule Moongate.Application do
   ### Private
 
   # Load the server.json file for the world.
-  defp load_config, do: load_config(Worlds.get_world)
+  defp load_config, do: load_config(Moongate.Worlds.get_world)
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/server.json") do
       {:ok, read} = File.read "priv/worlds/#{world}/server.json"
@@ -42,7 +41,7 @@ defmodule Moongate.Application do
   # server through modules using the Moongate DSL.
   # This is the entry point for your world
   # directory.
-  defp load_world, do: load_world(Worlds.get_world, "#{Worlds.get_world}/server")
+  defp load_world, do: load_world(Moongate.Worlds.get_world, "#{Moongate.Worlds.get_world}/server")
   defp load_world(world, path) do
     dir = File.ls("priv/worlds/#{path}")
     load_all_in_directory(dir, world, path)
@@ -77,7 +76,7 @@ defmodule Moongate.Application do
 
   # Start the supervision tree.
   defp start_supervisor(config) do
-    {:ok, read} = File.read "priv/worlds/#{Worlds.get_world}/supervisors.json"
+    {:ok, read} = File.read "priv/worlds/#{Moongate.Worlds.get_world}/supervisors.json"
     {:ok, world_supervisors} = JSON.decode(read)
     {:ok, supervisor} = Moongate.Supervisor.start_link({world_supervisors, config})
     GenServer.call(:registry, {:register, supervisor})

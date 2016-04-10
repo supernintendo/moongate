@@ -1,42 +1,41 @@
 defmodule Moongate.Stage do
-  alias Moongate.Data, as: Data
   use Moongate.Macros.Processes
 
   def arrive(event, stage_name) do
     event
-    |> Data.mutate({:join_stage, stage_name})
+    |> Moongate.Data.mutate({:join_stage, stage_name})
   end
 
   def arrive!(event, stage_name) do
     event
-    |> Data.mutate({:join_stage, stage_name})
-    |> Data.mutate({:set_target_stage, stage_name})
+    |> Moongate.Data.mutate({:join_stage, stage_name})
+    |> Moongate.Data.mutate({:set_target_stage, stage_name})
   end
 
   def clean(event) do
     event
-    |> Data.mutate({:clean_from_all_pools})
+    |> Moongate.Data.mutate({:clean_from_all_pools})
   end
 
   def create(event, pool_name, attributes) do
     event
-    |> Data.mutate({:create_in_pool, pool_name, attributes})
+    |> Moongate.Data.mutate({:create_in_pool, pool_name, attributes})
   end
 
   def depart(event) do
     event
-    |> Data.mutate({:leave_from, event.origin})
+    |> Moongate.Data.mutate({:leave_from, event.origin})
   end
 
   def travel(event, stage_name) do
     event
     |> depart
-    |> Data.mutate({:join_stage, stage_name})
+    |> Moongate.Data.mutate({:join_stage, stage_name})
   end
 
   def subscribe(event, pool_name) do
     event
-    |> Data.mutate({:subscribe_to_pool, pool_name})
+    |> Moongate.Data.mutate({:subscribe_to_pool, pool_name})
   end
 
   def is_authenticated?(t) do
