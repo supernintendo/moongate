@@ -105,7 +105,7 @@ defmodule Moongate.Stages.Instance do
   end
 
   defp mutation({:subscribe_to_pool, pool}, event, state) do
-    process = Moongate.Service.Pools.pool_process(state.id Moongate.Atoms.to_strings(pool))
+    process = Moongate.Service.Pools.pool_process(state.id, Moongate.Atoms.to_strings(pool))
     tell({:subscribe, event}, process)
     nil
   end
