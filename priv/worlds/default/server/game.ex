@@ -6,6 +6,10 @@ defmodule Default.Game do
     test_level: Default.Stage.Level
   }
 
+  @doc """
+    This is called when a player connects
+    to the server.
+  """
   def connected(event) do
     event |> arrive!(:login_screen)
   end

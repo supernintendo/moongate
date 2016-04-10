@@ -1,8 +1,4 @@
-defmodule Moongate.TCPSocket do
-  defstruct port: nil
-end
-
-defmodule Moongate.Sockets.TCP.Socket do
+defmodule Moongate.Socket.TCP.GenServer do
   use GenServer
   use Moongate.Macros.Processes
 
@@ -10,7 +6,7 @@ defmodule Moongate.Sockets.TCP.Socket do
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    link(%Moongate.TCPSocket{port: port}, "socket", "#{port}")
+    link(%Moongate.Socket.GenServer.State{port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
@@ -24,13 +20,13 @@ defmodule Moongate.Sockets.TCP.Socket do
     uuid = UUID.uuid4(:hex)
 
     socket = Socket.TCP.accept!(listener)
-    origin = %Moongate.SocketOrigin{
+    origin = %Moongate.Origin{
       id: uuid,
       ip: nil,
       port: socket,
       protocol: :tcp
     }
-    child = spawn_new(:events, origin)
+    child = spawn_new(:event, origin)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
     Moongate.Say.pretty("Socket with id #{uuid} connected.", :magenta)
     accept(listener)
@@ -43,7 +39,7 @@ defmodule Moongate.Sockets.TCP.Socket do
     if packet == nil do
       # Client disconnects.
       Moongate.Say.pretty("Socket with id #{id} disconnected.", :black)
-      kill_by_pid(:events, pid)
+      kill_by_pid(:event, pid)
       socket |> Socket.close
       :close
     else
@@ -61,7 +57,7 @@ defmodule Moongate.Sockets.TCP.Socket do
     case Moongate.Packets.parse(packet) do
       {:error, error} when valid -> Moongate.Say.pretty("Bad packet `#{safe_packet}`: #{error}.", :red)
       {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
-      {:ok, parsed} -> tell({:event, parsed, {port, :tcp}}, :events, id)
+      {:ok, parsed} -> tell({:event, parsed, {port, :tcp}}, :event, id)
     end
     ""
   end

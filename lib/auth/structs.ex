@@ -1,8 +1,8 @@
-defmodule Moongate.AuthSessions do
+defmodule Moongate.Auth.GenServer.State do
   @moduledoc """
     Represents the state of the Moongate.Auth GenServer.
-    `sessions` is a map of Moongate.AuthSessions with the ids
-    of Moongate.SocketOrigins as keys.
+    `sessions` is a map of Moongate.AuthSessions with the
+    of ids of each Moongate.Origin as keys.
   """
   defstruct anonymous: false, sessions: %{}
 end

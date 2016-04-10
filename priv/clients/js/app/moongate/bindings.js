@@ -54,7 +54,7 @@ class Bindings {
             });
         }
     }
-    eventsSetToken(id, token) {
+    eventSetToken(id, token) {
         this.state.authToken = token;
         this.callback('authenticated', []);
     }

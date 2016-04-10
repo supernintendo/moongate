@@ -1,9 +1,7 @@
-defmodule Moongate.Auth do
+defmodule Moongate.Auth.GenServer do
   @moduledoc """
-    Provides the behavior for the Moongate Auth GenServer. A
-    %Moongate.AuthSessions is kept as state. This module
-    primarily deals with authenticating users and allowing
-    account creation.
+    Provides the behavior for authentication and account
+    creation.
   """
   import Moongate.Macros.SocketWriter
   use GenServer
@@ -16,14 +14,14 @@ defmodule Moongate.Auth do
   """
   def start_link(config) do
     if config["anonymous"] do
-      link(%Moongate.AuthSessions{anonymous: true}, "auth")
+      link(%Moongate.Auth.GenServer.State{anonymous: true}, "auth")
     else
-      link(%Moongate.AuthSessions{}, "auth")
+      link(%Moongate.Auth.GenServer.State{}, "auth")
     end
   end
 
   @doc """
-    Check whether a Moongate.SocketOrigin is authenticated.
+    Check whether a Moongate.Origin is authenticated.
   """
   def handle_call({:check_auth, origin}, _from, state) do
     has_id = Map.has_key?(state.sessions, origin.id)
@@ -48,7 +46,7 @@ defmodule Moongate.Auth do
 
     if Map.has_key?(state.sessions, event.origin.id) do
       {:auth, state.sessions[event.origin.id]}
-      |> tell_pid(event.origin.events_listener)
+      |> tell_pid(event.origin.event_listener)
     end
 
     {:noreply, state}
@@ -120,8 +118,8 @@ defmodule Moongate.Auth do
   end
 
   # Mutates state by assigning a new %Moongate.AuthSession
-  # to its sessions map, using the %Moongate.EventListener
-  # id as the key.
+  # to its sessions map, using the event listener's id
+  # as the key.
   defp create_session(state, {email, _}, id) do
     session = %Moongate.AuthSession{
       email: email,

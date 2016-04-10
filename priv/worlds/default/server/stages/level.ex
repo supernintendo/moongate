@@ -4,6 +4,10 @@ defmodule Default.Stage.Level do
   meta %{}
   pools [Player]
 
+  @doc """
+    This is called when a player joins this
+    stage.
+  """
   def arrival(client) do
     attributes = %{
       x: random(128),
@@ -14,6 +18,10 @@ defmodule Default.Stage.Level do
     |> create(Player, attributes)
   end
 
+  @doc """
+    This is called when a player leaves this
+    stage.
+  """
   def departure(client) do
     client |> depart
   end

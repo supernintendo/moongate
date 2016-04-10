@@ -1,4 +1,4 @@
-defmodule Moongate.HTTP.Headers do
+defmodule Moongate.HTTP.Middleware.Headers do
   @moduledoc """
     Provides a Cowboy middleware for inspecting outgoing payloads
     and including the correct headers when necessary.

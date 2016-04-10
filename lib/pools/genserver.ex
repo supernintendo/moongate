@@ -1,14 +1,12 @@
-defmodule Moongate.Pools.Pool do
-  alias Moongate.Service.Deeds, as: Deeds
-  alias Moongate.Service.Pools, as: Pools
+defmodule Moongate.Pool.GenServer do
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes
 
   def start_link({name, stage, pool}) do
-    state = %Moongate.PoolState{
-      attributes: Pools.get_attributes(pool),
+    state = %Moongate.Pool.GenServer.State{
+      attributes: Moongate.Pool.Service.get_attributes(pool),
       name: name,
       spec: pool,
       stage: stage
@@ -45,7 +43,7 @@ defmodule Moongate.Pools.Pool do
   end
 
   def handle_cast({:use_all_deeds, event}, state) do
-    deeds = Enum.map(Pools.get_deeds(state.spec), fn deed ->
+    deeds = Enum.map(Moongate.Pool.Service.get_deeds(state.spec), fn deed ->
       Moongate.Atoms.to_strings(deed)
     end)
     Enum.map(deeds, &(tell_pid({:use_deed, %{event | use_deed: &1}}, self)))
@@ -57,12 +55,12 @@ defmodule Moongate.Pools.Pool do
 
     if member !=nil do
       if event.use_deed != nil do
-        valid = Enum.any?(Pools.get_deeds(state.spec), fn deed ->
+        valid = Enum.any?(Moongate.Pool.Service.get_deeds(state.spec), fn deed ->
           Moongate.Atoms.to_strings(deed) == event.use_deed
         end)
         if valid do
-          if (Deeds.has_function?(Deeds.deed_module(event.use_deed), event.cast)) do
-            apply(Deeds.deed_module(event.use_deed), String.to_atom(event.cast), [member, event.params, event])
+          if (Moongate.Deed.Service.has_function?(Moongate.Deed.Service.deed_module(event.use_deed), event.cast)) do
+            apply(Moongate.Deed.Service.deed_module(event.use_deed), String.to_atom(event.cast), [member, event.params, event])
           end
         end
       end
@@ -83,7 +81,7 @@ defmodule Moongate.Pools.Pool do
   end
 
   @doc """
-    Send a packet to a Moongate.SocketOrigin describing the shape of
+    Send a packet to a Moongate.Origin describing the shape of
     members of this pool.
   """
   def handle_cast({:describe, origin}, state) do
@@ -149,7 +147,7 @@ defmodule Moongate.Pools.Pool do
     case type do
       :int -> 0
       :string -> ""
-      :origin -> %Moongate.SocketOrigin{}
+      :origin -> %Moongate.Origin{}
     end
   end
 

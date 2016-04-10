@@ -1,16 +1,12 @@
-defmodule Moongate.SupervisionTreeState do
-  defstruct table: nil
-end
-
-defmodule Moongate.SupervisionTree do
+defmodule Moongate.Registry.GenServer do
   use GenServer
   use Moongate.Macros.Processes
 
   def start_link do
-    %Moongate.SupervisionTreeState{
-      table: :ets.new(:supervision_tree, [:set, :protected])
+    %Moongate.Registry.GenServer.State{
+      table: :ets.new(:registry, [:set, :protected])
     }
-    |> link("tree")
+    |> link("registry")
   end
 
   def init(state) do
@@ -64,7 +60,9 @@ defmodule Moongate.SupervisionTree do
     Map.put(acc, elem(child, 0), elem(child, 1))
   end
 
-  # Return every child that isn't the supervision tree.
+  # Given a worker process, return true or false
+  # indicating whether or not that process is the
+  # registry process itself.
   defp not_self(worker) do
     elem(worker, 1) != self()
   end

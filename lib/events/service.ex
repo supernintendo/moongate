@@ -1,4 +1,4 @@
-defmodule Moongate.Events do
+defmodule Moongate.Event.Service do
   @whitelist ["auth"]
 
   def scope_message(message) do

@@ -1,3 +1,3 @@
-defmodule Moongate.HTTP do
+defmodule Moongate.HTTP.GenServer.State do
   defstruct path: "client/", port: nil
 end

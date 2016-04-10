@@ -13,13 +13,13 @@ defmodule Moongate.Application do
   def start(_type, _args) do
     Moongate.Say.greeting
     load_world
-    supervisor = load_config |> start_supervisor
+    registry = load_config |> start_supervisor
     initialize_stages
     spawn_sockets(Worlds.get_world)
 
     if Mix.env() == :prod, do: recur
 
-    {:ok, supervisor}
+    {:ok, registry}
   end
 
   ### Private
@@ -80,7 +80,7 @@ defmodule Moongate.Application do
     {:ok, read} = File.read "priv/worlds/#{Worlds.get_world}/supervisors.json"
     {:ok, world_supervisors} = JSON.decode(read)
     {:ok, supervisor} = Moongate.Supervisor.start_link({world_supervisors, config})
-    GenServer.call(:tree, {:register, supervisor})
+    GenServer.call(:registry, {:register, supervisor})
 
     supervisor
   end
@@ -89,10 +89,10 @@ defmodule Moongate.Application do
   # appropriate protocol on the provided port.
   defp spawn_socket({port, params}) do
     case params["protocol"] do
-      "TCP" -> spawn_new(:tcp_sockets, String.to_integer(port))
-      "UDP" -> spawn_new(:udp_sockets, String.to_integer(port))
-      "WebSocket" -> spawn_new(:web_sockets, String.to_integer(port))
-      "HTTP" -> spawn_new(:http_hosts, {String.to_integer(port), params["path"]})
+      "TCP" -> spawn_new(:tcp, String.to_integer(port))
+      "UDP" -> spawn_new(:udp, String.to_integer(port))
+      "WebSocket" -> spawn_new(:ws, String.to_integer(port))
+      "HTTP" -> spawn_new(:http, {String.to_integer(port), params["path"]})
     end
   end
 
@@ -104,7 +104,7 @@ defmodule Moongate.Application do
 
   # Initialize one stage.
   defp initialize_stage({id, stage}) do
-    spawn_new(:stages, [id: id, stage: stage])
+    spawn_new(:stage, [id: id, stage: stage])
   end
 
   # Fairly straightforward.

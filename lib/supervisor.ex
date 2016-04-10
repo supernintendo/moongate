@@ -14,16 +14,17 @@ defmodule Moongate.Supervisor do
   """
   def init({world_supervisors, config}) do
     [
-      worker(Moongate.SupervisionTree, [], [id: :tree]),
+      worker(Moongate.Registry.GenServer, [], [id: :registry]),
       worker(Moongate.Repo, [], [id: :repo]),
-      worker(Moongate.Auth, [config], [id: :auth]),
-      supervisor(Moongate.Events.Supervisor, [], [id: :events]),
-      supervisor(Moongate.Pools.Supervisor, [], [id: :pool]),
-      supervisor(Moongate.Stages.Supervisor, [], [id: :stages]),
-      supervisor(Moongate.Sockets.TCP.Supervisor, [], [id: :tcp_sockets]),
-      supervisor(Moongate.Sockets.UDP.Supervisor, [], [id: :udp_sockets]),
-      supervisor(Moongate.Sockets.Web.Supervisor, [], [id: :web_sockets]),
-      supervisor(Moongate.Sockets.HTTP.Supervisor, [], [id: :http_hosts])
+      worker(Moongate.Auth.GenServer, [config], [id: :auth]),
+      supervisor(Moongate.Dispatcher.Supervisor, [], [id: :dispatcher]),
+      supervisor(Moongate.Event.Supervisor, [], [id: :event]),
+      supervisor(Moongate.Pool.Supervisor, [], [id: :pool]),
+      supervisor(Moongate.Stage.Supervisor, [], [id: :stage]),
+      supervisor(Moongate.Socket.TCP.Supervisor, [], [id: :tcp]),
+      supervisor(Moongate.Socket.UDP.Supervisor, [], [id: :udp]),
+      supervisor(Moongate.Socket.Web.Supervisor, [], [id: :ws]),
+      supervisor(Moongate.HTTP.Supervisor, [], [id: :http])
     ]
     ++ supervisors_from(world_supervisors)
     |>supervise(strategy: :one_for_one)

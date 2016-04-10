@@ -47,7 +47,7 @@ defmodule Moongate.Say do
   end
 
   @doc """
-    Given a Moongate.SocketOrigin, return the appropriate
+    Given a Moongate.Origin, return the appropriate
     string to use to represent that origin.
   """
   def origin(o) do

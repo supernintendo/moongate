@@ -1,10 +1,10 @@
-defmodule Moongate.HTTP.Host do
+defmodule Moongate.HTTP.GenServer do
   use GenServer
   use Moongate.Macros.Processes
   use Moongate.Macros.Worlds
 
   def start_link({port, path}) do
-    link(%Moongate.HTTP{path: path, port: port}, "socket", "#{port}")
+    link(%Moongate.HTTP.GenServer.State{path: path, port: port}, "socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
@@ -19,7 +19,7 @@ defmodule Moongate.HTTP.Host do
     dispatch = :cowboy_router.compile([{:_, routes(state.path)}])
     {:ok, _} = :cowboy.start_http(:http, 100, [port: state.port], [
       env: [dispatch: dispatch],
-      middlewares: [:cowboy_router, Moongate.HTTP.Headers, :cowboy_handler]
+      middlewares: [:cowboy_router, Moongate.HTTP.Middleware.Headers, :cowboy_handler]
     ])
   end
 

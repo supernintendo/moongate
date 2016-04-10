@@ -1,4 +1,4 @@
-defmodule Moongate.Service.Pools do
+defmodule Moongate.Pool.Service do
   use Moongate.Macros.ExternalResources
 
   @doc """

@@ -10,9 +10,8 @@ defmodule Moongate.StageEvent do
   end
 end
 
-defmodule Moongate.StageInstance do
+defmodule Moongate.Stage.GenServer.State do
   defstruct(
-    events: %{},
     id: nil,
     members: [],
     pools: [],

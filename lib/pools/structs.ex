@@ -1,12 +1,4 @@
-defmodule Moongate.PoolMutation do
-  defstruct(
-    by: 0,
-    mode: "linear",
-    time_started: nil
-  )
-end
-
-defmodule Moongate.PoolState do
+defmodule Moongate.Pool.GenServer.State do
   defstruct(
     attributes: %{},
     index: 0,
@@ -15,5 +7,13 @@ defmodule Moongate.PoolState do
     spec: nil,
     stage: nil,
     subscribers: []
+  )
+end
+
+defmodule Moongate.PoolMutation do
+  defstruct(
+    by: 0,
+    mode: "linear",
+    time_started: nil
   )
 end

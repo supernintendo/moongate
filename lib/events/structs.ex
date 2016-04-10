@@ -1,6 +1,6 @@
 defmodule Moongate.ClientEvent do
   @moduledoc """
-    Represents a Moongate.Events.Listener's SocketOrigin,
+    Represents a Moongate.Event.Listener's SocketOrigin,
     as well as information related to packets received by
     the socket connection.
   """
@@ -16,10 +16,9 @@ defmodule Moongate.ClientEvent do
   )
 end
 
-defmodule Moongate.EventListener do
+defmodule Moongate.Event.GenServer.State do
   @moduledoc """
-    Represents the state of a Moongate.Events.Listener
-    GenServer.
+    Represents the state of a Moongate.Event.GenServer.
   """
   defstruct id: nil, origin: nil, stages: [], target_stage: nil
   defimpl Collectable do

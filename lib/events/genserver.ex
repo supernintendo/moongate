@@ -1,6 +1,6 @@
-defmodule Moongate.Events.Listener do
+defmodule Moongate.Event.GenServer do
   @moduledoc """
-    Provides functionality for a Moongate Event Listener.
+    Provides functionality for a client's event listener.
   """
   import Moongate.Macros.SocketWriter
   use GenServer
@@ -10,10 +10,10 @@ defmodule Moongate.Events.Listener do
   ### Public
 
   @doc """
-    Start a Moongate.Events.Listener GenServer.
+    Start the event listener.
   """
   def start_link(origin) do
-    %Moongate.EventListener{
+    %Moongate.Event.GenServer.State{
       id: origin.id,
       origin: origin
     }
@@ -29,7 +29,7 @@ defmodule Moongate.Events.Listener do
     }
     |> Moongate.Worlds.world_apply(:connected)
     |> mutations(state)
-    |> Map.put(:origin, %{ state.origin | events_listener: self })
+    |> Map.put(:origin, %{ state.origin | event_listener: self })
     |> no_reply
   end
 
@@ -37,7 +37,7 @@ defmodule Moongate.Events.Listener do
     Authenticate with the given params.
   """
   def handle_cast({:auth, token}, state) do
-    write_to(state.origin, :set_token, "events", "#{token.identity}")
+    write_to(state.origin, :set_token, "event", "#{token.identity}")
     {:noreply, %{ state | origin: %{ state.origin | auth: token } }}
   end
 
@@ -85,7 +85,7 @@ defmodule Moongate.Events.Listener do
   # Parse a message and return a %Moongate.ClientEvent
   defp handle_message(message, state) do
     message
-    |> Moongate.Events.scope_message
+    |> Moongate.Event.Service.scope_message
     |> IO.inspect
     |> use_message(state)
   end
@@ -93,7 +93,11 @@ defmodule Moongate.Events.Listener do
   # Get the target process for the message.
   def target_process(message, state) do
     state.target_stage
-    |> Moongate.Service.Pools.pool_process(message |> Moongate.Events.delimited_values |> hd)
+    |> Moongate.Pool.Service.pool_process(
+      message
+      |> Moongate.Event.Service.delimited_values
+      |> hd
+    )
   end
 
   # Check whether a socket is qualified to send messages

@@ -1,4 +1,4 @@
-defmodule Moongate.Service.Deeds do
+defmodule Moongate.Deed.Service do
   use Moongate.Macros.ExternalResources
 
   def has_function?(deed_module, func_name) do

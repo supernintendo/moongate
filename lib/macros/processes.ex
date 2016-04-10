@@ -45,7 +45,7 @@ defmodule Moongate.Macros.Processes do
       end
 
       defp kill_by_pid(namespace, pid) do
-        GenServer.call(:tree, {:kill_by_pid, namespace, pid})
+        GenServer.call(:registry, {:kill_by_pid, namespace, pid})
       end
 
       defp pid_for_name(namespace, id) do
@@ -53,7 +53,7 @@ defmodule Moongate.Macros.Processes do
       end
 
       defp spawn_new(namespace, params) do
-        GenServer.call(:tree, {:spawn, namespace, params})
+        GenServer.call(:registry, {:spawn, namespace, params})
       end
 
       defp tell!(message, name) do
@@ -79,7 +79,7 @@ defmodule Moongate.Macros.Processes do
       end
 
       defp tell_all(message, namespace) do
-        GenServer.cast(:tree, {:tell_all, namespace, message})
+        GenServer.cast(:registry, {:tell_all, namespace, message})
       end
 
       defp tell(message, name) do

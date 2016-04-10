@@ -1,11 +1,11 @@
-defmodule Moongate.Stages.Instance do
+defmodule Moongate.Stage.GenServer do
   alias Moongate.Data, as: Data
   import Moongate.Macros.SocketWriter
   use GenServer
   use Moongate.Macros.Processes
 
   def start_link(params) do
-    %Moongate.StageInstance{
+    %Moongate.Stage.GenServer.State{
       id: params[:id],
       stage: params[:stage]
     }
@@ -67,7 +67,7 @@ defmodule Moongate.Stages.Instance do
   end
 
   defp mutation({:join_stage, stage_name}, event, state) do
-    tell_pid!({:mutations, event}, event.origin.events_listener)
+    tell_pid!({:mutations, event}, event.origin.event_listener)
     nil
   end
 
@@ -80,7 +80,7 @@ defmodule Moongate.Stages.Instance do
   end
 
   defp mutation({:subscribe_to_pool, pool}, event, state) do
-    process = Moongate.Service.Pools.pool_process(state.id, Moongate.Atoms.to_strings(pool))
+    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
     tell({:subscribe, event}, process)
     nil
   end
