@@ -1,6 +1,6 @@
 # Moongate #
 
-_A game server for the modern era_.
+_A game server with a little magic_.
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -28,14 +28,6 @@ Simply use `iex -S mix` for now. Deployment and running in production is not cur
 ### Status ###
 
 Moongate is **early software**. At this time, future versions are not guaranteed to be backwards compatible.
-
-### Attribution ###
-
-This repository contains art from the following asset packs:
-
-* [16x16 Oblique Tileset by DENZI](http://opengameart.org/content/denzis-16x16-oblique-tilesets)
-* [Blowhard 2: Blow Harder by Carl Olsson](http://opengameart.org/content/blowhard-2-blow-harder)
-* [RogueLite by LD](http://opengameart.org/content/roguelite)
 
 ### License ###
 
