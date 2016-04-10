@@ -1,28 +1,3 @@
-defmodule Moongate.StageEvent do
-  defstruct(
-    from: nil,
-    mutations: [],
-    origin: nil,
-    params: nil
-  )
-  defimpl Collectable do
-    defdelegate into(original), to: Moongate.Data, as: :into
-  end
-end
-
-defmodule Moongate.StageInstance do
-  defstruct(
-    events: %{},
-    id: nil,
-    members: [],
-    pools: [],
-    stage: nil
-  )
-  defimpl Collectable do
-    defdelegate into(original), to: Moongate.Data, as: :into
-  end
-end
-
 defmodule Moongate.Stages.Instance do
   alias Moongate.Data, as: Data
   import Moongate.Macros.SocketWriter
@@ -143,4 +118,3 @@ defmodule Moongate.Stages.Instance do
     String.to_atom(process_name)
   end
 end
-B

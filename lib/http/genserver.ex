@@ -1,7 +1,3 @@
-defmodule Moongate.HTTP do
-  defstruct path: "client/", port: nil
-end
-
 defmodule Moongate.HTTP.Host do
   use GenServer
   use Moongate.Macros.Processes
