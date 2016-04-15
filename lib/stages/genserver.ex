@@ -87,8 +87,9 @@ defmodule Moongate.Stage.GenServer do
     nil
   end
 
-  defp mutation({:create_in_pool, pool, params}, _event, state) do
-    IO.puts "TODO: Create in pool"
+  defp mutation({:create_in_pool, pool, params}, event, state) do
+    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
+    tell({:add_to_pool, Map.put(params, :origin, event.origin)}, process)
     nil
   end
 

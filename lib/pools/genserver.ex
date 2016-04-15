@@ -22,11 +22,8 @@ defmodule Moongate.Pool.GenServer do
     Add a new member to the pool, merging default attributes with those
     provided.
   """
-  def handle_cast({:add_to_pool, event, params}, state) do
+  def handle_cast({:add_to_pool, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
-    stage_name = Atom.to_string(state.stage)
-    stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:relay, event, state.spec, :create})
 
     state
     |> Map.put(:index, state.index + 1)
@@ -35,8 +32,9 @@ defmodule Moongate.Pool.GenServer do
   end
 
   def handle_cast({:remove_from_pool, origin}, state) do
+    IO.inspect state.members
     state
-    |> Map.put(:members, Enum.filter(state.members, &(&1.origin.id != origin.id)))
+    |> Map.put(:members, Enum.filter(state.members, &(elem(&1[:origin], 0).id != origin.id)))
     |> Map.put(:subscribers, Enum.filter(state.subscribers, &(&1.id != origin.id)))
     |> no_reply
   end
