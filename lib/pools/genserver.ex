@@ -24,22 +24,21 @@ defmodule Moongate.Pool.GenServer do
   """
   def handle_cast({:add_to_pool, event, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
-    state = %{state | members: state.members ++ [new_pool_member(attributes, state)]}
     stage_name = Atom.to_string(state.stage)
     stage = String.to_atom("stage_#{stage_name}")
     GenServer.cast(stage, {:relay, event, state.spec, :create})
-    modified = %{state | index: state.index + 1}
-    {:noreply, modified}
+
+    state
+    |> Map.put(:index, state.index + 1)
+    |> Map.put(:members, state.members ++ [new_pool_member(attributes, state)])
+    |> no_reply
   end
 
-  def handle_cast({:remove_from_pool, event, target}, state) do
-    member = Enum.find(state.members, &(&1[:origin] == target[:origin]))
-    members = List.delete(state.members, member)
-    stage_name = Atom.to_string(state.stage)
-    stage = String.to_atom("stage_#{stage_name}")
-    GenServer.cast(stage, {:relay, %{event | params: {target}}, state.spec, :drop})
-    modified = %{state | members: members}
-    {:noreply, modified}
+  def handle_cast({:remove_from_pool, origin}, state) do
+    state
+    |> Map.put(:members, Enum.filter(state.members, &(&1.origin.id != origin.id)))
+    |> Map.put(:subscribers, Enum.filter(state.subscribers, &(&1.id != origin.id)))
+    |> no_reply
   end
 
   def handle_cast({:use_all_deeds, event}, state) do
@@ -135,10 +134,9 @@ defmodule Moongate.Pool.GenServer do
     {:reply, result, state}
   end
 
-  def handle_call({:subscribe, origin}, _from, state) do
-    {:reply, :ok, %{state |
-      subscribers: state.subscribers ++ [origin]
-    }}
+  def handle_cast({:subscribe, event}, state) do
+    %{state | subscribers: state.subscribers ++ [event.origin]}
+    |> no_reply
   end
 
   # Return the default value given the type of a default member

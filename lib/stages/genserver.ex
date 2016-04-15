@@ -75,6 +75,9 @@ defmodule Moongate.Stage.GenServer do
   end
 
   defp mutation({:leave_from, origin}, _event, state) do
+    state.pools
+    |> Enum.map(&(tell({:remove_from_pool, origin}, :pool, &1)))
+
     {:members, Enum.filter(state.members, &(&1.id != origin.id))}
   end
 
