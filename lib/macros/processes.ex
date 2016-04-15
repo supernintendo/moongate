@@ -52,6 +52,7 @@ defmodule Moongate.Macros.Processes do
         Process.whereis(String.to_atom("#{namespace}_#{id}"))
       end
 
+      defp spawn_new(namespace), do: spawn_new(namespace, nil)
       defp spawn_new(namespace, params) do
         GenServer.call(:registry, {:spawn, namespace, params})
       end
