@@ -1,4 +1,9 @@
 defmodule Moongate.Packets do
+  @moduledoc """
+    Provides functions related to working with socket
+    packets.
+  """
+
   @doc """
     Takes a packet after it has been converted into
     a List and returns the byte size of all characters

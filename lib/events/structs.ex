@@ -1,8 +1,9 @@
 defmodule Moongate.ClientEvent do
   @moduledoc """
-    Represents a Moongate.Event.Listener's SocketOrigin,
-    as well as information related to packets received by
-    the socket connection.
+    A structured representation of a packet message,
+    after it has been parsed and made sense of. This
+    is usually what gets passed around in the DSL-enabled
+    modules of a Moongate world.
   """
   defstruct(
     cast: nil,
@@ -18,10 +19,11 @@ end
 
 defmodule Moongate.Event.GenServer.State do
   @moduledoc """
-    Represents the state of a Moongate.Event.GenServer.
+    Represents the state of an event process. `into` is
+    implemented to allow the use of mutations.
   """
   defstruct id: nil, origin: nil, stages: [], target_stage: nil
   defimpl Collectable do
-    defdelegate into(original), to: Moongate.Data, as: :into
+    defdelegate into(original), to: Moongate.Macros.Mutations, as: :into
   end
 end

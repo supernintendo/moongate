@@ -1,13 +1,15 @@
 defmodule Moongate.Event.Supervisor do
   @moduledoc """
-    This is a supervisor for Moongate.Events.Listener only. It uses
-    the simple_one_for_one strategy, which allows supervised processes
-    to be dynamically added and killed.
+    This is a supervisor for event processes. Every client
+    that connects to the server effectively adds a process
+    to this supervisor. Processes within this supervisor
+    are responsible for receiving and sending messages to
+    and from a client.
   """
   use Supervisor
 
   @doc """
-    Start the events listener supervisor.
+    Start the event process supervisor.
   """
   def start_link do
     Supervisor.start_link(__MODULE__, nil, [name: :event])

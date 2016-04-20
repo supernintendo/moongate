@@ -4,6 +4,11 @@ defmodule Moongate.Pool.GenServer do
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes
 
+  ### Public
+
+  @doc """
+    Start the pool process.
+  """
   def start_link({name, stage, pool}) do
     state = %Moongate.Pool.GenServer.State{
       attributes: Moongate.Pool.Service.get_attributes(pool),
@@ -14,13 +19,16 @@ defmodule Moongate.Pool.GenServer do
     link(state, "pool", name)
   end
 
+  @doc """
+    This is called after start_link has resolved.
+  """
   def handle_cast({:init}, state) do
     {:noreply, state}
   end
 
   @doc """
-    Add a new member to the pool, merging default attributes with those
-    provided.
+    Add a new member to the pool, merging default attributes
+    with those provided.
   """
   def handle_cast({:add_to_pool, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
@@ -31,6 +39,10 @@ defmodule Moongate.Pool.GenServer do
     |> no_reply
   end
 
+  @doc """
+    Remove a member from the pool as well as any associated
+    subscribers.
+  """
   def handle_cast({:remove_from_pool, origin}, state) do
     state
     |> Map.put(:members, Enum.filter(state.members, &(elem(&1[:origin], 0).id != origin.id)))
@@ -38,6 +50,9 @@ defmodule Moongate.Pool.GenServer do
     |> no_reply
   end
 
+  @doc """
+    Call a function within all deeds defined on this pool.
+  """
   def handle_cast({:use_all_deeds, event}, state) do
     deeds = Enum.map(Moongate.Pool.Service.get_deeds(state.spec), fn deed ->
       Moongate.Atoms.to_strings(deed)
@@ -46,6 +61,9 @@ defmodule Moongate.Pool.GenServer do
     {:noreply, state}
   end
 
+  @doc """
+    Call a function within a deed defined on this pool.
+  """
   def handle_cast({:use_deed, event}, state) do
     member = find_owned_member(event.origin, state)
 
@@ -65,19 +83,7 @@ defmodule Moongate.Pool.GenServer do
   end
 
   @doc """
-    Asynchronously call a function defined on the pool module.
-  """
-  def handle_cast({:cause, callback, member}, state) do
-    pool_callback(callback, member, state, nil)
-    {:noreply, state}
-  end
-  def handle_cast({:cause, callback, member, params}, state) do
-    pool_callback(callback, member, state, params)
-    {:noreply, state}
-  end
-
-  @doc """
-    Send a packet to a Moongate.Origin describing the shape of
+    Send a packet to an origin describing the shape of
     members of this pool.
   """
   def handle_cast({:describe, origin}, state) do
@@ -101,12 +107,26 @@ defmodule Moongate.Pool.GenServer do
     {:noreply, modified}
   end
 
+  @doc """
+    Set an attribute of a pool member to a value.
+  """
   def handle_cast({:set, target, attribute, value}, state) do
     member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
     members = List.delete(state.members, member)
     modified_member = set(member, attribute, value)
     modified = %{state | members: members ++ [modified_member]}
     {:noreply, modified}
+  end
+
+  @doc """
+    Add an origin to this pool's list of subscribers,
+    effectively causing it to receiving all future
+    packets related to changes and events within
+    this pool.
+  """
+  def handle_cast({:subscribe, event}, state) do
+    %{state | subscribers: state.subscribers ++ [event.origin]}
+    |> no_reply
   end
 
   @doc """
@@ -122,19 +142,7 @@ defmodule Moongate.Pool.GenServer do
     {:reply, members, state}
   end
 
-  @doc """
-    Synchronously call a function defined on the pool module,
-    replying with the result.
-  """
-  def handle_call({:cause, callback, member, params}, _from, state) do
-    result = pool_callback(callback, member, state, params)
-    {:reply, result, state}
-  end
-
-  def handle_cast({:subscribe, event}, state) do
-    %{state | subscribers: state.subscribers ++ [event.origin]}
-    |> no_reply
-  end
+  ### Private
 
   # Return the default value given the type of a default member
   # attribute.
@@ -146,6 +154,8 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
+  # Find the member of this pool that corresponds to
+  # an origin.
   defp find_owned_member(origin, state) do
     results = Enum.filter(state.members, fn (member) ->
       {member_origin, _} = member[:origin]
@@ -158,14 +168,16 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
-  # Return an initial attribute for a member when a default is
-  # not provided, determining the default from the type.
+  # Return an initial attribute for a member when a
+  # default is not provided, determining the default from
+  # the type.
   defp initial_attributes_for_member({key, {type}}, params) do
     initial_attributes_for_member({key, {type, default_value_for_type(type)}}, params)
   end
 
-  # Return an initial attribute for a member with any params
-  # passed to the construction of the member taking prescendence.
+  # Return an initial attribute for a member with any
+  # params passed to the construction of the member
+  # taking prescendence.
   defp initial_attributes_for_member({key, {_type, initial_value}}, params) do
     {key, {params[key] || initial_value, []}}
   end
@@ -184,11 +196,17 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
+  # Get the current value that is being transformed
+  # based on the time that has passed since the
+  # transformation began.
   defp transform_delta(transform) do
     time_passed = Moongate.Time.current_ms - transform.time_started
     transform.by * time_passed
   end
 
+  # Return a data structure which represents a
+  # transformation of one of a pool member's attributes
+  # over time.
   defp transform_from(delta, params) do
     %Moongate.PoolTransform{
       by: delta,
@@ -197,6 +215,7 @@ defmodule Moongate.Pool.GenServer do
     }
   end
 
+  # Return attributes for a new pool member.
   defp new_pool_member(attributes, state) do
     [__moongate_pool_index: state.index,
      __moongate_pool_name: state.name,
@@ -225,6 +244,7 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
+  # Set one of a pool member's attributes to a new value.
   defp set(member, attribute, new_value) do
     {_old_value, transforms} = member[attribute]
     Keyword.put(member, attribute, {new_value, transforms})

@@ -4,6 +4,6 @@ defmodule Moongate.Macros.SocketWriter do
   end
 
   def write_to(target, tag, name, message) do
-    GenServer.cast(target.event_listener, {:write, tag, name, message})
+    GenServer.cast(target.events, {:write, tag, name, message})
   end
 end

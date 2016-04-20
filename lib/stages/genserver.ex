@@ -5,6 +5,9 @@ defmodule Moongate.Stage.GenServer do
   use Moongate.Macros.Mutations, genserver: true
   use Moongate.Macros.Processes
 
+  @doc """
+    Start the stage process.
+  """
   def start_link(params) do
     %Moongate.Stage.GenServer.State{
       id: params[:id],
@@ -13,18 +16,16 @@ defmodule Moongate.Stage.GenServer do
     |> link("stage", "#{params[:id]}")
   end
 
+  @doc """
+    This is called after start_link has resolved.
+  """
   def handle_cast({:init}, state) do
     {:noreply, state |> init_pools}
   end
 
-  def handle_cast({:relay, _event, _from, _key}, state) do
-    {:noreply, state}
-  end
-
   @doc """
-    Receive a message from an event listener and if the origin on the
-    event is qualified, call the callback defined on the stage
-    module.
+    Receive a message from an event listener and call
+    the callback defined on the stage module.
   """
   def handle_cast({:tunnel, event}, state) do
     apply(state.stage, :takes, [{event.cast, event.params}, %{ event | from: state.id }])
@@ -32,24 +33,21 @@ defmodule Moongate.Stage.GenServer do
     |> no_reply
   end
 
-  def handle_cast({:pool_publish, pool, pid, tag}, state) do
-    pool_name = pool
-    |> Atom.to_string
-    |> String.split(".")
-    |> tl
-    |> hd
-
-    tell({:publish_to, pid, tag}, :pool, "#{Atom.to_string(state.id)}_#{String.downcase(pool_name)}")
-
-    {:noreply, state}
-  end
-
+  @doc """
+    Mutate the stage state to account for a dropped
+    member.
+  """
   def handle_cast({:depart, event}, state) do
     apply(state.stage, :departure, [event])
     |> mutations(state)
     |> no_reply
   end
 
+  @doc """
+    Mutate the stage state to account for a new
+    member based on the result of calling `arrival`
+    on the stage module.
+  """
   def handle_call({:arrive, origin}, _from, state) do
     apply(state.stage, :arrival, [
       %Moongate.StageEvent{

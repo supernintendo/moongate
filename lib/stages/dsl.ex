@@ -76,27 +76,6 @@ defmodule Moongate.Stage do
     client
   end
 
-  defmacro call(_event, target, callback, params) do
-    quote do
-      pool_name(unquote(target)[:__moongate_pool])
-      |> GenServer.call({:cause, unquote(callback), unquote(target), unquote(params)})
-    end
-  end
-
-  defmacro cast(_event, target, callback) do
-    quote do
-      pool_name(unquote(target)[:__moongate_pool])
-      |> GenServer.cast({:cause, unquote(callback), unquote(target)})
-    end
-  end
-
-  defmacro cast(_event, target, callback, params) do
-    quote do
-      pool_name(unquote(target)[:__moongate_pool])
-      |> GenServer.cast({:cause, unquote(callback), unquote(target), unquote(params)})
-    end
-  end
-
   defmacro find(module_name, params) do
     quote do
       pool_name(unquote(module_name))

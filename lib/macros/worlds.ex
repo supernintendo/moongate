@@ -9,7 +9,7 @@ defmodule Moongate.Macros.Worlds do
 
     quote do
       defp world_module do
-        Module.safe_concat(unquote(camel_world), "Game")
+        Module.safe_concat(unquote(camel_world), "World")
       end
 
       defp world_directory, do: world_directory(nil)

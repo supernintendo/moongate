@@ -1,4 +1,8 @@
 defmodule Moongate.Say do
+  @moduledoc """
+    Provides functions related to console output.
+  """
+
   @doc """
     A greeting message, output when the server is started.
   """

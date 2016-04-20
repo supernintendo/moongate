@@ -1,4 +1,4 @@
-defmodule Default.Game do
+defmodule Default.World do
   import Moongate
 
   stages %{

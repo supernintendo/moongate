@@ -1,4 +1,8 @@
 defmodule Moongate.StageEvent do
+  @moduledoc """
+    Represents a stage event. `into` is implemented to
+    allow the use of mutations.
+  """
   defstruct(
     from: nil,
     mutations: [],
@@ -6,11 +10,15 @@ defmodule Moongate.StageEvent do
     params: nil
   )
   defimpl Collectable do
-    defdelegate into(original), to: Moongate.Data, as: :into
+    defdelegate into(original), to: Moongate.Macros.Mutations, as: :into
   end
 end
 
 defmodule Moongate.Stage.GenServer.State do
+  @moduledoc """
+    Represents the state of a stage process. `into` is
+    implemented to allow the use of mutations.
+  """
   defstruct(
     id: nil,
     members: [],
@@ -18,6 +26,6 @@ defmodule Moongate.Stage.GenServer.State do
     stage: nil
   )
   defimpl Collectable do
-    defdelegate into(original), to: Moongate.Data, as: :into
+    defdelegate into(original), to: Moongate.Macros.Mutations, as: :into
   end
 end

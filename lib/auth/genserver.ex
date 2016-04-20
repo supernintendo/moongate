@@ -1,7 +1,7 @@
 defmodule Moongate.Auth.GenServer do
   @moduledoc """
-    Provides the behavior for authentication and account
-    creation.
+    Handles all authentication related messages. This
+    includes login and registration.
   """
   import Moongate.Macros.SocketWriter
   use GenServer
@@ -10,7 +10,11 @@ defmodule Moongate.Auth.GenServer do
   ### Public
 
   @doc """
-    Start the Moongate.Auth GenServer.
+    Start the authentication GenServer and initialize
+    state with the anonymous flag if it is set in the
+    current world's config.json - this effectively
+    causes authentication to be bypassed and is mostly
+    used for testing.
   """
   def start_link(config) do
     if config["anonymous"] do
@@ -21,7 +25,10 @@ defmodule Moongate.Auth.GenServer do
   end
 
   @doc """
-    Check whether a Moongate.Origin is authenticated.
+    Checks to see if an origin has the same id as
+    an authenticated session and that the origin
+    has been assigned an identifier equal to that
+    of the session.
   """
   def handle_call({:check_auth, origin}, _from, state) do
     has_id = Map.has_key?(state.sessions, origin.id)
@@ -37,7 +44,11 @@ defmodule Moongate.Auth.GenServer do
   end
 
   @doc """
-    Attempt to login with the provided credentials.
+    Query the database with the username and password
+    provided by the params of an event. If the username and
+    password are correct, add a session for the event's
+    origin to the GenServer state and notify the event
+    process making the request.
   """
   def handle_cast({"login", event}, state) do
     state = event.params
@@ -46,12 +57,18 @@ defmodule Moongate.Auth.GenServer do
 
     if Map.has_key?(state.sessions, event.origin.id) do
       {:auth, state.sessions[event.origin.id]}
-      |> tell_pid(event.origin.event_listener)
+      |> tell_pid(event.origin.events)
     end
 
     {:noreply, state}
   end
 
+  @doc """
+    Given the id of an origin, remove that id from the
+    sessions list if it exists, effectively treating it
+    as unauthenticated (as in the case of logging out,
+    for example).
+  """
   def handle_cast({:deauth, id}, state) do
     if Map.has_key?(state.sessions, id) do
       {:noreply, %{ state | sessions: state.sessions |> Map.delete(id) }}
@@ -61,7 +78,9 @@ defmodule Moongate.Auth.GenServer do
   end
 
   @doc """
-    Check if a user is logged in by email.
+    Check the sessions list for the email provided
+    by the params of an event and send a packet indicating
+    login status for the origin with that email.
   """
   def handle_cast({:is_logged_in, event}, state) do
     {email} = event.params
@@ -76,7 +95,9 @@ defmodule Moongate.Auth.GenServer do
   end
 
   @doc """
-    Create a new account with the given params if we're allowed.
+    Try to create a new account with the given params
+    and send a packet to the origin indicating whether
+    or not account creation was successful.
   """
   def handle_cast({:register, event}, state) do
     {email, password} = event.params
@@ -117,8 +138,8 @@ defmodule Moongate.Auth.GenServer do
     ])
   end
 
-  # Mutates state by assigning a new %Moongate.AuthSession
-  # to its sessions map, using the event listener's id
+  # Mutates state by assigning a new session to its
+  # sessions map, using the event process' id
   # as the key.
   defp create_session(state, {email, _}, id) do
     session = %Moongate.AuthSession{

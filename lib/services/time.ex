@@ -1,4 +1,7 @@
 defmodule Moongate.Time do
+  @moduledoc """
+    Provides functions related to time.
+  """
   use Timex
 
   def current_ms do

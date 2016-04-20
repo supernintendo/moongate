@@ -1,7 +1,7 @@
 defmodule Moongate.Pool do
   @moduledoc """
     Provides macros which describe the foundational data
-    structures and functions of a Moongate Pool. A Pool
+    structures and functions of a Moongate pool. A Pool
     may be thought of as a collection of similar entities
     within a game. Pools are a fundamental part of the
     Elixir DSL.

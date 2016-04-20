@@ -1,13 +1,10 @@
 defmodule Moongate.HTTP.Supervisor do
   @moduledoc """
-    This is a supervisor for Moongate.HTTP.GenServer only. It
-    uses the simple_one_for_one strategy, which allows supervised
-    processes to be dynamically added and killed.
-
-    When Moongate starts, the ports.json of the active world is
-    loaded and a Moongate.HTTP.GenServer is added to this supervisor
-    for every object with `protocol` set to `"HTTP"`. The key of
-    the object is used as the process' port.
+    This is a supervisor for a simple HTTP server. When
+    Moongate starts, the ports.json of the active world is
+    loaded and a process is added to this supervisor for
+    every object with `protocol` set to `"HTTP"`. The key
+    of the object is used as the process' port.
   """
   use Supervisor
 

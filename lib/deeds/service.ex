@@ -1,6 +1,15 @@
 defmodule Moongate.Deed.Service do
+  @moduledoc """
+    Provides functions related to working with deeds
+    (deeds contain functions which are used to interact
+    with members of pools).
+  """
   use Moongate.Macros.ExternalResources
 
+  @doc """
+    Check if a function is defined on the deed's
+    module.
+  """
   def has_function?(deed_module, func_name) do
     :functions
     |> deed_module.__info__
@@ -9,12 +18,12 @@ defmodule Moongate.Deed.Service do
     end)
   end
 
+  @doc """
+    Return the actual module name for a deed when only
+    given its first part.
+  """
   def deed_module(module_name) do
     [:"#{String.capitalize(world_name)}", Deeds, module_name]
     |> Module.safe_concat
-  end
-
-  def get_functions(module_name) do
-    apply(deed_module(module_name), :__info__, [:functions])
   end
 end

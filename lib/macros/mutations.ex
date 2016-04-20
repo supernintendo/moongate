@@ -2,6 +2,15 @@ defmodule Moongate.Macros.Mutations do
   defmacro __using__(opts) do
     quote do
       if unquote(opts[:genserver] == true) do
+        @doc """
+          Handle mutations.
+        """
+        def handle_call({:mutations, event}, _from, state) do
+          state = event |> mutations(state)
+
+          {:reply, :ok, state}
+        end
+
         def mutations(event, state) do
           (for mut <- event.mutations do
             mutation(mut, event, state)
@@ -20,5 +29,14 @@ defmodule Moongate.Macros.Mutations do
         %{map | mutations: map.mutations ++ [value]}
       end
     end
+  end
+
+  def into(original) do
+    {original, fn
+      map, {:cont, {k, v}} ->
+        :maps.put(k, v, map)
+      map, :done -> map
+    _, :halt -> :ok
+    end}
   end
 end

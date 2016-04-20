@@ -18,7 +18,7 @@ defmodule Moongate.Deed do
   end
 
   def get(member, key) do
-    Moongate.Data.pool_member_attr(member, key)
+    Moongate.Pool.Service.member_attr(member, key)
   end
 
   def tagged(_event, member, _message) do

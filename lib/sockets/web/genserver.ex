@@ -18,19 +18,19 @@ defmodule Moongate.Socket.Web.GenServer do
     client = listener |> Socket.Web.accept!
     client |> Socket.Web.accept!
 
-    event_listener = spawn_new(:event, %Moongate.Origin{
+    events = spawn_new(:event, %Moongate.Origin{
       id: UUID.uuid4(:hex),
       ip: nil,
       port: client,
       protocol: :web
     })
-    spawn(fn -> handle(event_listener, client) end)
+    spawn(fn -> handle(events, client) end)
 
     accept(listener)
   end
 
   # Receive messages from a socket connection.
-  defp handle(event_listener, client) do
+  defp handle(events, client) do
     case client |> Socket.Web.recv! do
       {:text, packet} ->
         safe_packet = Regex.replace(~r/[\n\b\t\r]/, packet, "")
@@ -39,13 +39,13 @@ defmodule Moongate.Socket.Web.GenServer do
         case Moongate.Packets.parse(packet) do
           {:error, error} when valid -> Moongate.Say.pretty("Bad packet #{safe_packet}: #{error}.", :red)
           {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
-          {:ok, parsed} -> tell_pid({:event, parsed, {client, :web}}, event_listener)
+          {:ok, parsed} -> tell_pid({:event, parsed, {client, :web}}, events)
         end
 
-        handle(event_listener, client)
+        handle(events, client)
       _ ->
-        tell_pid!(:cleanup, event_listener)
-        kill_by_pid(:event, event_listener)
+        tell_pid!(:cleanup, events)
+        kill_by_pid(:event, events)
     end
   end
 end

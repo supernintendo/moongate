@@ -1,4 +1,7 @@
 defmodule Moongate.Service.Stages do
+  @moduledoc """
+    Provides functions related to working with stages.
+  """
   use Moongate.Macros.Processes
 
   @doc """
