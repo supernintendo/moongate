@@ -10,7 +10,7 @@ defmodule Moongate.Deed.Service do
   end
 
   def deed_module(module_name) do
-    [String.to_atom(String.capitalize(world_name)), Deeds, module_name]
+    [:"#{String.capitalize(world_name)}", Deeds, module_name]
     |> Module.safe_concat
   end
 

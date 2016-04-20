@@ -32,7 +32,6 @@ defmodule Moongate.Pool.GenServer do
   end
 
   def handle_cast({:remove_from_pool, origin}, state) do
-    IO.inspect state.members
     state
     |> Map.put(:members, Enum.filter(state.members, &(elem(&1[:origin], 0).id != origin.id)))
     |> Map.put(:subscribers, Enum.filter(state.subscribers, &(&1.id != origin.id)))
@@ -93,12 +92,12 @@ defmodule Moongate.Pool.GenServer do
   end
 
   @doc """
-    Handle a pool member mutation event.
+    Handle a pool member transformation event.
   """
-  def handle_cast({:mutate, target, attribute, delta, params}, state) do
+  def handle_cast({:transform, target, attribute, delta, params}, state) do
     member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
     members = List.delete(state.members, member)
-    modified = %{state | members: members ++ [mutate(member, attribute, delta, params)]}
+    modified = %{state | members: members ++ [transform(member, attribute, delta, params)]}
     {:noreply, modified}
   end
 
@@ -171,27 +170,27 @@ defmodule Moongate.Pool.GenServer do
     {key, {params[key] || initial_value, []}}
   end
 
-  # Return a mutated pool member.
-  defp mutate(member, attribute, delta, params) do
-    {value, mutations} = member[attribute]
-    mutation = mutation_from(delta, params)
+  # Return a transformed pool member.
+  defp transform(member, attribute, delta, params) do
+    {value, transforms} = member[attribute]
+    transform = transform_from(delta, params)
 
-    if Enum.any?(mutations, &(Map.get(&1, :member) == params[:member])) do
-      old_mutation = hd(Enum.filter(mutations, &(Map.get(&1, :member) == params[:member])))
-      mutations = List.delete(mutations, old_mutation)
-      Keyword.put(member, attribute, {value + mutation_delta(old_mutation), mutations ++ [mutation]})
+    if Enum.any?(transforms, &(Map.get(&1, :member) == params[:member])) do
+      old_transform = hd(Enum.filter(transforms, &(Map.get(&1, :member) == params[:member])))
+      transforms = List.delete(transforms, old_transform)
+      Keyword.put(member, attribute, {value + transform_delta(old_transform), transforms ++ [transform]})
     else
-      Keyword.put(member, attribute, {value, mutations ++ [mutation]})
+      Keyword.put(member, attribute, {value, transforms ++ [transform]})
     end
   end
 
-  defp mutation_delta(mutation) do
-    time_passed = Moongate.Time.current_ms - mutation.time_started
-    mutation.by * time_passed
+  defp transform_delta(transform) do
+    time_passed = Moongate.Time.current_ms - transform.time_started
+    transform.by * time_passed
   end
 
-  defp mutation_from(delta, params) do
-    %Moongate.PoolMutation{
+  defp transform_from(delta, params) do
+    %Moongate.PoolTransform{
       by: delta,
       mode: params[:mode],
       time_started: Moongate.Time.current_ms
@@ -227,7 +226,7 @@ defmodule Moongate.Pool.GenServer do
   end
 
   defp set(member, attribute, new_value) do
-    {_old_value, mutations} = member[attribute]
-    Keyword.put(member, attribute, {new_value, mutations})
+    {_old_value, transforms} = member[attribute]
+    Keyword.put(member, attribute, {new_value, transforms})
   end
 end

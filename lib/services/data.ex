@@ -17,14 +17,6 @@ defmodule Moongate.Data do
     end}
   end
 
-  @doc """
-    Takes a map and a value and returns the same map
-    that value added to the end of its `mutations` list.
-  """
-  def mutate(map, value) do
-    %{map | mutations: map.mutations ++ [value]}
-  end
-
   def pool_member_attr(member, key) do
     mutations = elem(member[key], 1)
 

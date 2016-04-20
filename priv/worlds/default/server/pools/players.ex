@@ -11,5 +11,4 @@ defmodule Default.Pools.Player do
   }
   deeds [Movement, Test]
   public [:name, :x, :y, :direction]
-  listens [:foo]
 end

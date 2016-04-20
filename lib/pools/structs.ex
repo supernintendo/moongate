@@ -10,7 +10,7 @@ defmodule Moongate.Pool.GenServer.State do
   )
 end
 
-defmodule Moongate.PoolMutation do
+defmodule Moongate.PoolTransform do
   defstruct(
     by: 0,
     mode: "linear",

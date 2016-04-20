@@ -1,6 +1,8 @@
 defmodule Moongate.Stage.GenServer do
   import Moongate.Macros.SocketWriter
+  import Moongate.Stage.Mutations
   use GenServer
+  use Moongate.Macros.Mutations, genserver: true
   use Moongate.Macros.Processes
 
   def start_link(params) do
@@ -54,43 +56,9 @@ defmodule Moongate.Stage.GenServer do
         from: Process.info(self)[:registered_name],
         origin: origin
       }])
-    |> Moongate.Data.mutate({:join_this_stage, origin})
+    |> mutate({:join_this_stage, origin})
     |> mutations(state)
     |> reply(:ok)
-  end
-
-  defp mutations(event, state) do
-    (for mut <- event.mutations, do: mutation(mut, event, state))
-    |> Enum.filter(&(&1 != nil))
-    |> Enum.into(state)
-  end
-
-  defp mutation({:join_stage, stage_name}, event, state) do
-    tell_pid!({:mutations, event}, event.origin.event_listener)
-    nil
-  end
-
-  defp mutation({:join_this_stage, origin}, _event, state) do
-    {:members, state.members ++ [origin]}
-  end
-
-  defp mutation({:leave_from, origin}, _event, state) do
-    state.pools
-    |> Enum.map(&(tell({:remove_from_pool, origin}, :pool, &1)))
-
-    {:members, Enum.filter(state.members, &(&1.id != origin.id))}
-  end
-
-  defp mutation({:subscribe_to_pool, pool}, event, state) do
-    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
-    tell({:subscribe, event}, process)
-    nil
-  end
-
-  defp mutation({:create_in_pool, pool, params}, event, state) do
-    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
-    tell({:add_to_pool, Map.put(params, :origin, event.origin)}, process)
-    nil
   end
 
   @doc """

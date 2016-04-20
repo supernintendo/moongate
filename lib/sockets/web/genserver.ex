@@ -19,7 +19,6 @@ defmodule Moongate.Socket.Web.GenServer do
     client |> Socket.Web.accept!
 
     event_listener = spawn_new(:event, %Moongate.Origin{
-      dispatcher: spawn_new(:dispatcher),
       id: UUID.uuid4(:hex),
       ip: nil,
       port: client,

@@ -17,7 +17,6 @@ defmodule Moongate.Supervisor do
       worker(Moongate.Registry.GenServer, [], [id: :registry]),
       worker(Moongate.Repo, [], [id: :repo]),
       worker(Moongate.Auth.GenServer, [config], [id: :auth]),
-      supervisor(Moongate.Dispatcher.Supervisor, [], [id: :dispatcher]),
       supervisor(Moongate.Event.Supervisor, [], [id: :event]),
       supervisor(Moongate.Pool.Supervisor, [], [id: :pool]),
       supervisor(Moongate.Stage.Supervisor, [], [id: :stage]),

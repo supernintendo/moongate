@@ -1,7 +1,6 @@
 defmodule Moongate.Origin do
   defstruct(
     auth: %Moongate.AuthSession{email: nil, identity: "anon"},
-    dispatcher: nil,
     event_listener: nil,
     id: nil,
     ip: nil,

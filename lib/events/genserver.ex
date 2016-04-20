@@ -3,7 +3,9 @@ defmodule Moongate.Event.GenServer do
     Provides functionality for a client's event listener.
   """
   import Moongate.Macros.SocketWriter
+  import Moongate.Event.Mutations
   use GenServer
+  use Moongate.Macros.Mutations, genserver: true
   use Moongate.Macros.Processes
   use Moongate.Macros.Worlds
 
@@ -64,7 +66,7 @@ defmodule Moongate.Event.GenServer do
       origin: state.origin
     }
     Enum.map(state.stages, fn(stage) ->
-      tell({:depart, event}, String.to_atom("stage_#{Atom.to_string(stage)}"))
+      tell({:depart, event}, :"stage_#{Atom.to_string(stage)}")
     end)
     tell({:deauth, state.origin.id}, :auth)
 
@@ -112,25 +114,6 @@ defmodule Moongate.Event.GenServer do
   # of the origin of this event listener.
   defp is_logged_in?(state) do
     state.origin.auth.identity != "anon"
-  end
-
-  defp mutations(event, state) do
-    (for mut <- event.mutations, do: mutation(mut, event, state))
-    |> Enum.into(state)
-  end
-
-  defp mutation({:join_stage, stage_name}, event, state) do
-    Moongate.Service.Stages.arrive(event.origin, stage_name)
-
-    {:stages, state.stages ++ [stage_name]}
-  end
-
-  defp mutation({:leave_from, origin}, event, state) do
-    {:stages, Enum.filter(state.stages, &(&1 != event.from)) }
-  end
-
-  defp mutation({:set_target_stage, stage_name}, _event, state) do
-    {:target_stage, stage_name}
   end
 
   # Do nothing.
@@ -188,5 +171,39 @@ defmodule Moongate.Event.GenServer do
        origin: state.origin
      }}
     |> tell("stage", state.target_stage)
+  end
+
+  def handle_cast({:write, tag, name, message}, state) do
+    timestamp = Moongate.Time.current_ms
+    tag = Atom.to_string(tag)
+
+    if is_list(message) do
+      parts = Enum.map(message, &Moongate.Atoms.to_strings/1)
+      parsed_parts = String.strip(Enum.join(parts, "·"))
+      packet_length = byte_size("#{timestamp}" <> name <> tag <> List.to_string(parts))
+      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{parsed_parts}}"
+    else
+      packet_length = byte_size("#{timestamp}" <> name <> tag <> message)
+      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{String.strip(message)}}"
+    end
+
+    write(state.origin.protocol, state.origin, parsed_message)
+
+    {:noreply, state}
+  end
+
+  defp write(:tcp, target, message) do
+    target.port |> Socket.Stream.send!(message)
+  end
+
+  defp write(:udp, target, message) do
+    target.port |> Socket.Datagram.send!(message, {target.ip, String.to_integer(target.id)})
+  end
+
+  defp write(:web, target, message) do
+    target.port |> Socket.Web.send!({:text, message})
+  end
+
+  defp write(protocol, target, message) do
   end
 end

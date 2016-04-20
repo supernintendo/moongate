@@ -1,10 +1,6 @@
 defmodule Default.Deeds.Movement do
   import Moongate.Deed
 
-  @transform %{
-    mode: "linear",
-    tag: "movement"
-  }
   attributes %{
     direction: :string,
     speed: :float,
@@ -27,16 +23,16 @@ defmodule Default.Deeds.Movement do
     speed = this |> get(:speed)
 
     cond do
-      x < 0 -> this |> mutate(:x, -speed, @transform)
-      y < 0 -> this |> mutate(:y, -speed, @transform)
-      x > 0 -> this |> mutate(:x, speed, @transform)
-      y > 0 -> this |> mutate(:y, speed, @transform)
+      x < 0 -> this |> lin(:x, -speed)
+      y < 0 -> this |> lin(:y, -speed)
+      x > 0 -> this |> lin(:x, speed)
+      y > 0 -> this |> lin(:y, speed)
     end
   end
 
   defp stop_moving(this, x, y) do
-    if (x != 0), do: this |> mutate(:x, 0, @transform)
-    if (y != 0), do: this |> mutate(:y, 0, @transform)
+    if (x != 0), do: this |> lin(:x, 0)
+    if (y != 0), do: this |> lin(:y, 0)
   end
 
   defp set_direction(this, x, y) do

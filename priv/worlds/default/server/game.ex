@@ -5,7 +5,6 @@ defmodule Default.Game do
     login_screen: Default.Stage.LoginScreen,
     test_level: Default.Stage.Level
   }
-
   @doc """
     This is called when a player connects
     to the server.

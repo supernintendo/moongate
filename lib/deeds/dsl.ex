@@ -25,9 +25,12 @@ defmodule Moongate.Deed do
     {:tagged, :drop, "pool_#{member[:__moongate_pool_name]}", "#{member[:__moongate_pool_index]}"}
   end
 
-  defmacro mutate(target, attribute, delta, params) do
+  defmacro lin(target, attribute, delta) do
+  end
+
+  defmacro transform(target, attribute, delta) do
     quote do
-      GenServer.cast(self(), {:mutate, unquote(target), unquote(attribute), unquote(delta), unquote(params)})
+      GenServer.cast(self(), {:transform, unquote(target), unquote(attribute), unquote(delta)})
     end
   end
 

@@ -1,10 +1,11 @@
 defmodule Moongate do
+  use Moongate.Macros.Mutations
   use Moongate.Macros.Processes
 
   def arrive!(event, stage_name) do
     event
-    |> Moongate.Data.mutate({:join_stage, stage_name})
-    |> Moongate.Data.mutate({:set_target_stage, stage_name})
+    |> mutate({:join_stage, stage_name})
+    |> mutate({:set_target_stage, stage_name})
   end
 
   defmacro stages(stage_map) do
