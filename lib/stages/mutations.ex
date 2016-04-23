@@ -1,4 +1,5 @@
 defmodule Moongate.Stage.Mutations do
+  import Moongate.Macros.SocketWriter
   use Moongate.Macros.Processes
 
   def mutation({:join_stage, stage_name}, event, state) do
@@ -10,9 +11,10 @@ defmodule Moongate.Stage.Mutations do
     {:members, state.members ++ [origin]}
   end
 
-  def mutation({:leave_from, origin}, _event, state) do
+  def mutation({:leave_from, origin}, event, state) do
     state.pools
     |> Enum.map(&(tell({:remove_from_pool, origin}, :pool, &1)))
+    write_to(origin, :leave, "stage", "#{state.id}")
 
     {:members, Enum.filter(state.members, &(&1.id != origin.id))}
   end

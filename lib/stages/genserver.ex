@@ -38,6 +38,8 @@ defmodule Moongate.Stage.GenServer do
     member.
   """
   def handle_cast({:depart, event}, state) do
+    notify_depart(state, event.origin)
+
     apply(state.stage, :departure, [event])
     |> mutations(state)
     |> no_reply
@@ -49,11 +51,13 @@ defmodule Moongate.Stage.GenServer do
     on the stage module.
   """
   def handle_call({:arrive, origin}, _from, state) do
+    notify_arrive(state, origin)
+
     apply(state.stage, :arrival, [
       %Moongate.StageEvent{
         from: Process.info(self)[:registered_name],
         origin: origin
-      }])
+    }])
     |> mutate({:join_this_stage, origin})
     |> mutations(state)
     |> reply(:ok)
@@ -85,5 +89,19 @@ defmodule Moongate.Stage.GenServer do
     spawn_new(:pool, {process_name, state.id, pool})
 
     String.to_atom(process_name)
+  end
+
+  defp notify_arrive(state, origin) do
+    write_to(origin, :join, "stage",
+      "#{state.id} #{Moongate.Pool.Service.to_string_list(state.pools)}"
+    )
+    state
+  end
+
+  def notify_depart(state, origin) do
+    write_to(origin, :leave, "stage",
+      "#{state.id}"
+    )
+    state
   end
 end

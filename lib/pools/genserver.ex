@@ -32,10 +32,12 @@ defmodule Moongate.Pool.GenServer do
   """
   def handle_cast({:add_to_pool, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
+    member = new_pool_member(attributes, state)
 
     state
+    |> Map.put(:members, state.members ++ [member])
     |> Map.put(:index, state.index + 1)
-    |> Map.put(:members, state.members ++ [new_pool_member(attributes, state)])
+    |> notify_subscribers_of_new_member(member)
     |> no_reply
   end
 
@@ -83,21 +85,6 @@ defmodule Moongate.Pool.GenServer do
   end
 
   @doc """
-    Send a packet to an origin describing the shape of
-    members of this pool.
-  """
-  def handle_cast({:describe, origin}, state) do
-    attributes = Enum.map(state.attributes, fn(attribute) ->
-      case attribute do
-        {key, {type, _value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
-        {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type) <> "¦"
-      end
-    end)
-    write_to(origin, :describe, List.to_string(attributes))
-    {:noreply, state}
-  end
-
-  @doc """
     Handle a pool member transformation event.
   """
   def handle_cast({:transform, target, attribute, delta, params}, state) do
@@ -126,6 +113,7 @@ defmodule Moongate.Pool.GenServer do
   """
   def handle_cast({:subscribe, event}, state) do
     %{state | subscribers: state.subscribers ++ [event.origin]}
+    |> notify_subscribed(event.origin)
     |> no_reply
   end
 
@@ -223,6 +211,37 @@ defmodule Moongate.Pool.GenServer do
     ] ++ attributes
   end
 
+  defp notify_subscribed(state, origin) do
+    write_to(origin, :subscribe, "pool", "#{state.name} #{pool_attributes_string(state)}")
+    state
+  end
+
+  defp notify_subscribers_of_new_member(state, member) do
+    whitelist = publishable_attributes(state)
+
+    member
+    |> Enum.filter(fn ({key, _value}) ->
+      whitelist |> Enum.any?(&(&1 == key))
+    end)
+    |> Moongate.Pool.Service.member_to_string
+    |> (fn (attributes) ->
+      "#{state.name} #{member[:__moongate_pool_index]} #{attributes}"
+    end).()
+    |> write_to_all_subscribers(:member_created, state)
+
+    state
+  end
+
+  defp pool_attributes_string(state) do
+    Enum.map(state.attributes, fn(attribute) ->
+      case attribute do
+        {key, {type, _value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type)
+        {key, {type}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type)
+      end
+    end)
+    |> Enum.join(" ")
+  end
+
   # Call a function defined on the pool module with a member of
   # the pool designated as a target. That member, along with
   # a list of all members and any provided params will be
@@ -244,9 +263,21 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
+  defp publishable_attributes(state) do
+    state.spec
+    |> Moongate.Pool.Service.pool_module
+    |> apply(:__moongate__pool_publishes, [])
+  end
+
   # Set one of a pool member's attributes to a new value.
   defp set(member, attribute, new_value) do
     {_old_value, transforms} = member[attribute]
     Keyword.put(member, attribute, {new_value, transforms})
+  end
+
+  defp write_to_all_subscribers(message, action, state) do
+    for subscriber <- state.subscribers do
+      write_to(subscriber, action, "pool", message)
+    end
   end
 end

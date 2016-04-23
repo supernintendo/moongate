@@ -36,6 +36,19 @@ defmodule Moongate.Pool.Service do
     end
   end
 
+  def member_to_string(member) do
+    member
+    |> Enum.map(fn({key, value}) -> {key, member_attr(member, key)} end)
+    |> Enum.map(fn({key, value}) ->
+      case value do
+        %Moongate.Origin{} -> {key, value.auth.identity}
+        _ -> {key, value}
+      end
+    end)
+    |> Enum.map(fn({key, value}) -> "#{key}:¦#{value}¦" end)
+    |> Enum.join(" ")
+  end
+
   @doc """
     Return the actual module name for a pool when only
     given its first part.
@@ -54,5 +67,19 @@ defmodule Moongate.Pool.Service do
   end
 
   def publish_to_subscriber(_member, _subscriber, _attributes) do
+  end
+
+  @doc """
+    Transform a list of atoms representing pool process
+    names to a string containing the comma-separate
+    pool names. The stage name is removed from each
+    name.
+  """
+  def to_string_list(pools) do
+    pools
+    |> Enum.map(&("#{&1}"))
+    |> Enum.map(&(String.split(&1, "__")))
+    |> Enum.map(&(&1 |> tl |> hd))
+    |> Enum.join(" ")
   end
 end

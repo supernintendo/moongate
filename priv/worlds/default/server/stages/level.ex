@@ -2,7 +2,7 @@ defmodule Default.Stage.Level do
   import Moongate.Stage
 
   meta %{}
-  pools [Player]
+  pools [Player, Message]
 
   @doc """
     This is called when a player joins this

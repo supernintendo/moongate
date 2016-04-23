@@ -8,7 +8,7 @@ class Stage {
         let key = Utils.camelize(id);
 
         if (!this[key]) {
-            this[key] = new Pool(schema);
+            this[key] = new Pool(key, schema);
         }
     }
 }

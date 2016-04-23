@@ -1,16 +1,16 @@
-const Bindings = require('./moongate/bindings'),
-      Console = require('./moongate/console'),
-      Packets = require('./moongate/packets'),
-      Pools = require('./moongate/pools'),
-      Pool = require('./moongate/pool'),
-      Stages = require('./moongate/stages'),
-      State = require('./moongate/state'),
-      Utils = require('./moongate/utils');
+const Bindings = require('./lib/bindings'),
+      Console = require('./lib/console'),
+      Packets = require('./lib/packets'),
+      Pools = require('./lib/pools'),
+      Pool = require('./lib/pool'),
+      Stages = require('./lib/stages'),
+      State = require('./lib/state'),
+      Utils = require('./lib/utils');
 
 class Moongate {
     constructor(bindings = {}, extensions = {}) {
         this['🔮'] = 'v0.1.1';
-        this.status = 'disconnected';
+        this.connected = false;
         this.state = new State();
         this.stages = new Stages();
         this.bindings = new Bindings({
@@ -29,8 +29,8 @@ class Moongate {
 
     // Execute a State callback if it exists.
     callback(name, args) {
-        if (this.bindings[name] instanceof Function) {
-            return this.bindings[name].apply(this, args);
+        if (this.bindings.client[name] instanceof Function) {
+            return this.bindings.client[name].apply(this, args);
         }
         return false;
     }
@@ -42,7 +42,7 @@ class Moongate {
             delete this.socket;
         }
         this.ping = null;
-        this.status = 'disconnected';
+        this.connected = false;
         this.log('disconnected');
 
         return true;
@@ -70,6 +70,8 @@ class Moongate {
 
     // Given a username and password, send a login request.
     login(username, password) {
+        this.state.username = username;
+
         this.send(':auth', 'login', username, password);
     }
 
@@ -108,7 +110,7 @@ class Moongate {
 
     // Send a prepared packet to the server.
     send(...parts) {
-        if (this.status !== 'connected') {
+        if (!this.connected) {
             return console.warn('Moongate is not connected. Please refresh the page to reconnect.');
         }
         let delimiter = this.delimiter || '·',
@@ -134,20 +136,17 @@ class Moongate {
     // Execute the appropriate callback for a packet.
     use(parts) {
         let event = Packets.parse(parts, {authToken: this.state.authToken}),
-            callbackName = Moongate.callbackNameForEvent(event);
+            callbackName = Utils.camelize(event.action),
+            scope = this.bindings[event.from];
 
-        if (this.bindings[callbackName] && this.bindings[callbackName] instanceof Function) {
-            this.bindings[callbackName].apply(this, [event.id].concat(event.params));
+        if (scope && scope[callbackName] && scope[callbackName] instanceof Function) {
+            scope[callbackName].apply(this, [event.id].concat(event.params));
         }
     }
 
-    static callbackNameForEvent(event) {
-        return Utils.camelize(`${event.from}${Utils.uppercase(event.action)}`);
-    }
-
     static connected(callback) {
-        this.status = 'connected';
-        this.log('connected');
+        this.connected = true;
+        this.log('connected', this.socket.url);
 
         if (callback instanceof Function) {
             return callback();
@@ -163,6 +162,7 @@ class Moongate {
             let [time, target, action, ...params] = parts;
 
             Moongate.updatePing(time);
+
             this.use(parts);
         }
     }

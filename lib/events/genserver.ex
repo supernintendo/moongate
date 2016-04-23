@@ -30,7 +30,7 @@ defmodule Moongate.Event.GenServer do
   """
   def handle_cast({:init}, state) do
     %Moongate.StageEvent{
-      origin: state.origin
+      origin: %{ state.origin | events: self }
     }
     |> Moongate.Worlds.world_apply(:connected)
     |> mutations(state)
@@ -90,16 +90,13 @@ defmodule Moongate.Event.GenServer do
   def handle_cast({:write, tag, name, message}, state) do
     timestamp = Moongate.Time.current_ms
     tag = Atom.to_string(tag)
+    packet_length = "#{timestamp}"
+    <> String.strip(name)
+    <> String.strip(tag)
+    <> String.strip(message)
+    |> byte_size
 
-    if is_list(message) do
-      parts = Enum.map(message, &Moongate.Atoms.to_strings/1)
-      parsed_parts = String.strip(Enum.join(parts, "·"))
-      packet_length = byte_size("#{timestamp}" <> name <> tag <> List.to_string(parts))
-      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{parsed_parts}}"
-    else
-      packet_length = byte_size("#{timestamp}" <> name <> tag <> message)
-      parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{String.strip(message)}}"
-    end
+    parsed_message = "#{packet_length}{#{timestamp}·#{name}·#{tag}·#{String.strip(message)}}"
 
     write(state.origin.protocol, state.origin, parsed_message)
 

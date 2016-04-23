@@ -1,5 +1,23 @@
+let Utils = require('./utils'),
+    encoder =  new TextEncoder('utf-8');
+
 class Packets {
     constructor() {
+    }
+
+    static byteSize(str) {
+        var m = encodeURIComponent(str).match(/%[89ABab]/g);
+
+        return str.length + (m ? m.length : 0);
+    }
+
+    static kv(string) {
+        return string.split('¦ ').reduce((acc, pair) => {
+            let [key, value] = pair.split(':¦');
+
+            acc[key] = value;
+            return acc;
+        }, {});
     }
 
     // Return an object literal containing the parts of a raw packet.
@@ -28,6 +46,24 @@ class Packets {
         }
     }
 
+    static target(parts) {
+        let scope = parts.split(' ').slice(0, 2),
+            [stageName, poolName] = scope[0].split('__'),
+            index = scope[1],
+            stage = this.stages && this.stages[Utils.camelize(stageName)],
+            pool = poolName && stage && stage[Utils.camelize(poolName)],
+            result = {};
+
+        if (index)
+            result['index'] = Number(index);
+        if (stage)
+            result['stage'] = stage;
+        if (pool)
+            result['pool'] = pool;
+
+        return result;
+    }
+
     // Deconstruct a packet string to a packet array.
     static unravel(message) {
         let [length, contents] = message.split(/{(.*?)}/g),
@@ -38,24 +74,6 @@ class Packets {
             return parts;
         }
         return [];
-    }
-
-    static byteSize(str) {
-        var s = str.length;
-
-        for (var i = str.length - 1; i >= 0; i--) {
-            var code = str.charCodeAt(i);
-
-            if (code > 0x7f && code <= 0x7ff) {
-                s++;
-            } else if (code > 0x7ff && code <= 0xffff) {
-                s+=2;
-            }
-            if (code >= 0xDC00 && code <= 0xDFFF) {
-                i--; //trail surrogate
-            }
-        }
-        return s;
     }
 }
 export default Packets
