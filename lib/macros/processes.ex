@@ -86,6 +86,7 @@ defmodule Moongate.Macros.Processes do
       defp tell(message, name) do
         pid = Process.whereis(name)
         capabilities = capabilities_for(pid)
+
         if capabilities.can_be_cast_to, do: GenServer.cast(name, message)
         if capabilities.can_receive, do: send(pid, message)
       end

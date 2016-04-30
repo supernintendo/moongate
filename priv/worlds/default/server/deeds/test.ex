@@ -3,12 +3,12 @@ defmodule Default.Deeds.Test do
 
   attributes %{}
 
-  def foo(this) do
-    this
+  def foo(entity) do
+    entity
     |> announce(:foo)
   end
 
-  def announced({Player, :foo}, this) do
-    this
+  def announced({Player, :foo}, entity) do
+    entity
   end
 end

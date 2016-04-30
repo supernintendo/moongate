@@ -97,6 +97,13 @@ defmodule Moongate.Packets do
     end
   end
 
+  def whitelist(collection, list) do
+    collection
+    |> Enum.filter(fn ({key, _value}) ->
+      list |> Enum.any?(&(&1 == key))
+    end)
+  end
+
   @doc """
     Takes a packet list and returns the same
     list without brackets.

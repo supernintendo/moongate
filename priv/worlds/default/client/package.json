@@ -15,7 +15,6 @@
         "clean-css-brunch": ">= 1.0 < 1.9",
         "css-brunch": ">= 1.0 < 1.9",
         "javascript-brunch": ">= 1.0 < 1.9",
-        "pixi.js": "3.0.8",
         "uglify-js-brunch": ">= 1.0 < 1.9"
     }
 }

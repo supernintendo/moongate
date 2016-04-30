@@ -5,9 +5,8 @@ const Events = require('./events'),
       Utils = require('./utils');
 
 class Bindings {
-    constructor(params) {
-        let {bindings, parent} = params,
-            k = Object.keys(bindings),
+    constructor({bindings, parent}) {
+        let k = Object.keys(bindings),
             l = k.length;
 
         this.client = {
@@ -15,7 +14,7 @@ class Bindings {
             keydown: bindings.keydown || () => {},
             keypress: bindings.keypress || () => {},
             keyup: bindings.keyup || () => {},
-            tick: bindings.tick || () => {},
+            tick: Bindings.tick.bind(parent, bindings.tick || () => {}),
         };
         this.event = Events;
         this.stage = Stages;
@@ -66,6 +65,30 @@ class Bindings {
                 window.removeEventListener(key, this[`${key}Handled`].bind(this, parent));
             }
         });
+    }
+    static tick(callback, ...params) {
+        Utils.entries(this.stages).forEach(([k, v]) => {
+            Utils.entries(v).forEach(([k, v]) => {
+                let pool = v;
+
+                Utils.entries(v.transformations).forEach(([k, v]) => {
+                    let attribute = k;
+
+                    Utils.entries(v).forEach(([k, v]) => {
+                        let index = k;
+
+                        Utils.entries(v).forEach(([name, [type, amount]]) => {
+                            switch (type) {
+                            case 'lin':
+                            default:
+                                pool.members[index][attribute] = pool.members[index][attribute] + amount;
+                            }
+                        });
+                    });
+                });
+            });
+        });
+        callback.apply(this, params);
     }
 }
 export default Bindings

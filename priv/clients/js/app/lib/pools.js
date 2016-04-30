@@ -1,4 +1,5 @@
 const Packets = require('./packets'),
+      Pool = require('./pool'),
       Stage = require('./stage'),
       Utils = require('./utils');
 
@@ -16,6 +17,9 @@ class Pools {
      Here, each property is delimited by a ' '. Key name and
      type are delimited by ':'.
      */
+    static create(parts) {
+        return Pools.poolUpdate.apply(this, arguments);
+    }
     static parseSchema(pairs) {
         let l = pairs.length,
             results = {};
@@ -29,15 +33,26 @@ class Pools {
         }
         return results;
     }
-    static memberCreated(id, parts) {
+    static remove(parts) {
+        let target = Packets.target.call(this, parts);
+
+        if (target.pool) {
+            target.pool.remove(target.index);
+        }
+    }
+    static poolUpdate(parts) {
         let attributes = Packets.kv(parts.split(' ').slice(2).join(' ')),
             target = Packets.target.call(this, parts);
 
         if (target.pool) {
             target.pool.update(target.index, attributes);
         }
+        return target.pool.get(target.index);
     }
-    static subscribe(id, parts) {
+    static refresh(parts) {
+        return Pools.poolUpdate.apply(this, arguments);
+    }
+    static subscribe(parts) {
         let [stageNameAndPoolName, ...attributes] = parts.split(' '),
             [stageName, poolName] = stageNameAndPoolName.split('__'),
             schema = Pools.parseSchema(attributes),
@@ -50,6 +65,23 @@ class Pools {
                 Stage.addPool.apply(stage, [Utils.camelize(poolName), schema]);
             }
         }
+        return stage;
+    }
+    static transform(parts) {
+        let target = Packets.target.call(this, parts),
+            [transform, key, delta] = parts.split(' ').slice(2),
+            [type, tag] = transform.split(':');
+
+        if (!target.pool.transformations[key]) {
+            target.pool.transformations[key] = {};
+        }
+        if (!target.pool.transformations[key][target.index]) {
+            target.pool.transformations[key][target.index] = {};
+        }
+        target.pool.transformations[key][target.index][tag] = [
+            type,
+            Pool.conform(delta, target.pool.schema[key])
+        ];
     }
 }
 export default Pools

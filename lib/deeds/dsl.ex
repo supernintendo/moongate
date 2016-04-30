@@ -10,6 +10,7 @@ defmodule Moongate.Deed do
 
     <ProjectName>.Deeds.<NameOfPool>
   """
+  use Moongate.Macros.Mutations
 
   def announce(member, message) do
   end
@@ -17,26 +18,26 @@ defmodule Moongate.Deed do
   def announce(member, message, params) do
   end
 
+  def lin(member, attribute, tag, delta) do
+    member
+    |> mutate({:transform, :lin, attribute, tag, delta})
+  end
+
   def get(member, key) do
     Moongate.Pool.Service.member_attr(member, key)
+  end
+
+  def set(member, key, value) do
+    member
   end
 
   def tagged(_event, member, _message) do
     {:tagged, :drop, "pool_#{member[:__moongate_pool_name]}", "#{member[:__moongate_pool_index]}"}
   end
 
-  defmacro lin(target, attribute, delta) do
-  end
-
   defmacro transform(target, attribute, delta) do
     quote do
       GenServer.cast(self(), {:transform, unquote(target), unquote(attribute), unquote(delta)})
-    end
-  end
-
-  defmacro set(target, attribute, value) do
-    quote do
-      GenServer.cast(self(), {:set, unquote(target), unquote(attribute), unquote(value)})
     end
   end
 

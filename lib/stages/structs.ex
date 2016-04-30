@@ -1,11 +1,11 @@
 defmodule Moongate.StageEvent do
   @moduledoc """
-    Represents a stage event. `into` is implemented to
-    allow the use of mutations.
+    Represents a stage event. `into` is
+    implemented to allow the use of mutations.
   """
   defstruct(
+    __moongate_mutations: [],
     from: nil,
-    mutations: [],
     origin: nil,
     params: nil
   )

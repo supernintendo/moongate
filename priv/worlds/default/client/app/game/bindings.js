@@ -22,7 +22,6 @@ let Bindings = {
         }
     },
     tick(game) {
-        game.canvas.tick();
     }
 };
 export default Bindings;

@@ -9,7 +9,7 @@ defmodule Moongate.ClientEvent do
     cast: nil,
     error: nil,
     from: nil,
-    mutations: [],
+    __moongate_mutations: [],
     origin: nil,
     params: nil,
     to: nil,

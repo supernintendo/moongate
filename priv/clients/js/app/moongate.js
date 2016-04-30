@@ -113,6 +113,9 @@ class Moongate {
         if (!this.connected) {
             return console.warn('Moongate is not connected. Please refresh the page to reconnect.');
         }
+        if (parts.length === 0) {
+            return false;
+        }
         let delimiter = this.delimiter || '·',
             outgoing = Packets.outgoing(delimiter, parts);
 
@@ -122,15 +125,12 @@ class Moongate {
     }
 
     // Execute a callback on tick.
-    tick(tick, params = []) {
+    tick(...params) {
         this.callback('tick', params);
 
-        if (tick) {
-            this.state.ticking = true;
-        }
-        if (this.state.ticking) {
-            window.requestAnimationFrame(this.tick.bind(this, null, params));
-        }
+        window.requestAnimationFrame(() => {
+            this.tick.apply(this, params);
+        });
     }
 
     // Execute the appropriate callback for a packet.
@@ -139,8 +139,13 @@ class Moongate {
             callbackName = Utils.camelize(event.action),
             scope = this.bindings[event.from];
 
-        if (scope && scope[callbackName] && scope[callbackName] instanceof Function) {
-            scope[callbackName].apply(this, [event.id].concat(event.params));
+        if (scope && scope[callbackName] instanceof Function) {
+            let result = scope[callbackName].apply(this, event.params);
+
+            if (this.bindings.client[event.from] && this.bindings.client[event.from][callbackName] instanceof Function) {
+                result = this.bindings.client[event.from].apply(this, [result]);
+            }
+            return result;
         }
     }
 

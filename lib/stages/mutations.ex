@@ -19,6 +19,8 @@ defmodule Moongate.Stage.Mutations do
     {:members, Enum.filter(state.members, &(&1.id != origin.id))}
   end
 
+  def mutation({:set_target_stage, _}, _, _), do: nil
+
   def mutation({:subscribe_to_pool, pool}, event, state) do
     process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
     tell({:subscribe, event}, process)

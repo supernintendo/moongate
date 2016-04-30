@@ -31,7 +31,7 @@ defmodule Moongate.Stage do
   def travel(event, stage_name) do
     event
     |> depart
-    |> mutate({:join_stage, stage_name})
+    |> arrive!(stage_name)
   end
 
   def subscribe(event, pool_name) do

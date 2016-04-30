@@ -143,7 +143,7 @@ defmodule Moongate.Event.GenServer do
   defp use_message({:deed, message}, state) do
     {:use_deed, %Moongate.ClientEvent{
       cast: message |> tl |> hd,
-      to: message |> target_process(state),
+      to: target_process(message, state),
       params: message |> tl |> tl |> List.to_tuple,
       origin: state.origin,
       use_deed: message |> hd |> String.split(".") |> tl |> hd
@@ -157,7 +157,7 @@ defmodule Moongate.Event.GenServer do
     {:use_all_deeds,
      %Moongate.ClientEvent{
        cast: message |> tl |> hd,
-       to: message |> target_process(state),
+       to: target_process(message, state),
        params: message |> tl |> tl |> List.to_tuple,
        origin: state.origin
      }}
@@ -183,7 +183,7 @@ defmodule Moongate.Event.GenServer do
   defp use_message({:stage, message}, state) do
     {:tunnel,
      %Moongate.ClientEvent{
-       cast: message |> hd,
+       cast: hd(message),
        to: state.target_stage,
        params: message |> tl |> List.to_tuple,
        origin: state.origin

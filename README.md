@@ -1,6 +1,6 @@
-# Moongate #
+# Moongate
 
-_A game server with a little magic_.
+_A server with a little magic_.
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -8,26 +8,22 @@ _A game server with a little magic_.
 
 ### Overview ###
 
-Moongate is a multiplayer game server written in Elixir. It contains a DSL for managing game state and communicating with clients, providing a simple backbone for your serverside code.
-
-Moongate supports TCP, UDP and WebSockets. A JavaScript client is included, allowing you to write multiplayer web games out of the box.
+Moongate is a server and application platform for the [Elixir Programming Language](http://elixir-lang.org/). It provides a DSL (domain-specific language) which allows developers to create synchronized, networked experiences.
 
 <!--A guide on how to get started with Moongate can be found [here](). Full API documentation is [provided as well]().-->
 
-### Installing ###
-Make sure you have the following dependencies:
+### Dependencies ###
 
 * Elixir 1.0.5+
 * PostgreSQL 9.3.5+
 
-Once you do, simply clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations.
+### Installation ###
 
-### Running ###
-Simply use `iex -S mix` for now. Deployment and running in production is not currently supported.
+Clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, run `iex -S mix` or `mix` to start the server.
 
 ### Status ###
 
-Moongate is **early software**. At this time, future versions are not guaranteed to be backwards compatible.
+Moongate is **young software**. Features may be missing or incomplete and use in production is not supported.
 
 ### License ###
 

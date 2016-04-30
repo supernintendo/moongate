@@ -27,8 +27,8 @@ defmodule Moongate.Pool.Service do
     mutations = elem(member[key], 1)
 
     if length(mutations) > 0 do
-      mod = Enum.reduce(mutations, 0, fn(mutation, acc) ->
-        acc + mutation.by * (Moongate.Time.current_ms - mutation.time_started)
+      mod = Enum.reduce(mutations, 0, fn({type, tag, amount, time_started}, acc) ->
+        acc + amount * (Moongate.Time.current_ms - time_started)
       end)
       elem(member[key], 0) + mod
     else

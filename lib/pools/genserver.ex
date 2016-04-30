@@ -1,7 +1,9 @@
 defmodule Moongate.Pool.GenServer do
   import Moongate.Macros.SocketWriter
+  import Moongate.Pool.Mutations
   use GenServer
   use Moongate.Macros.ExternalResources
+  use Moongate.Macros.Mutations, genserver: true
   use Moongate.Macros.Processes
 
   ### Public
@@ -37,7 +39,7 @@ defmodule Moongate.Pool.GenServer do
     state
     |> Map.put(:members, state.members ++ [member])
     |> Map.put(:index, state.index + 1)
-    |> notify_subscribers_of_new_member(member)
+    |> member_update(member, :create)
     |> no_reply
   end
 
@@ -46,9 +48,14 @@ defmodule Moongate.Pool.GenServer do
     subscribers.
   """
   def handle_cast({:remove_from_pool, origin}, state) do
+    member = state.members
+    |> Enum.filter(&(elem(&1[:origin], 0).id == origin.id))
+    |> List.first
+
     state
-    |> Map.put(:members, Enum.filter(state.members, &(elem(&1[:origin], 0).id != origin.id)))
+    |> Map.put(:members, Enum.filter(state.members, &(&1 != member)))
     |> Map.put(:subscribers, Enum.filter(state.subscribers, &(&1.id != origin.id)))
+    |> member_removed(member[:__moongate_pool_index])
     |> no_reply
   end
 
@@ -67,21 +74,11 @@ defmodule Moongate.Pool.GenServer do
     Call a function within a deed defined on this pool.
   """
   def handle_cast({:use_deed, event}, state) do
-    member = find_owned_member(event.origin, state)
-
-    if member !=nil do
-      if event.use_deed != nil do
-        valid = Enum.any?(Moongate.Pool.Service.get_deeds(state.spec), fn deed ->
-          Moongate.Atoms.to_strings(deed) == event.use_deed
-        end)
-        if valid do
-          if (Moongate.Deed.Service.has_function?(Moongate.Deed.Service.deed_module(event.use_deed), event.cast)) do
-            apply(Moongate.Deed.Service.deed_module(event.use_deed), String.to_atom(event.cast), [member, event.params, event])
-          end
-        end
-      end
-    end
-    {:noreply, state}
+    updated = event.origin
+    |> find_owned_member(state)
+    |> deed_callback(event, state)
+    |> replace_member(state)
+    |> no_reply
   end
 
   @doc """
@@ -131,6 +128,45 @@ defmodule Moongate.Pool.GenServer do
   end
 
   ### Private
+
+  defp cast_params(params) do
+    params
+    |> Tuple.to_list
+    |> Enum.map(fn(param) ->
+      cond do
+        String.match?(param, ~r/[0-9]+/) -> String.to_integer(param)
+        true -> param
+      end
+    end)
+    |> List.to_tuple
+  end
+
+  defp deed_callback(member, event, state) do
+    if member != nil && event.use_deed != nil && deed_valid?(event.use_deed, state) do
+      if deed_has_function(event.use_deed, event.cast) do
+        event.use_deed
+        |> Moongate.Deed.Service.deed_module
+        |> apply(String.to_atom(event.cast), [member, cast_params(event.params)])
+        |> notify_partial(state)
+        |> mutations(member)
+      else
+        member
+      end
+    else
+      member
+    end
+  end
+
+  defp deed_has_function(deed, func_name) do
+    deed
+    |> Moongate.Deed.Service.deed_module
+    |> Moongate.Deed.Service.has_function?(func_name)
+  end
+
+  defp deed_valid?(deed, state) do
+    Moongate.Pool.Service.get_deeds(state.spec)
+    |> Enum.any?(&(Moongate.Atoms.to_strings(&1) == deed))
+  end
 
   # Return the default value given the type of a default member
   # attribute.
@@ -205,31 +241,59 @@ defmodule Moongate.Pool.GenServer do
 
   # Return attributes for a new pool member.
   defp new_pool_member(attributes, state) do
-    [__moongate_pool_index: state.index,
-     __moongate_pool_name: state.name,
-     __moongate_pool: state.spec
-    ] ++ attributes
+    attributes
+    |> Enum.into(%{
+      __moongate_mutations: [],
+      __moongate_pool_index: state.index,
+      __moongate_pool_name: state.name,
+      __moongate_pool: state.spec
+    })
   end
 
   defp notify_subscribed(state, origin) do
     write_to(origin, :subscribe, "pool", "#{state.name} #{pool_attributes_string(state)}")
+
+    for member <- state.members do
+      member_update(state, member, :refresh, origin)
+    end
+
     state
   end
 
-  defp notify_subscribers_of_new_member(state, member) do
-    whitelist = publishable_attributes(state)
-
+  defp notify_partial(member, state) do
+    
+    for mutation <- member.__moongate_mutations do
+      case mutation do
+        {:transform, type, attribute, tag, amount} ->
+          "#{state.name} #{member.__moongate_pool_index} #{type}:#{tag} #{attribute} #{amount}"
+          |> write_to_all_subscribers(:transform, state)
+        _ ->
+          IO.puts "foo"
+      end
+    end
     member
-    |> Enum.filter(fn ({key, _value}) ->
-      whitelist |> Enum.any?(&(&1 == key))
-    end)
-    |> Moongate.Pool.Service.member_to_string
-    |> (fn (attributes) ->
-      "#{state.name} #{member[:__moongate_pool_index]} #{attributes}"
-    end).()
-    |> write_to_all_subscribers(:member_created, state)
+  end
 
+  defp member_removed(state, index) do
+    write_to_all_subscribers("#{state.name} #{index}", :remove, state)
     state
+  end
+
+  defp member_update(state, member) do
+    "#{state.name} #{member[:__moongate_pool_index]} "
+    <> (member
+        |> Moongate.Packets.whitelist(publishable(state))
+        |> Moongate.Pool.Service.member_to_string)
+  end
+
+  defp member_update(state, member, action) do
+    member_update(state, member)
+    |> write_to_all_subscribers(action, state)
+    state
+  end
+
+  defp member_update(state, member, action, origin) do
+    write_to(origin, action, "pool", member_update(state, member))
   end
 
   defp pool_attributes_string(state) do
@@ -263,10 +327,18 @@ defmodule Moongate.Pool.GenServer do
     end
   end
 
-  defp publishable_attributes(state) do
+  defp publishable(state) do
     state.spec
     |> Moongate.Pool.Service.pool_module
     |> apply(:__moongate__pool_publishes, [])
+  end
+
+  defp replace_member(member, state) do
+    %{state | members:
+      state.members
+      |> Enum.filter(&(&1.__moongate_pool_index != member.__moongate_pool_index))
+      |> List.insert_at(0, member)
+     }
   end
 
   # Set one of a pool member's attributes to a new value.
@@ -276,8 +348,6 @@ defmodule Moongate.Pool.GenServer do
   end
 
   defp write_to_all_subscribers(message, action, state) do
-    for subscriber <- state.subscribers do
-      write_to(subscriber, action, "pool", message)
-    end
+    write_to_all(state.subscribers, action, "pool", message)
   end
 end

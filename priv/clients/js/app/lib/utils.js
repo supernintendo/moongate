@@ -26,6 +26,11 @@ const Utils = {
             return part[1].toUpperCase();
         });
     },
+    entries(obj) {
+        return Object.keys(obj).map((k) => {
+            return [k, obj[k]];
+        });
+    },
     uppercase(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }

@@ -6,7 +6,7 @@ defmodule Default.World do
     test_level: Default.Stage.Level
   }
   @doc """
-    This is called when a player connects
+    This is called when a client connects
     to the server.
   """
   def connected(event) do

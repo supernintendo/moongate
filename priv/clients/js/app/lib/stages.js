@@ -14,19 +14,23 @@ class Stages {
             return this[key];
         }
     }
-    static leave(id, parts) {
+    static leave(parts) {
         let target = Packets.target.call(this, parts),
-            stageNames = Object.keys(this.stages);
+            stageNames = Object.keys(this.stages),
+            result = null;
 
         stageNames.forEach((stageName) => {
             if (target.stage === this.stages[stageName]) {
                 delete this.stages[stageName];
 
                 this.log('stageLeave', stageName);
+
+                result = stageName;
             }
         });
+        return result;
     }
-    static join(id, parts) {
+    static join(parts) {
         let [stageName, ...poolNames] = parts.split(' '),
             stage = Stages.addStage.apply(this.stages, [stageName]);
 
@@ -34,6 +38,8 @@ class Stages {
             Stage.addPool.apply(stage, [Utils.camelize(poolName)])
         });
         this.log('stageJoin', stageName);
+
+        return stage;
     }
 }
 export default Stages

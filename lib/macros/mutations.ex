@@ -12,7 +12,7 @@ defmodule Moongate.Macros.Mutations do
         end
 
         def mutations(event, state) do
-          (for mut <- event.mutations do
+          (for mut <- event.__moongate_mutations do
             mutation(mut, event, state)
           end)
           |> Enum.filter(&(&1 != nil))
@@ -26,7 +26,7 @@ defmodule Moongate.Macros.Mutations do
         list.
       """
       def mutate(map, value) do
-        %{map | mutations: map.mutations ++ [value]}
+        %{map | __moongate_mutations: map.__moongate_mutations ++ [value]}
       end
     end
   end
