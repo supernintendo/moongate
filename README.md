@@ -12,7 +12,7 @@ Moongate is a server and application platform for the [Elixir Programming Langua
 
 ### Dependencies ###
 
-* Elixir 1.0.5+
+* Elixir 1.2.3
 * PostgreSQL 9.3.5+
 
 ### Installation ###
