@@ -8,9 +8,7 @@
     "moduleType": [],
     "private": true,
     "dependencies": {
-        "howler.js": "1.1.28",
-        "jquery": "2.1.4",
-        "pixi.js": "3.0.8"
+        "jquery": "2.1.4"
     },
     "ignore": [
         "**/.*",

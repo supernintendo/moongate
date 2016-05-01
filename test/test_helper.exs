@@ -3,7 +3,7 @@ defmodule Moongate.Tests.Helper do
   def defaults do
     %{
       http_port: 7596,
-      log_packets: false,
+      log_packets: true,
       login: "moongate",
       password: "test",
       tcp_port: 7593,
@@ -73,7 +73,7 @@ defmodule Moongate.Tests.Helper do
 
   # Send a packet to the server.
   def send_packet(socket, message) do
-    length = String.length(String.replace(message, " ", ""))
+    length = String.length(String.replace(message, "·", ""))
     packet = "#{length}{#{message}}"
     if defaults.log_packets do
       IO.puts "Client sent packet: #{packet}."

@@ -1,15 +1,25 @@
-defmodule Moongate.Sockets.UDP.Supervisor do
+defmodule Moongate.Socket.UDP.Supervisor do
+  @moduledoc """
+    This is a supervisor for a UDP packet listener. When
+    Moongate starts, the ports.json of the active world is
+    loaded and a process is added to this supervisor for
+    every object with `protocol` set to `"UDP"`. The key
+    of the object is used as the process' port.
+  """
   use Supervisor
 
+  @doc """
+    Start the UDP packet listener supervisor.
+  """
   def start_link do
-    Supervisor.start_link(__MODULE__, nil, [name: :udp_sockets])
+    Supervisor.start_link(__MODULE__, nil, [name: :udp])
   end
 
   @doc """
-    Prepare the sockets listener supervisor.
+    This is called after start_link has resolved.
   """
   def init(_) do
-    children = [worker(Moongate.Sockets.UDP.Socket, [], [])]
-    supervise(children, strategy: :simple_one_for_one)
+    [worker(Moongate.Socket.UDP.GenServer, [], [])]
+    |> supervise(strategy: :simple_one_for_one)
   end
 end

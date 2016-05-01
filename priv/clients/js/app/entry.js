@@ -1,4 +1,4 @@
-let Moongate = require('./moongate');
+const Moongate = require('./moongate');
 
 console.log(
     '%c moongate.js%c v%c0.1.0 ',
@@ -6,4 +6,4 @@ console.log(
     'background: #151718; color: #757178',
     'background: #151718; color: #009FCB'
 );
-export default Moongate;
+export default Moongate
