@@ -6,7 +6,7 @@ defmodule Moongate.Mixfile do
     [app: :moongate,
      version: "0.1.1",
      codename: "Neophyte",
-     elixir: ">= 1.0.5",
+     elixir: "1.2.3",
      deps: deps,
      default_task: "run"]
   end
