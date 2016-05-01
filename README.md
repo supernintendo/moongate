@@ -10,8 +10,6 @@ _A server with a little magic_.
 
 Moongate is a server and application platform for the [Elixir Programming Language](http://elixir-lang.org/). It provides a DSL (domain-specific language) which allows developers to create synchronized, networked experiences.
 
-<!--A guide on how to get started with Moongate can be found [here](). Full API documentation is [provided as well]().-->
-
 ### Dependencies ###
 
 * Elixir 1.0.5+
