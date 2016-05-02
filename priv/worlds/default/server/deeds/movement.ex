@@ -7,49 +7,21 @@ defmodule Default.Deeds.Movement do
     x: :float,
     y: :float
   }
+  transforms %{
+    "move left" => {:sub, :x, :by, :speed},
+    "move right" => {:add, :x, :by, :speed},
+    "move up" => {:sub, :y, :by, :speed},
+    "move down" => {:add, :y, :by, :speed},
+    "move xreset" => {:cure, :x},
+    "move yreset" => {:cure, :y},
+    "move _" => nil,
+    "turn" => {:set, :direction}
+  }
 
   def move(entity, {x, y}) do
     entity
-    |> set_direction(x, y)
-    |> start_moving(x, y)
-  end
-
-  def stop(entity, {x, y}) do
-    entity
-    |> stop_moving(x, y)
-  end
-
-  defp start_moving(entity, x, y) do
-    speed = entity |> get(:speed)
-
-    cond do
-      x < 0 -> entity |> lin(:x, :movement, speed * -1)
-      y < 0 -> entity |> lin(:y, :movement, speed * -1)
-      x > 0 -> entity |> lin(:x, :movement, speed)
-      y > 0 -> entity |> lin(:y, :movement, speed)
-      true -> entity
-    end
-  end
-
-  defp stop_moving(entity, x, y) do
-    cond do
-      x != 0 and y != 0 ->
-        entity
-        |> lin(:x, :movement, 0)
-        |> lin(:y, :movement, 0)
-      x != 0 -> entity |> lin(:x, :movement, 0)
-      y != 0 -> entity |> lin(:y, :movement, 0)
-      true -> entity
-    end
-  end
-
-  defp set_direction(entity, x, y) do
-    cond do
-      x < 0 -> entity |> set(:direction, "left")
-      y < 0 -> entity |> set(:direction, "up")
-      x > 0 -> entity |> set(:direction, "right")
-      y > 0 -> entity |> set(:direction, "down")
-      true -> entity
-    end
+    |> transform("turn", x)
+    |> transform("move #{x}")
+    |> transform("move #{y}")
   end
 end

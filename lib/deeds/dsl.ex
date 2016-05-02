@@ -18,6 +18,9 @@ defmodule Moongate.Deed do
   def announce(member, message, params) do
   end
 
+  def constantly(callbacks) do
+  end
+
   def lin(member, attribute, tag, delta) do
     member
     |> mutate({:transform, :lin, attribute, tag, delta})
@@ -35,9 +38,30 @@ defmodule Moongate.Deed do
     {:tagged, :drop, "pool_#{member[:__moongate_pool_name]}", "#{member[:__moongate_pool_index]}"}
   end
 
-  defmacro transform(target, attribute, delta) do
+  defmacro transform(target, name) do
     quote do
-      GenServer.cast(self(), {:transform, unquote(target), unquote(attribute), unquote(delta)})
+      transform(unquote(target), unquote(name), nil)
+    end
+  end
+  defmacro transform(target, name, params) do
+    quote do
+      tag = String.split(unquote(name), " ") |> List.first
+
+      case __moongate__deed_transforms[unquote(name)] do
+        {:add, attribute, :by, delta} ->
+          unquote(target)
+          |> lin(attribute, tag, get(unquote(target), delta))
+        {:cure, attribute} ->
+          unquote(target)
+          |> lin(attribute, tag, 0)
+        {:set, attribute} ->
+          unquote(target)
+          |> set(attribute, unquote(params))
+        {:sub, attribute, :by, delta} ->
+          unquote(target)
+          |> lin(attribute, tag, get(unquote(target), delta) * -1)
+        _ -> unquote(target)
+      end
     end
   end
 
@@ -45,11 +69,20 @@ defmodule Moongate.Deed do
 
   defmacro attributes(attribute_map) do
     quote do
-      def __moongate__pool_attributes(_), do: __moongate__pool_attributes
-      def __moongate__pool_attributes do
+      def __moongate__deed_attributes(_), do: __moongate__deed_attributes
+      def __moongate__deed_attributes do
         Map.merge(unquote(attribute_map), %{
           origin: {:origin}
         })
+      end
+    end
+  end
+
+  defmacro transforms(transform_map) do
+    quote do
+      def __moongate__deed_transforms(_), do: __moongate__deed_transforms
+      def __moongate__deed_transforms do
+        unquote(transform_map)
       end
     end
   end

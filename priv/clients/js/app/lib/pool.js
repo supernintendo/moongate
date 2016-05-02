@@ -8,6 +8,11 @@ class Pool {
         this.transformations = {};
         this.setSchema(schema);
     }
+    all() {
+        return Object.keys(this.members).map((key) => {
+            return this.members[key];
+        });
+    }
     get(index) {
         return this.members[index];
     }

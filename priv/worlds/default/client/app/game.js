@@ -13,6 +13,7 @@ class Game {
     start() {
         this.gate.connect('127.0.0.1', 2593, this.login.bind(this));
         this.gate.tick(this);
+        console.log(this.gate);
     }
     login() {
         this.gate.login('test', 'moongate');

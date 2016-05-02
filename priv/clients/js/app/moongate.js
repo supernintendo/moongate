@@ -1,5 +1,6 @@
 const Bindings = require('./lib/bindings'),
       Console = require('./lib/console'),
+      Dummy = require('./lib/dummy'),
       Packets = require('./lib/packets'),
       Pools = require('./lib/pools'),
       Pool = require('./lib/pool'),
@@ -124,6 +125,13 @@ class Moongate {
         }
     }
 
+    stage(name) {
+        if (this.stages[name]) {
+            return this.stages[name];
+        }
+        return new Dummy();
+    }
+
     // Execute a callback on tick.
     tick(...params) {
         this.callback('tick', params);
@@ -143,7 +151,7 @@ class Moongate {
             let result = scope[callbackName].apply(this, event.params);
 
             if (this.bindings.client[event.from] && this.bindings.client[event.from][callbackName] instanceof Function) {
-                result = this.bindings.client[event.from].apply(this, [result]);
+                result = this.bindings.client[event.from][callbackName].apply(this, [result]);
             }
             return result;
         }
