@@ -1,6 +1,12 @@
-let GamePackets = require('./game-packets');
+let GamePackets = require('./game-packets'),
+    Board = require('./board');
 
 let Bindings = {
+    pool: {
+        create(member) {
+            Board.add(member);
+        }
+    },
     authenticated() {
         this.send('proceed');
     },
@@ -16,12 +22,18 @@ let Bindings = {
     },
     keyup(e, key) {
         if (this.keysNotPressed(87, 65, 83, 68)) {
-            this.send('Player.Movement', 'stop', 1, 1);
+            this.send('Player.Movement', 'move', 'xreset', 'yreset');
         } else {
             this.send.apply(this, GamePackets.keyup(key, this));
         }
     },
     tick(game) {
+        Board.update();
+        // game.gate
+        //     .stage('testLevel')
+        //     .pool('player')
+        //     .all()
+        //     .forEach((player) => {});
     }
 };
 export default Bindings;

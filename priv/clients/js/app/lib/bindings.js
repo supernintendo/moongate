@@ -9,13 +9,12 @@ class Bindings {
         let k = Object.keys(bindings),
             l = k.length;
 
-        this.client = {
-            authenticated: bindings.authenticated || () => {},
-            keydown: bindings.keydown || () => {},
-            keypress: bindings.keypress || () => {},
-            keyup: bindings.keyup || () => {},
-            tick: Bindings.tick.bind(parent, bindings.tick || () => {}),
-        };
+        this.client = bindings;
+        this.client.authenticated = this.client.authenticated || () => {};
+        this.client.keydown = this.client.keydown || () => {};
+        this.client.keypress = this.client.keypress || () => {};
+        this.client.keyup = this.client.keyup || () => {};
+        this.client.tick = Bindings.tick.bind(parent, bindings.tick || () => {});
         this.event = Events;
         this.stage = Stages;
         this.pool = Pools;

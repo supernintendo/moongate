@@ -4,11 +4,11 @@ defmodule Default.Pools.Player do
   attributes %{
     origin:       :origin,
     name:         {:string, "a noob"},
-    speed:        {:float, 0.125},
+    speed:        {:float, 3.25},
     x:            {:float, 50.0},
     y:            {:float, 50.0},
     direction:    {:string, "up"}
   }
   deeds [Movement, Test]
-  public [:name, :x, :y, :direction]
+  public [:origin, :name, :x, :y, :direction]
 end

@@ -1,3 +1,10 @@
 html, body {
     background: #000000;
+    text-align: center;
+}
+#board {
+    border: 1px solid blue;
+    display: inline-block;
+    height: 400px;
+    width: 400px;
 }
