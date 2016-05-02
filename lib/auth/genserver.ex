@@ -1,7 +1,7 @@
 defmodule Moongate.Auth.GenServer do
   @moduledoc """
-    Handles all authentication related messages. This
-    includes login and registration.
+    Handles all authentication requests as well
+    as account creation.
   """
   import Moongate.Macros.SocketWriter
   use GenServer
@@ -86,9 +86,9 @@ defmodule Moongate.Auth.GenServer do
     {email} = event.params
 
     if Map.has_key?(state.sessions, email) do
-      write_to(event.origin, :info, "User is logged in.")
+      write_to(event.origin, :info, "auth", "User is logged in.")
     else
-      write_to(event.origin, :info, "User is not logged in.")
+      write_to(event.origin, :info, "auth", "User is not logged in.")
     end
 
     {:noreply, state}
@@ -106,9 +106,9 @@ defmodule Moongate.Auth.GenServer do
     if status == :ok do
       IO.puts "Account for #{email} created."
 
-      write_to(event.origin, :info, "Your account has been created.")
+      write_to(event.origin, :info, "auth", "Your account has been created.")
     else
-      write_to(event.origin, :info, "Error creating account for #{email}.")
+      write_to(event.origin, :info, "auth", "Error creating account for #{email}.")
     end
 
     {:noreply, state}
@@ -158,7 +158,7 @@ defmodule Moongate.Auth.GenServer do
         state
         |> create_session(event.params, event.origin.id)
       {:error, message} ->
-        write_to(event.origin, :info, message)
+        write_to(event.origin, :info, "auth", message)
         state
       _ ->
         state

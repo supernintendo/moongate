@@ -3,7 +3,7 @@ defmodule Moongate.Stage.Mutations do
   use Moongate.Macros.Processes
 
   def mutation({:join_stage, stage_name}, event, state) do
-    tell_pid!({:mutations, event}, event.origin.events)
+    ask_pid({:mutations, event}, event.origin.events)
     nil
   end
 

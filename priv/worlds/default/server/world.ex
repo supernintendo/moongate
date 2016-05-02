@@ -10,6 +10,6 @@ defmodule Default.World do
     to the server.
   """
   def connected(event) do
-    event |> arrive!(:login_screen)
+    event |> arrive(:login_screen)
   end
 end

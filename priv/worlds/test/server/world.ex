@@ -5,6 +5,6 @@ defmodule Test.World do
     test_stage: Test.Stage.TestStage
   }
   def connected(event) do
-    event |> arrive!(:test_stage)
+    event |> arrive(:test_stage)
   end
 end

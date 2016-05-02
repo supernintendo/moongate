@@ -9,7 +9,7 @@ defmodule Moongate.Service.Stages do
     to join a stage.
   """
   def arrive(origin, stage_name) do
-    tell!({:arrive, origin}, :stage, stage_name)
+    ask({:arrive, origin}, :stage, stage_name)
   end
 
   @doc """

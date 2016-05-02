@@ -57,7 +57,7 @@ defmodule Moongate.Macros.Processes do
         GenServer.call(:registry, {:spawn, namespace, params})
       end
 
-      defp tell!(message, name) do
+      defp ask(message, name) do
         pid = Process.whereis(name)
         capabilities = capabilities_for(pid)
 
@@ -69,7 +69,7 @@ defmodule Moongate.Macros.Processes do
         result
       end
 
-      defp tell!(message, namespace, id) do
+      defp ask(message, namespace, id) do
         pid = pid_for_name(namespace, id)
         capabilities = capabilities_for(pid)
 
@@ -98,7 +98,7 @@ defmodule Moongate.Macros.Processes do
         if capabilities.can_receive, do: send(pid, message)
       end
 
-      defp tell_pid!(message, pid) do
+      defp ask_pid(message, pid) do
         capabilities = capabilities_for(pid)
 
         if capabilities.can_be_called, do: result = GenServer.call(pid, message)

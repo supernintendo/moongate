@@ -1,13 +1,12 @@
 defmodule Moongate.Stage do
+  @moduledoc """
+    Provides the DSL for stages (a stage is a
+    collection of pools)
+  """
   use Moongate.Macros.Mutations
   use Moongate.Macros.Processes
 
   def arrive(event, stage_name) do
-    event
-    |> mutate({:join_stage, stage_name})
-  end
-
-  def arrive!(event, stage_name) do
     event
     |> mutate({:join_stage, stage_name})
     |> mutate({:set_target_stage, stage_name})
@@ -28,10 +27,14 @@ defmodule Moongate.Stage do
     |> mutate({:leave_from, event.origin})
   end
 
+  def get(member, key) do
+    Moongate.Pool.Service.member_attr(member, key)
+  end
+
   def travel(event, stage_name) do
     event
     |> depart
-    |> arrive!(stage_name)
+    |> arrive(stage_name)
   end
 
   def subscribe(event, pool_name) do
@@ -40,7 +43,7 @@ defmodule Moongate.Stage do
   end
 
   def is_authenticated?(t) do
-    {:ok, result} = tell!({:check_auth, t.origin}, :auth)
+    {:ok, result} = ask({:check_auth, t.origin}, :auth)
 
     result
   end

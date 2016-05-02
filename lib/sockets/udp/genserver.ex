@@ -13,7 +13,8 @@ defmodule Moongate.Socket.UDP.GenServer do
     {:noreply, server}
   end
 
-  def handler({packet, {ip, port}}, server) do
+  # Handle an incoming datagram.
+  defp handler({packet, {ip, port}}, server) do
     safe_packet = Regex.replace(~r/[\n\b\t\r]/, packet, "")
     valid = String.valid?(safe_packet)
 
@@ -35,7 +36,8 @@ defmodule Moongate.Socket.UDP.GenServer do
     server |> udp_listen
   end
 
-  def udp_listen(server) do
+  # Listen for UDP datagrams.
+  defp udp_listen(server) do
     server |> Socket.Datagram.recv! |> handler(server)
   end
 end

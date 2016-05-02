@@ -7,18 +7,6 @@ defmodule Moongate.Deed.Service do
   use Moongate.Macros.ExternalResources
 
   @doc """
-    Check if a function is defined on the deed's
-    module.
-  """
-  def has_function?(deed_module, func_name) do
-    :functions
-    |> deed_module.__info__
-    |> Enum.any?(fn ({func, _arity}) ->
-      "#{func}" == func_name
-    end)
-  end
-
-  @doc """
     Return the actual module name for a deed when only
     given its first part.
   """

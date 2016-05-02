@@ -5,7 +5,6 @@ defmodule Default.Deeds.Test do
 
   def foo(entity) do
     entity
-    |> announce(:foo)
   end
 
   def announced({Player, :foo}, entity) do

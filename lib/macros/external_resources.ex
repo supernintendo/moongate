@@ -1,4 +1,8 @@
 defmodule Moongate.Macros.ExternalResources do
+  @doc """
+    Compile using the current world that is set in
+    our Mix config.
+  """
   defmacro __before_compile__(_env) do
     if Mix.env() == :test do
       world = "test"

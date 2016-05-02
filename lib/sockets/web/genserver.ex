@@ -44,7 +44,7 @@ defmodule Moongate.Socket.Web.GenServer do
 
         handle(events, client)
       _ ->
-        tell_pid!(:cleanup, events)
+        ask_pid(:cleanup, events)
         kill_by_pid(:event, events)
     end
   end

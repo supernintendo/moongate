@@ -66,9 +66,6 @@ defmodule Moongate.Pool.Service do
     String.to_atom("pool_#{stage_name}__#{String.downcase(module_name)}")
   end
 
-  def publish_to_subscriber(_member, _subscriber, _attributes) do
-  end
-
   @doc """
     Transform a list of atoms representing pool process
     names to a string containing the comma-separate

@@ -6,10 +6,10 @@ defmodule Moongate.ClientEvent do
     modules of a Moongate world.
   """
   defstruct(
+    __moongate_mutations: [],
     cast: nil,
     error: nil,
     from: nil,
-    __moongate_mutations: [],
     origin: nil,
     params: nil,
     to: nil,

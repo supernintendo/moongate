@@ -160,7 +160,7 @@ defmodule Moongate.Pool.GenServer do
   defp deed_has_function(deed, func_name) do
     deed
     |> Moongate.Deed.Service.deed_module
-    |> Moongate.Deed.Service.has_function?(func_name)
+    |> Moongate.Modules.has_function?(func_name)
   end
 
   defp deed_valid?(deed, state) do

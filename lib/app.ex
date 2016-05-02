@@ -1,4 +1,7 @@
 defmodule Moongate.Application do
+  @moduledoc """
+    The Moongate Application Platform.
+  """
   use Application
   use Moongate.Macros.ExternalResources
   use Moongate.Macros.Processes

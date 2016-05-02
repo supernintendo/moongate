@@ -1,12 +1,23 @@
 defmodule Moongate.HTTP.GenServer do
+  @moduledoc """
+    Provides an HTTP server for serving static assets.
+    Moongate.js is automatically accessible from all
+    HTTP servers.
+  """
   use GenServer
   use Moongate.Macros.Processes
   use Moongate.Macros.Worlds
 
+  @doc """
+    Start the HTTP server.
+  """
   def start_link({port, path}) do
     link(%Moongate.HTTP.GenServer.State{path: path, port: port}, "socket", "#{port}")
   end
 
+  @doc """
+    This is called after start_link has resolved.
+  """
   def handle_cast({:init}, state) do
     Moongate.Say.pretty("Listening on port #{state.port} (HTTP)...", :green)
     listen(state)
@@ -14,6 +25,7 @@ defmodule Moongate.HTTP.GenServer do
     {:noreply, state}
   end
 
+  # Listen for incoming HTTP requests using Cowboy.
   defp listen(state) do
     Application.ensure_all_started(:cowboy)
     dispatch = :cowboy_router.compile([{:_, routes(state.path)}])
@@ -23,6 +35,7 @@ defmodule Moongate.HTTP.GenServer do
     ])
   end
 
+  # Defines the public routes for the web server.
   defp routes(path) do
     [
       {"/", :cowboy_static, {:priv_file, :moongate, "#{world_directory}/#{path}/index.html"}},
