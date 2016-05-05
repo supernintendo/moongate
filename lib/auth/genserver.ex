@@ -17,7 +17,7 @@ defmodule Moongate.Auth.GenServer do
     used for testing.
   """
   def start_link(config) do
-    if config["anonymous"] do
+    if config.anonymous do
       link(%Moongate.Auth.GenServer.State{anonymous: true}, "auth")
     else
       link(%Moongate.Auth.GenServer.State{}, "auth")
