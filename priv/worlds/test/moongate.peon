@@ -1,4 +1,5 @@
 %{
+  anonymous: false,
   sockets: [
     {:tcp, 7593},
     {:udp, 7594},
