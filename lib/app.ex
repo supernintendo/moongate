@@ -15,9 +15,11 @@ defmodule Moongate.Application do
   def start(_type, _args) do
     Moongate.Say.greeting
     load_world
-    registry = load_config |> start_supervisor
+
+    config = load_config
+    registry = start_supervisor(config)
     initialize_stages
-    spawn_sockets(Moongate.Worlds.get_world)
+    spawn_sockets(config)
 
     if Mix.env() == :prod, do: recur
 
@@ -29,9 +31,8 @@ defmodule Moongate.Application do
   # Load the server.json file for the world.
   defp load_config, do: load_config(Moongate.Worlds.get_world)
   defp load_config(world) do
-    if File.exists?("priv/worlds/#{world}/server.json") do
-      {:ok, read} = File.read "priv/worlds/#{world}/server.json"
-      {:ok, config} = JSON.decode(read)
+    if File.exists?("priv/worlds/#{world}/moongate.peon") do
+      {:ok, config} = Peon.from_file("priv/worlds/#{world}/moongate.peon")
 
       config
     else
@@ -70,18 +71,13 @@ defmodule Moongate.Application do
 
   # Spawn socket listeners as they are defined in
   # the world's ports.json.
-  defp spawn_sockets(world) do
-    {:ok, read} = File.read "priv/worlds/#{world}/ports.json"
-    {:ok, ports} = JSON.decode(read)
-
-    ports |> Enum.map(&spawn_socket(&1))
+  defp spawn_sockets(config) do
+    config.sockets |> Enum.map(&spawn_socket(&1))
   end
 
   # Start the supervision tree.
   defp start_supervisor(config) do
-    {:ok, read} = File.read "priv/worlds/#{Moongate.Worlds.get_world}/supervisors.json"
-    {:ok, world_supervisors} = JSON.decode(read)
-    {:ok, supervisor} = Moongate.Supervisor.start_link({world_supervisors, config})
+    {:ok, supervisor} = Moongate.Supervisor.start_link(config)
     GenServer.call(:registry, {:register, supervisor})
 
     supervisor
@@ -89,12 +85,10 @@ defmodule Moongate.Application do
 
   # Give an entry from ports.json, spawn a socket with the
   # appropriate protocol on the provided port.
-  defp spawn_socket({port, params}) do
-    case params["protocol"] do
-      "TCP" -> spawn_new(:tcp, String.to_integer(port))
-      "UDP" -> spawn_new(:udp, String.to_integer(port))
-      "WebSocket" -> spawn_new(:ws, String.to_integer(port))
-      "HTTP" -> spawn_new(:http, {String.to_integer(port), params["path"]})
+  defp spawn_socket(socket) do
+    case socket do
+      {protocol, port} -> spawn_new(protocol, port)
+      {protocol, port, params} -> spawn_new(protocol, {port, params})
     end
   end
 

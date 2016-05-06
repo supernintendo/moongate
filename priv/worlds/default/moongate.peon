@@ -1,0 +1,8 @@
+%{
+  anonymous: true,
+  sockets: [
+    {:tcp, 2592},
+    {:ws, 2593},
+    {:http, 2594, "client/public"}
+  ]
+}
