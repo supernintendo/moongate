@@ -9,6 +9,6 @@ defmodule Default.Pools.Player do
     y:            {:float, 50.0},
     direction:    {:string, "up"}
   }
-  deeds [Movement, Test]
+  deeds [Movement]
   public [:origin, :name, :x, :y, :direction]
 end
