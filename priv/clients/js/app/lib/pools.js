@@ -39,6 +39,7 @@ class Pools {
         if (target.pool) {
             target.pool.remove(target.index);
         }
+        return target.index;
     }
     static poolUpdate(parts) {
         let attributes = Packets.kv(parts.split(' ').slice(2).join(' ')),
@@ -47,7 +48,7 @@ class Pools {
         if (target.pool) {
             target.pool.update(target.index, attributes);
         }
-        return target.pool.get(target.index);
+        return [target.pool.get(target.index), target.index];
     }
     static refresh(parts) {
         return Pools.poolUpdate.apply(this, arguments);

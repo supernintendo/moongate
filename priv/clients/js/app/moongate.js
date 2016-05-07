@@ -148,10 +148,15 @@ class Moongate {
             scope = this.bindings[event.from];
 
         if (scope && scope[callbackName] instanceof Function) {
-            let result = scope[callbackName].apply(this, event.params);
+            let result = scope[callbackName].apply(this, event.params),
+                callback = this.bindings.client[event.from] && this.bindings.client[event.from][callbackName];
 
-            if (this.bindings.client[event.from] && this.bindings.client[event.from][callbackName] instanceof Function) {
-                result = this.bindings.client[event.from][callbackName].apply(this, [result]);
+            if (callback && callback instanceof Function) {
+                if (result instanceof Array) {
+                    result = callback.apply(this, result);
+                } else {
+                    result = callback.apply(this, [result]);
+                }
             }
             return result;
         }
