@@ -7,13 +7,16 @@
     src: url(fonts/CrimsonText-Roman.ttf);
 }
 html, body {
+    -webkit-animation: sky 4s;
+    -moz-animation: sky 4s;
+    -o-animation: sky 4s;
+    animation: sky 4s;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;  
-    animation: sky 4s;
+    user-select: none;
     background-color: #ECECEC;
     cursor: crosshair;
     font-family: 'Crimson Text', serif;
@@ -21,66 +24,82 @@ html, body {
     margin: 0;
     padding: 0;
 }
-@keyframes sky {
-    0% {
-        background-color: #000000;
-    }
-    100% {
-        background-color: #ECECEC;
-    }
-}
 h1 {
     font-family: 'Berkshire Swash';
     font-size: 3.75rem;
     position: absolute;
-    width: 100%;
     top: 6.2rem;
-    animation:         blink 2s infinite;
+    width: 100%;
 }
 p {
+    -webkit-animation: float 1.25s infinite;
+    -moz-animation: float 1.25s infinite;
+    -o-animation: float 1.25s infinite;
+    animation: float 1.25s infinite;
     background-color: #000000;
     color: #FFFFFF;
     display: inline-block;
-    position: fixed;
     left: 25%;
+    position: fixed;
     width: 50%;
-    animation: float 1.25s infinite;
 }
 code {
     background-color: #1C1C1C;
     color: #09AFC7;
 }
+.blink {
+    -webkit-animation: blink 1s steps(5, start) infinite;
+    -moz-animation: blink 1s steps(5, start) infinite;
+    -o-animation: blink 1s steps(5, start) infinite;
+    animation: blink 1s steps(5, start) infinite;
+
+}
+.rainbow {
+    -webkit-animation: rainbow 100s infinite;
+    -moz-animation: rainbow 100s infinite;
+    -o-animation: rainbow 100s infinite;
+    animation: rainbow 100s infinite;
+}
 img.sphere {
     height: 18rem;
-    pointer-events: none;
     margin-top: 2.5rem;
+    pointer-events: none;
     width: 18rem;
 }
 
-.rainbow {
-    -webkit-animation: rainbow 100s infinite;
-    -moz-animation:    rainbow 100s infinite;
-    -o-animation:      rainbow 100s infinite;
-    animation:         rainbow 100s infinite;
-}
-
-/* Chrome, Safari, Opera */ 
-@-webkit-keyframes rainbow {
-    0% {
-        -webkit-filter: hue-rotate(0deg);
-        filter: hue-rotate(0deg);
+/* Keyframes */
+@-webkit-keyframes blink {
+    to {
+        visibility: hidden;
     }
-    50%  {
-        -webkit-filter: hue-rotate(360deg);
-        filter: hue-rotate(180deg);
+}
+@keyframes blink {
+    to {
+        visibility: hidden;        
+    }
+}
+@-webkit-keyframes float {
+    0% {
+        bottom: 1.25rem;
+    }
+    50% {
+        bottom: 2rem;
     }
     100% {
-        -webkit-filter: hue-rotate(0deg);
-        filter: hue-rotate(0deg);
+        bottom: 1.25rem;
     }
 }
-
-/* Standard syntax */
+@keyframes float {
+    0% {
+        bottom: 1.25rem;
+    }
+    50% {
+        bottom: 2rem;
+    }
+    100% {
+        bottom: 1.25rem;
+    }
+}
 @keyframes rainbow {
     0% {
         -webkit-filter: hue-rotate(0deg);
@@ -95,31 +114,33 @@ img.sphere {
         filter: hue-rotate(0deg);
     }
 }
-
-.blink {
-    animation: blink-animation 1s steps(5, start) infinite;
-    -webkit-animation: blink-animation 1s steps(5, start) infinite;
-
-}
-@keyframes blink-animation {
-    to {
-        visibility: hidden;        
-    }
-}
-@-webkit-keyframes blink-animation {
-    to {
-        visibility: hidden;
-    }
-}
-
-@keyframes float {
+@-webkit-keyframes rainbow {
     0% {
-        bottom: 1.25rem;
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
     }
-    50% {
-        bottom: 2rem;
+    50%  {
+        -webkit-filter: hue-rotate(360deg);
+        filter: hue-rotate(180deg);
     }
     100% {
-        bottom: 1.25rem;
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+}
+@-webkit-keyframes sky {
+    0% {
+        background-color: #000000;
+    }
+    100% {
+        background-color: #ECECEC;
+    }
+}
+@keyframes sky {
+    0% {
+        background-color: #000000;
+    }
+    100% {
+        background-color: #ECECEC;
     }
 }
