@@ -1,10 +1,8 @@
-let GamePackets = require('./game-packets'),
-    Board = require('./board');
+let GamePackets = require('./game-packets');
 
 let Bindings = {
     pool: {
         create(member) {
-            Board.add(member);
         }
     },
     authenticated() {
@@ -28,12 +26,6 @@ let Bindings = {
         }
     },
     tick(game) {
-        Board.update();
-        // game.gate
-        //     .stage('testLevel')
-        //     .pool('player')
-        //     .all()
-        //     .forEach((player) => {});
     }
 };
 export default Bindings;

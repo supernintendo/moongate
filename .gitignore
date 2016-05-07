@@ -38,3 +38,6 @@ doc/
 
 # JS stuff.
 .tern-port
+
+# Moongate
+/user
