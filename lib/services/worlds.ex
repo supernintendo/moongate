@@ -12,7 +12,11 @@ defmodule Moongate.Worlds do
     `priv/worlds`.
   """
   def get_world do
-    Application.get_env(:moongate, :world) || "default"
+    if Mix.env() == :test do
+      "test"
+    else
+      Application.get_env(:moongate, :world) || "default"
+    end
   end
 
   @doc """
