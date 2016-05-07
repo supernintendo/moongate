@@ -77,10 +77,12 @@ class Bindings {
                         let index = k;
 
                         Utils.entries(v).forEach(([name, [type, amount]]) => {
-                            switch (type) {
-                            case 'lin':
-                            default:
-                                pool.members[index][attribute] = pool.members[index][attribute] + amount;
+                            if (pool.members[index]) {
+                                switch (type) {
+                                case 'lin':
+                                default:
+                                    pool.members[index][attribute] = pool.members[index][attribute] + amount;
+                                }
                             }
                         });
                     });
