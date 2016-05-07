@@ -35,3 +35,6 @@ bower_components/
 _build/
 deps/
 doc/
+
+# JS stuff.
+.tern-port
