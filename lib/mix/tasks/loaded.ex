@@ -1,5 +1,5 @@
-defmodule Mix.Tasks.Moongate.Current do
-  @shortdoc "Prints the currently selected world."
+defmodule Mix.Tasks.Moongate.Loaded do
+  @shortdoc "Prints the currently loaded world."
   use Mix.Task
 
   def run(_) do

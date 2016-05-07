@@ -1,5 +1,7 @@
 %{
   anonymous: true,
+  db: "localhost/moongate",
+  db_user: {"moongate", "moongate"},
   sockets: [
     {:tcp, 2592},
     {:ws, 2593},
