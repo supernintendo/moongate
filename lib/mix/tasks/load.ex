@@ -24,6 +24,12 @@ defmodule Mix.Tasks.Moongate.Load do
     {:ok, file} = File.open("user", [:write])
     IO.binwrite(file, result)
     Mix.Tasks.Clean.run([])
+
+    IO.puts(
+      IO.chardata_to_string(
+      ["Loaded world "] ++
+      IO.ANSI.format_fragment(
+        [:blue, "#{world}" <> IO.ANSI.reset <> "."], true)))
   end
 
   defp world_list do
