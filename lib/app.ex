@@ -32,7 +32,7 @@ defmodule Moongate.Application do
   defp load_config, do: load_config(Moongate.Worlds.get_world)
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/moongate.peon") do
-      {:ok, config} = Peon.from_file("priv/worlds/#{world}/moongate.peon")
+      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.peon")
 
       config
     else
