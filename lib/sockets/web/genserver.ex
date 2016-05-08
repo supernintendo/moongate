@@ -7,7 +7,7 @@ defmodule Moongate.Socket.Web.GenServer do
   end
 
   def handle_cast({:init}, state) do
-    Moongate.Say.pretty("Listening on port #{state.port} (WebSocket)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (WebSocket)...", :green, [suppress_timestamp: true])
 
     server = Socket.Web.listen!(state.port) |> accept
     {:noreply, server}

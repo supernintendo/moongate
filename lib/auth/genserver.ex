@@ -155,6 +155,15 @@ defmodule Moongate.Auth.GenServer do
   defp finalize_login(result, event, state) do
     case result do
       {:ok, message} ->
+        {username, _password} = event.params
+        [:underline, username]
+        ++ [IO.ANSI.reset]
+        ++ [" has "]
+        ++ [:green, "logged in"]
+        ++ [IO.ANSI.reset]
+        ++ ["."]
+        |> Moongate.Say.ansi([timestamp: true])
+
         state
         |> create_session(event.params, event.origin.id)
       {:error, message} ->
@@ -178,7 +187,7 @@ defmodule Moongate.Auth.GenServer do
   defp validate(user, password) do
     cond do
       user == nil ->
-        {:error, "The user account for that email doesn't exist."}
+        {:error, "The account with that name does not exist."}
       hash(user, password) == user.password ->
         {:ok, "You have successfully logged in."}
       true ->

@@ -7,7 +7,7 @@ defmodule Moongate.Socket.UDP.GenServer do
   end
 
   def handle_cast({:init}, state) do
-    Moongate.Say.pretty("Listening on port #{state.port} (UDP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (UDP)...", :green, [suppress_timestamp: true])
     {:ok, server} = Socket.UDP.open(state.port)
     server |> udp_listen
     {:noreply, server}

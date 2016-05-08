@@ -10,7 +10,7 @@ defmodule Moongate.Socket.TCP.GenServer do
   end
 
   def handle_cast({:init}, state) do
-    Moongate.Say.pretty("Listening on port #{state.port} (TCP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (TCP)...", :green, [suppress_timestamp: true])
     Socket.TCP.listen!(state.port, packet: 0)
     |> accept
   end

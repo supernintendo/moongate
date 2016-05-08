@@ -3,6 +3,24 @@ defmodule Moongate.Say do
     Provides functions related to console output.
   """
 
+  def ansi(list, options) do
+    modified = list
+
+    if options[:timestamp] do
+      [:bright, "#{Moongate.Time.now_formatted} " <> IO.ANSI.reset] ++ list
+      |> ansi
+    else
+      ansi(list)
+    end
+  end
+
+  def ansi(list) do
+    list ++ [IO.ANSI.reset]
+    |> IO.ANSI.format_fragment(true)
+    |> IO.chardata_to_string
+    |> IO.puts
+  end
+
   @doc """
     A greeting message, output when the server is started.
   """
@@ -12,14 +30,16 @@ defmodule Moongate.Say do
     pretty("(  ( (_) (_) ) ) (_( (_( (_ )_)", :blue, [suppress_timestamp: true])
     pretty("                   _)      (_", :blue, [suppress_timestamp: true])
     IO.puts ""
-    IO.puts(
-      IO.chardata_to_string(["☪ "] ++
-        IO.ANSI.format_fragment(
-          [:inverse, "v#{Moongate.Mixfile.project[:version]}" <> IO.ANSI.reset <> " #{Moongate.Mixfile.project[:codename]}"], true)))
-    IO.puts(
-      IO.chardata_to_string(["Your current world is: "] ++
-        IO.ANSI.format_fragment(
-          [:magenta, "#{Moongate.Worlds.get_world}" <> IO.ANSI.reset], true)))
+
+    [:inverse,
+     "v#{Moongate.Mixfile.project[:version]}"
+     <> IO.ANSI.reset
+     <> " #{Moongate.Mixfile.project[:codename]}"
+    ]
+    |> ansi
+
+    ["Your current world is: "] ++ [:magenta, "#{Moongate.Worlds.get_world}"]
+    |> ansi
 
     IO.puts ""
   end
@@ -33,21 +53,12 @@ defmodule Moongate.Say do
   """
   def pretty(string, modifier, options) do
     if options[:suppress_timestamp] do
-      timestamp = [""]
+      [modifier, string]
+      |> ansi
     else
-      if modifier == :red do
-        timestamp_modifier = :red
-      else
-        timestamp_modifier = :bright
-      end
-      timestamp = IO.ANSI.format_fragment([timestamp_modifier, "#{Moongate.Time.now_formatted}" <> IO.ANSI.reset], true) ++
-                  IO.ANSI.format_fragment([:black, " ∙ ", IO.ANSI.reset])
+      [modifier, string]
+      |> ansi([timestamp: true])
     end
-
-    IO.puts(
-      IO.chardata_to_string(timestamp ++
-        IO.ANSI.format_fragment(
-          [modifier, string <> IO.ANSI.reset], true)))
   end
 
   @doc """

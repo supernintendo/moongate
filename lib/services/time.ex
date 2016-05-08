@@ -4,13 +4,28 @@ defmodule Moongate.Time do
   """
   use Timex
 
+  @months {
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  }
+
   def current_ms do
     Time.now(:milliseconds) |> round
   end
 
   def now_formatted do
-    {:ok, date} = Timex.format(DateTime.today, "{ISO:Extended}")
+    {{year, month, day}, {hour, min, _sec}} = :calendar.local_time()
 
-    date
+    "#{@months |> elem(month - 1)} #{day}, #{year} · #{hour}:#{min} "
   end
 end

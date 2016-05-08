@@ -19,7 +19,7 @@ defmodule Moongate.HTTP.GenServer do
     This is called after start_link has resolved.
   """
   def handle_cast({:init}, state) do
-    Moongate.Say.pretty("Listening on port #{state.port} (HTTP)...", :green)
+    Moongate.Say.pretty("Listening on port #{state.port} (HTTP)...", :green, [suppress_timestamp: true])
     listen(state)
 
     {:noreply, state}
