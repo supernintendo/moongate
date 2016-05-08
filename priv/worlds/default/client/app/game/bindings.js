@@ -1,31 +1,30 @@
-let GamePackets = require('./game-packets');
-
 let Bindings = {
     pool: {
-        create(member) {
+        create(member, index) {
+            this.game.board.draw(member, index);
+        },
+        refresh(member, index) {
+            this.game.board.draw(member, index);
+        },
+        remove(index) {
+            this.game.board.erase(index);
+        },
+        update(member, index) {
+            this.game.board.draw(member, index);
         }
     },
     authenticated() {
         this.send('proceed');
     },
-    keydown(e, key, first) {
-        if (first) {
-            let packet = GamePackets.keydown(key);
-
-            if (packet) {
-                this.send.apply(this, packet);
-                return true;
-            }
-        }
-    },
-    keyup(e, key) {
-        if (this.keysNotPressed(87, 65, 83, 68)) {
-            this.send('Player.Movement', 'move', 'xreset', 'yreset');
-        } else {
-            this.send.apply(this, GamePackets.keyup(key, this));
-        }
-    },
     tick(game) {
+        if (this.stages.testLevel && this.stages.testLevel.player) {
+            Object.keys(this.stages.testLevel.player.members).forEach((index) => {
+                game.board.refresh(index);
+            })
+        }
+        if (game.state.mouseTimer > 0) {
+            game.state.mouseTimer -= 1;
+        }
     }
 };
-export default Bindings;
+export default Bindings
