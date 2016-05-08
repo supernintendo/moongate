@@ -66,6 +66,13 @@ img.sphere {
     pointer-events: none;
     width: 18rem;
 }
+[data-board] div {
+    transition: top 100ms, left 100ms;
+    height: 8px;
+    width: 8px;
+    background-color: blue;
+    position: fixed;
+}
 
 /* Keyframes */
 @-webkit-keyframes blink {

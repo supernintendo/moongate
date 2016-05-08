@@ -261,17 +261,19 @@ defmodule Moongate.Pool.GenServer do
   end
 
   defp notify_partial(member, state) do
-    
     for mutation <- member.__moongate_mutations do
       case mutation do
         {:transform, type, attribute, tag, amount} ->
           "#{state.name} #{member.__moongate_pool_index} #{type}:#{tag} #{attribute} #{amount}"
           |> write_to_all_subscribers(:transform, state)
+        {:set, attribute, value} ->
+          "#{state.name} #{member.__moongate_pool_index} #{attribute}:#{value}"
+          |> write_to_all_subscribers(:set_attr, state)
         _ ->
-          IO.puts "foo"
+          state
       end
     end
-    member
+    state
   end
 
   defp member_removed(state, index) do

@@ -24,11 +24,10 @@ defmodule Moongate.Deed do
 
   @doc """
     Set an attribute of a member to a value.
-
-    TODO: Make this work.
   """
   def set(member, key, value) do
     member
+    |> mutate({:set, key, value})
   end
 
   @doc """

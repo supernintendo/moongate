@@ -53,6 +53,14 @@ class Pools {
     static refresh(parts) {
         return Pools.poolUpdate.apply(this, arguments);
     }
+    static setAttr(parts) {
+        let [k, v] = parts.split(' ').slice(2).join(' ').split(':'),
+            target = Packets.target.call(this, parts);
+
+        return target.pool.update(target.index, {
+            [k]: v
+        });
+    }
     static subscribe(parts) {
         let [stageNameAndPoolName, ...attributes] = parts.split(' '),
             [stageName, poolName] = stageNameAndPoolName.split('__'),
