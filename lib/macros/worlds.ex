@@ -5,7 +5,9 @@ defmodule Moongate.Macros.Worlds do
     else
       world = Application.get_env(:moongate, :world) || "default"
     end
-    camel_world = Mix.Utils.camelize(world)
+    camel_world = world
+    |> String.replace("-", "_")
+    |> Mix.Utils.camelize
 
     quote do
       defp world_module do

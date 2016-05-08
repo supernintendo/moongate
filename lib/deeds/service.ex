@@ -11,7 +11,11 @@ defmodule Moongate.Deed.Service do
     given its first part.
   """
   def deed_module(module_name) do
-    [:"#{String.capitalize(world_name)}", Deeds, module_name]
+    [world_name
+     |> String.capitalize
+     |> String.replace("-", "_")
+     |> Mix.Utils.camelize
+     |> String.to_atom, Deeds, module_name]
     |> Module.safe_concat
   end
 end

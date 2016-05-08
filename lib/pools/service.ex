@@ -54,7 +54,11 @@ defmodule Moongate.Pool.Service do
     given its first part.
   """
   def pool_module(module_name) do
-    [String.to_atom(String.capitalize(world_name)), Pools, module_name]
+    [world_name
+     |> String.capitalize
+     |> String.replace("-", "_")
+     |> Mix.Utils.camelize
+     |> String.to_atom, Pools, module_name]
     |> Module.safe_concat
   end
 
