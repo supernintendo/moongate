@@ -7,7 +7,6 @@ defmodule Default.Deeds.Movement do
   }
 
   def move(entity, {x, y}) do
-    IO.puts "foo"
     entity
     |> set(:x, x)
     |> set(:y, y)
