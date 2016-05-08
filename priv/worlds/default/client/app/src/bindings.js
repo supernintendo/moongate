@@ -24,6 +24,9 @@ let Bindings = {
         }
         if (app.state.mouseTimer > 0) {
             app.state.mouseTimer -= 1;
+            if (app.state.mouseTimer <= 0) {
+                app.mouseMoved();
+            }
         }
     }
 };

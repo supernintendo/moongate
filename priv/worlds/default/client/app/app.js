@@ -12,20 +12,32 @@ class App {
             }
         });
         this.state = {
-            mouseTimer: 0
+            mouseTimer: 0,
+            lastMouseX: 0,
+            lastMouseY: 0
         };
     }
     bindMouse() {
         // // Send mouse position
         $(window).on('mousemove', (e) => {
             if (this.gate.connected && this.state.mouseTimer <= 0) {
-                this.gate.send('Player.Movement', 'move', e.pageX, e.pageY);
-                this.state.mouseTimer = 1;
+                this.mouseMoved();
+                this.state.mouseTimer = 15;
             }
+            this.state.lastMouseX = e.pageX;
+            this.state.lastMouseY = e.pageY;
         });
     }
     login() {
         this.gate.login('test', 'moongate');
+    }
+    mouseMoved() {
+        this.gate.send(
+            'Player.Movement',
+            'move',
+            this.state.lastMouseX,
+            this.state.lastMouseY
+        );
     }
     start() {
         $.ajax({
