@@ -7,7 +7,7 @@ defmodule Moongate.Say do
     modified = list
 
     if options[:timestamp] do
-      [:bright, "#{Moongate.Time.now_formatted} " <> IO.ANSI.reset] ++ list
+      [IO.ANSI.color(3, 3, 3) <> "#{Moongate.Time.now_formatted} " <> IO.ANSI.reset] ++ list
       |> ansi
     else
       ansi(list)

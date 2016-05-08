@@ -156,7 +156,7 @@ defmodule Moongate.Auth.GenServer do
     case result do
       {:ok, message} ->
         {username, _password} = event.params
-        [:underline, username]
+        [:bright, username]
         ++ [IO.ANSI.reset]
         ++ [" has "]
         ++ [:green, "logged in"]

@@ -29,7 +29,7 @@ class App {
         });
     }
     login() {
-        this.gate.login('test', 'moongate');
+        this.gate.login(this.name(), 'moongate');
     }
     mouseMoved() {
         this.gate.send(
@@ -38,6 +38,76 @@ class App {
             this.state.lastMouseX,
             this.state.lastMouseY
         );
+    }
+    name() {
+        let adjectives = [
+            'aloof',
+            'annoyed',
+            'anxious',
+            'aquatic',
+            'breezy',
+            'careful',
+            'confused',
+            'disillusioned',
+            'fantastic',
+            'fine',
+            'fluffy',
+            'fresh',
+            'friendly',
+            'gaudy',
+            'giddy',
+            'grouchy',
+            'happy',
+            'itchy',
+            'knowledgeable',
+            'lazy',
+            'loving',
+            'marvelous',
+            'pastoral',
+            'sleepy',
+            'spicy',
+            'supreme',
+            'tart',
+            'teeny-tiny',
+            'unusual',
+            'weird'
+        ];
+        let animals = [
+            'ape',
+            'basilisk',
+            'blue-crab',
+            'capybara',
+            'chicken',
+            'cougar',
+            'deer',
+            'fish',
+            'fox',
+            'frog',
+            'hamster',
+            'gazelle',
+            'gopher',
+            'grizzly-bear',
+            'kitten',
+            'koala',
+            'lizard',
+            'mule',
+            'newt',
+            'otter',
+            'ox',
+            'panda',
+            'puppy',
+            'rabbit',
+            'seal',
+            'squirrel',
+            'tiger',
+            'walrus',
+            'weasel',
+            'wombat'
+        ];
+        let adjective = adjectives[Math.floor(Math.random() * [adjectives.length - 1])],
+            animal = animals[Math.floor(Math.random() * [animals.length - 1])];
+
+        return `${adjective}-${animal}`;
     }
     start() {
         $.ajax({

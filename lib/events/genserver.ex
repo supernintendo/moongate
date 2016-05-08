@@ -78,7 +78,7 @@ defmodule Moongate.Event.GenServer do
     tell({:deauth, state.origin.id}, :auth)
 
     if state.origin.auth do
-      [:underline, state.origin.auth.email]
+      [:bright, state.origin.auth.email]
       ++ [IO.ANSI.reset]
       ++ [" has "]
       ++ [IO.ANSI.color(1, 1, 1), "logged out"]
