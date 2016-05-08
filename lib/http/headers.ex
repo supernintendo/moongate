@@ -13,13 +13,15 @@ defmodule Moongate.HTTP.Middleware.Headers do
     parts = String.split(route, ".")
 
     case List.last(parts) do
+      "json" ->
+        modified = :cowboy_req.set_resp_header("Content-Type", "application/json", req)
+        {:ok, modified, env}
       "js" ->
         source_map = String.lstrip(route, ?/) <> ".map"
         modified = :cowboy_req.set_resp_header("X-SourceMap", source_map, req)
+        {:ok, modified, env}
       _ ->
-        modified = req
+        {:ok, req, env}
     end
-
-    {:ok, modified, env}
   end
 end

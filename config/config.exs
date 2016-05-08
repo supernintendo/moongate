@@ -3,7 +3,7 @@ use Mix.Config
 default_world = "default"
 default_repo = "moongate:moongate@localhost/moongate"
 
-case File.read("user") do
+case File.read("priv/temp/user") do
   {:ok, data} ->
     user_config = data |> String.split("\n")
     world = user_config |> hd

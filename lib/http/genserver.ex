@@ -41,6 +41,7 @@ defmodule Moongate.HTTP.GenServer do
       {"/", :cowboy_static, {:priv_file, :moongate, "#{world_directory}/#{path}/index.html"}},
       {"/moongate.js", :cowboy_static, {:priv_file, :moongate, "clients/js/public/app.js"}},
       {"/moongate.js.map", :cowboy_static, {:priv_file, :moongate, "clients/js/public/app.js.map"}},
+      {"/moongate-manifest.json", :cowboy_static, {:priv_file, :moongate, "temp/manifest.json"}},
       {"/[...]", :cowboy_static, {:priv_dir,  :moongate, "#{world_directory}/#{path}"}}
     ]
   end

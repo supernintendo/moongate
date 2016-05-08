@@ -20,6 +20,7 @@ defmodule Moongate.Application do
     registry = start_supervisor(config)
     initialize_stages
     spawn_sockets(config)
+    create_manifest
 
     if Mix.env() == :prod, do: recur
 
@@ -27,6 +28,18 @@ defmodule Moongate.Application do
   end
 
   ### Private
+
+  defp create_manifest do
+    if File.exists?("priv/temp/manifest.json") do
+      File.rm("priv/temp/manifest.json")
+    end
+    manifest = %{
+      ip: Moongate.Network.get_ip
+    }
+    {:ok, json} = JSON.encode(manifest)
+    {:ok, file} = File.open("priv/temp/manifest.json", [:write])
+    IO.binwrite(file, json)
+  end
 
   # Load the server.json file for the world.
   defp load_config, do: load_config(Moongate.Worlds.get_world)

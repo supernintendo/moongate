@@ -1,5 +1,4 @@
-let Utils = require('./utils'),
-    encoder =  new TextEncoder('utf-8');
+let Utils = require('./utils');
 
 class Packets {
     constructor() {

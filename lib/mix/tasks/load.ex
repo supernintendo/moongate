@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Moongate.Load do
     prepared = defaults |> Map.merge(config)
     {username, password} = prepared.db_user
     result = "#{world}\n#{username}:#{password}@#{prepared.db}"
-    {:ok, file} = File.open("user", [:write])
+    {:ok, file} = File.open("priv/temp/user", [:write])
     IO.binwrite(file, result)
     Mix.Tasks.Clean.run([])
 

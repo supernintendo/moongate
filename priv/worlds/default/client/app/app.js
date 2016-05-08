@@ -15,12 +15,8 @@ class App {
             mouseTimer: 0
         };
     }
-    start() {
-        console.log(this.gate);
-        this.gate.connect('127.0.0.1', 2593, this.login.bind(this));
-        this.gate.tick(this);
-
-        // Send mouse position
+    bindMouse() {
+        // // Send mouse position
         $(window).on('mousemove', (e) => {
             if (this.gate.connected && this.state.mouseTimer <= 0) {
                 this.gate.send('Player.Movement', 'move', e.pageX, e.pageY);
@@ -30,6 +26,16 @@ class App {
     }
     login() {
         this.gate.login('test', 'moongate');
+    }
+    start() {
+        $.ajax({
+            url: '/moongate-manifest.json',
+            success: (response) => {
+                this.gate.connect(response.ip, 2593, this.login.bind(this));
+                this.gate.tick(this);
+                this.bindMouse();
+            }
+        });
     }
 }
 export default App;
