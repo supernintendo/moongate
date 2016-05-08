@@ -1,12 +1,12 @@
-let Bindings = require('./game/bindings'),
-    Board = require('./game/board'),
+let Bindings = require('./src/bindings'),
+    Board = require('./src/board'),
     Moongate = require('moongate');
 
-class Game {
+class App {
     constructor() {
         this.board = new Board('#board');
         this.gate = new Moongate(Bindings, {
-            game: this,
+            app: this,
             logs: {
                 all: true
             }
@@ -16,7 +16,7 @@ class Game {
         };
     }
     start() {
-        console.log(this);
+        console.log(this.gate);
         this.gate.connect('127.0.0.1', 2593, this.login.bind(this));
         this.gate.tick(this);
 
@@ -32,4 +32,4 @@ class Game {
         this.gate.login('test', 'moongate');
     }
 }
-export default Game;
+export default App;

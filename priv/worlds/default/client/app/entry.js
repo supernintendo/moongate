@@ -1,4 +1,4 @@
-let Game = require('./game'),
-    game= new Game();
+let App = require('./app'),
+    app = new App();
 
-export default game;
+export default app

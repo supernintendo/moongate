@@ -28,6 +28,7 @@ h1 {
     font-family: 'Berkshire Swash';
     font-size: 3.75rem;
     position: absolute;
+    margin-left: -0.75rem;
     top: 6.2rem;
     width: 100%;
 }
@@ -62,7 +63,8 @@ code {
 }
 img.sphere {
     height: 18rem;
-    margin-top: 2.5rem;
+    margin-right: 1rem;
+    margin-top: 3rem;
     pointer-events: none;
     width: 18rem;
 }
