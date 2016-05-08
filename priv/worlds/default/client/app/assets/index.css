@@ -70,8 +70,10 @@ img.sphere {
 }
 [data-board] div {
     transition: top 100ms, left 100ms;
-    height: 8px;
-    width: 8px;
+    margin-left: -0.25rem;
+    margin-top: -0.25rem;
+    height: 0.5rem;
+    width: 0.5rem;
     background-color: blue;
     position: fixed;
 }
