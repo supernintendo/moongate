@@ -44,8 +44,8 @@ defmodule Moongate.Application do
   # Load the server.json file for the world.
   defp load_config, do: load_config(Moongate.Worlds.get_world)
   defp load_config(world) do
-    if File.exists?("priv/worlds/#{world}/moongate.peon") do
-      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.peon")
+    if File.exists?("priv/worlds/#{world}/moongate.eon") do
+      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.eon")
 
       config
     else

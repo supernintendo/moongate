@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Moongate.Load do
       db_user: {"moongate", "moongate"}
     }
     world = hd(args)
-    {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.peon")
+    {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.eon")
     prepared = defaults |> Map.merge(config)
     {username, password} = prepared.db_user
     result = "#{world}\n#{username}:#{password}@#{prepared.db}"
