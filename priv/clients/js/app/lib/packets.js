@@ -5,9 +5,7 @@ class Packets {
     }
 
     static byteSize(str) {
-        var m = encodeURIComponent(str).match(/%[89ABab]/g);
-
-        return str.length + (m ? m.length : 0);
+        return encodeURIComponent(str).replace(/%[A-F\d]{2}/g, 'U').length;
     }
 
     static kv(string) {
@@ -47,10 +45,10 @@ class Packets {
 
     static target(parts) {
         let scope = parts.split(' ').slice(0, 2),
-            [stageName, poolName] = scope[0].split('__'),
+            [poolName, stageName] = scope[0].split('__for__'),
             index = scope[1],
-            stage = this.stages && this.stages[Utils.camelize(stageName)],
-            pool = poolName && stage && stage[Utils.camelize(poolName)],
+            stage = this.stages && this.stages[stageName],
+            pool = poolName && stage && stage[poolName],
             result = {};
 
         if (index)

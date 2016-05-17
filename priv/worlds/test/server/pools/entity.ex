@@ -1,4 +1,4 @@
-defmodule Test.Pools.Entity do
+defmodule Test.Pool.Entity do
   import Moongate.Pool
 
   attributes %{

@@ -12,7 +12,11 @@ defmodule Moongate.HTTP.GenServer do
     Start the HTTP server.
   """
   def start_link({port, path}) do
-    link(%Moongate.HTTP.GenServer.State{path: path, port: port}, "socket", "#{port}")
+    %Moongate.HTTP.GenServer.State{
+      path: path,
+      port: port
+    }
+    |> link("socket", "#{port}")
   end
 
   @doc """

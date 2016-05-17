@@ -15,7 +15,7 @@ defmodule Moongate.Deed.Service do
      |> String.capitalize
      |> String.replace("-", "_")
      |> Mix.Utils.camelize
-     |> String.to_atom, Deeds, module_name]
+     |> String.to_atom, Deed, module_name]
     |> Module.safe_concat
   end
 end

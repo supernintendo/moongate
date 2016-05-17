@@ -13,7 +13,7 @@ defmodule Moongate.Stage.GenServer do
       id: params[:id],
       stage: params[:stage]
     }
-    |> link("stage", "#{params[:id]}")
+    |> link
   end
 
   @doc """
@@ -78,17 +78,9 @@ defmodule Moongate.Stage.GenServer do
     Initialize one pool.
   """
   def init_pool(pool, state) do
-    process_name = "#{Atom.to_string(state.id)}_"
-    <> (pool
-        |> Atom.to_string
-        |> String.split(".")
-        |> tl
-        |> Enum.map(&("_" <> String.downcase(&1)))
-        |> List.to_string)
-
-    spawn_new(:pool, {process_name, state.id, pool})
-
-    String.to_atom(process_name)
+    name = Moongate.Pool.Service.pool_process_name(state.id, pool)
+    register(:pool, name, {name, state.id, pool})
+    name
   end
 
   defp notify_arrive(state, origin) do

@@ -3,7 +3,10 @@ defmodule Moongate.Socket.UDP.GenServer do
   use Moongate.Macros.Processes
 
   def start_link(port) do
-    link(%Moongate.Socket.GenServer.State{port: port}, "socket", "#{port}")
+    %Moongate.Socket.GenServer.State{
+      port: port
+    }
+    |> link("socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
@@ -22,8 +25,8 @@ defmodule Moongate.Socket.UDP.GenServer do
       {:error, error} when valid -> Moongate.Say.pretty("Bad packet #{safe_packet}: #{error}.", :red)
       {:error, error} -> Moongate.Say.pretty("Bad packet: #{error}.", :red)
       {:ok, parsed} ->
-        unless pid_for_name(:event, "#{port}") do
-          spawn_new(:event, %Moongate.Origin{
+        unless pid_for_name("event_#{port}") do
+          register(:event, %Moongate.Origin{
             id: port,
             ip: ip,
             port: server,

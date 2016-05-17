@@ -12,10 +12,8 @@ class Stage {
         return new Dummy();
     }
     static addPool(id, schema) {
-        let key = Utils.camelize(id);
-
-        if (!this[key]) {
-            this[key] = new Pool(key, schema);
+        if (!this[id]) {
+            this[id] = new Pool(id, schema);
         }
     }
 }

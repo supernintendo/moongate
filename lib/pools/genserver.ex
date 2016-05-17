@@ -18,7 +18,7 @@ defmodule Moongate.Pool.GenServer do
       spec: pool,
       stage: stage
     }
-    link(state, "pool", name)
+    |> link
   end
 
   @doc """
@@ -314,7 +314,7 @@ defmodule Moongate.Pool.GenServer do
   # passed to the callback function.
   defp pool_callback(callback, member, state, params) do
     world = String.to_atom(String.capitalize(world_name))
-    pool_module = Module.safe_concat([world, Pools, state.spec])
+    pool_module = Module.safe_concat([world, Pool, state.spec])
     pools = Map.put(%{}, state.spec, state.members)
     event = %{
       this: member,

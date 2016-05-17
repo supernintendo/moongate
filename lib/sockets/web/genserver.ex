@@ -3,7 +3,10 @@ defmodule Moongate.Socket.Web.GenServer do
   use Moongate.Macros.Processes
 
   def start_link(port) do
-    link(%Moongate.Socket.GenServer.State{port: port}, "socket", "#{port}")
+    %Moongate.Socket.GenServer.State{
+      port: port
+    }
+    |> link("socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
@@ -18,7 +21,7 @@ defmodule Moongate.Socket.Web.GenServer do
     client = listener |> Socket.Web.accept!
     client |> Socket.Web.accept!
 
-    events = spawn_new(:event, %Moongate.Origin{
+    events = register(:event, %Moongate.Origin{
       id: UUID.uuid4(:hex),
       ip: nil,
       port: client,
@@ -45,7 +48,7 @@ defmodule Moongate.Socket.Web.GenServer do
         handle(events, client)
       _ ->
         ask_pid(:cleanup, events)
-        kill_by_pid(:event, events)
+        kill_pid(:event, events)
     end
   end
 end

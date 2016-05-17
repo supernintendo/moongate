@@ -7,9 +7,10 @@ defmodule Moongate.Service.Stages do
   @doc """
     Make any neccessary GenServer calls to allow a client
     to join a stage.
-  """
-  def arrive(origin, stage_name) do
-    ask({:arrive, origin}, :stage, stage_name)
+    """
+  def arrive(origin, stage_module, name) do
+    process_name = Moongate.Service.Stages.stage_process_name(stage_module, name)
+    ask({:arrive, origin}, process_name)
   end
 
   @doc """
@@ -18,5 +19,18 @@ defmodule Moongate.Service.Stages do
   """
   def depart(event) do
     tell({:depart, event}, event.to)
+  end
+
+  def stage_module(module_name) do
+    [Moongate.Worlds.get_world
+     |> String.capitalize
+     |> String.replace("-", "_")
+     |> Mix.Utils.camelize
+     |> String.to_atom, Stage, module_name]
+    |> Module.safe_concat
+  end
+
+  def stage_process_name(stage_module, id) do
+    "stage_#{Moongate.Modules.to_string(stage_module)}_#{id}"
   end
 end

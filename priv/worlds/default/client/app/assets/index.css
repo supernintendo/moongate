@@ -23,6 +23,7 @@ html, body {
     text-align: center;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 h1 {
     font-family: 'Berkshire Swash';
@@ -43,6 +44,7 @@ p {
     left: 25%;
     position: fixed;
     width: 50%;
+    z-index: 2;
 }
 code {
     background-color: #1C1C1C;
@@ -61,21 +63,31 @@ code {
     -o-animation: rainbow 100s infinite;
     animation: rainbow 100s infinite;
 }
+.rainbow-fast {
+    -webkit-animation: rainbow 20s infinite;
+    -moz-animation: rainbow 20s infinite;
+    -o-animation: rainbow 20s infinite;
+    animation: rainbow 20s infinite;
+}
 img.sphere {
     height: 18rem;
     margin-right: 1rem;
     margin-top: 3rem;
     pointer-events: none;
+    position: relative;
     width: 18rem;
+    z-index: 1;
 }
 [data-board] div {
-    transition: top 3000ms ease-out, left 3000ms ease-out;
+    transition-property: transform;
     margin-left: -0.25rem;
     margin-top: -0.25rem;
     height: 0.5rem;
     width: 0.5rem;
     background-color: blue;
     position: fixed;
+    top: 0;
+    left: 0;
 }
 
 /* Keyframes */

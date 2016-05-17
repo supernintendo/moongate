@@ -58,7 +58,7 @@ defmodule Moongate.Pool.Service do
      |> String.capitalize
      |> String.replace("-", "_")
      |> Mix.Utils.camelize
-     |> String.to_atom, Pools, module_name]
+     |> String.to_atom, Pool, module_name]
     |> Module.safe_concat
   end
 
@@ -66,8 +66,8 @@ defmodule Moongate.Pool.Service do
     Return the globally registered name for a pool process
     when given a stage name and a pool module name.
   """
-  def pool_process(stage_name, module_name) do
-    String.to_atom("pool_#{stage_name}__#{String.downcase(module_name)}")
+  def pool_process_name(stage_process_name, module_name) do
+    "#{Moongate.Modules.to_string(module_name)}__for__#{stage_process_name}"
   end
 
   @doc """
@@ -78,9 +78,8 @@ defmodule Moongate.Pool.Service do
   """
   def to_string_list(pools) do
     pools
-    |> Enum.map(&("#{&1}"))
-    |> Enum.map(&(String.split(&1, "__")))
-    |> Enum.map(&(&1 |> tl |> hd))
+    |> Enum.map(&(String.split(&1, "__for__")))
+    |> Enum.map(&(&1 |> hd))
     |> Enum.join(" ")
   end
 end
