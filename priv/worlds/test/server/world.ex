@@ -1,10 +1,10 @@
 defmodule Test.World do
   import Moongate
 
-  stages %{
-    test_stage: Test.Stage.TestStage
-  }
+  def start do
+  end
+
   def connected(event) do
-    event |> arrive(:test_stage)
+    event
   end
 end
