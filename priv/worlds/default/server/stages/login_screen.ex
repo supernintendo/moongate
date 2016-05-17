@@ -1,7 +1,6 @@
 defmodule Default.Stage.LoginScreen do
   import Moongate.Stage
 
-  meta %{}
   pools []
 
   def arrival(client) do
@@ -9,16 +8,19 @@ defmodule Default.Stage.LoginScreen do
   end
 
   def departure(client) do
-    client |> depart
+    client
+    |> depart
   end
 
   def takes({"proceed", _params}, client) do
-    client |> authenticate
+    client
+    |> authenticate
   end
 
   def authenticate(client) do
     if is_authenticated?(client) do
-      client |> travel(:test_level)
+      client
+      |> travel(Level)
     end
   end
 end

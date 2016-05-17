@@ -6,7 +6,10 @@ defmodule Moongate.Socket.TCP.GenServer do
     Listen for incoming socket messages on a port.
   """
   def start_link(port) do
-    link(%Moongate.Socket.GenServer.State{port: port}, "socket", "#{port}")
+    %Moongate.Socket.GenServer.State{
+      port: port
+    }
+    |> link("socket", "#{port}")
   end
 
   def handle_cast({:init}, state) do
@@ -26,7 +29,7 @@ defmodule Moongate.Socket.TCP.GenServer do
       port: socket,
       protocol: :tcp
     }
-    child = spawn_new(:event, origin)
+    child = register(:event, origin)
     spawn(fn -> handle(socket, &handler(&1, &2, uuid), uuid, child) end)
     Moongate.Say.pretty("Socket with id #{uuid} connected.", :magenta)
     accept(listener)
@@ -39,7 +42,7 @@ defmodule Moongate.Socket.TCP.GenServer do
     if packet == nil do
       # Client disconnects.
       Moongate.Say.pretty("Socket with id #{id} disconnected.", :black)
-      kill_by_pid(:event, pid)
+      kill_pid(:event, pid)
       socket |> Socket.close
       :close
     else

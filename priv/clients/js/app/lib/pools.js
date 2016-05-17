@@ -63,15 +63,15 @@ class Pools {
     }
     static subscribe(parts) {
         let [stageNameAndPoolName, ...attributes] = parts.split(' '),
-            [stageName, poolName] = stageNameAndPoolName.split('__'),
+            [poolName, stageName] = stageNameAndPoolName.split('__for__'),
             schema = Pools.parseSchema(attributes),
-            stage = this.stages[Utils.camelize(stageName)];
+            stage = this.stages[stageName];
 
         if (stage) {
-            if (stage[Utils.camelize(poolName)]) {
-                stage[Utils.camelize(poolName)].setSchema(schema);
+            if (stage[poolName]) {
+                stage[poolName].setSchema(schema);
             } else {
-                Stage.addPool.apply(stage, [Utils.camelize(poolName), schema]);
+                Stage.addPool.apply(stage, [poolName, schema]);
             }
         }
         return stage;

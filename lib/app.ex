@@ -15,16 +15,15 @@ defmodule Moongate.Application do
   def start(_type, _args) do
     Moongate.Say.greeting
     load_world
-
     config = load_config
-    registry = start_supervisor(config)
-    initialize_stages
+    supervisor = start_supervisor(config)
     spawn_sockets(config)
     create_manifest
+    Moongate.Worlds.world_apply(:start)
 
     if Mix.env() == :prod, do: recur
 
-    {:ok, registry}
+    {:ok, supervisor}
   end
 
   ### Private
@@ -91,7 +90,12 @@ defmodule Moongate.Application do
   # Start the supervision tree.
   defp start_supervisor(config) do
     {:ok, supervisor} = Moongate.Supervisor.start_link(config)
-    GenServer.call(:registry, {:register, supervisor})
+
+    supervisor
+    |> Supervisor.which_children
+    |> Enum.map(fn({name, pid, type, params}) ->
+      Moongate.Processes.insert({"tree_#{name}", pid})
+    end)
 
     supervisor
   end
@@ -100,20 +104,9 @@ defmodule Moongate.Application do
   # appropriate protocol on the provided port.
   defp spawn_socket(socket) do
     case socket do
-      {protocol, port} -> spawn_new(protocol, port)
-      {protocol, port, params} -> spawn_new(protocol, {port, params})
+      {protocol, port} -> register(protocol, "#{port}", port)
+      {protocol, port, params} -> register(protocol, "#{port}", {port, params})
     end
-  end
-
-  # Initialize all stages.
-  defp initialize_stages do
-    apply(world_module, :__moongate_stages, [])
-    |> Enum.map(&initialize_stage(&1))
-  end
-
-  # Initialize one stage.
-  defp initialize_stage({id, stage}) do
-    spawn_new(:stage, [id: id, stage: stage])
   end
 
   # Fairly straightforward.

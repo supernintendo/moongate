@@ -3,10 +3,10 @@ defmodule Moongate.Event.Mutations do
     Provides functions which mutate the state of an
     event process.
   """
-  def mutation({:join_stage, stage_name}, event, state) do
-    Moongate.Service.Stages.arrive(event.origin, stage_name)
+  def mutation({:join_stage, stage_name, id}, event, state) do
+    Moongate.Service.Stages.arrive(event.origin, stage_name, id)
 
-    {:stages, state.stages ++ [stage_name]}
+    {:stages, state.stages ++ [Moongate.Service.Stages.stage_process_name(stage_name, id)]}
   end
 
   @doc """
@@ -20,7 +20,7 @@ defmodule Moongate.Event.Mutations do
     Set a stage as the target stage, causing incoming messages
     to be sent to that stage.
   """
-  def mutation({:set_target_stage, stage_name}, _event, state) do
-    {:target_stage, stage_name}
+  def mutation({:set_target_stage, stage_module, id}, _event, state) do
+    {:target_stage, Moongate.Service.Stages.stage_process_name(stage_module, id)}
   end
 end

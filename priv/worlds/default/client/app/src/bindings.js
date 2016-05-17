@@ -17,8 +17,10 @@ let Bindings = {
         this.send('proceed');
     },
     tick(app) {
-        if (this.stages.testLevel && this.stages.testLevel.player) {
-            Object.keys(this.stages.testLevel.player.members).forEach((index) => {
+        let stage = this.stages['Level_🔮'];
+
+        if (stage && stage.Player) {
+            Object.keys(stage.Player.members).forEach((index) => {
                 app.board.refresh(index);
             })
         }

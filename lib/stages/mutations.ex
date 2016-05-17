@@ -2,7 +2,7 @@ defmodule Moongate.Stage.Mutations do
   import Moongate.Macros.SocketWriter
   use Moongate.Macros.Processes
 
-  def mutation({:join_stage, stage_name}, event, state) do
+  def mutation({:join_stage, stage_name, id}, event, state) do
     ask_pid({:mutations, event}, event.origin.events)
     nil
   end
@@ -19,17 +19,17 @@ defmodule Moongate.Stage.Mutations do
     {:members, Enum.filter(state.members, &(&1.id != origin.id))}
   end
 
-  def mutation({:set_target_stage, _}, _, _), do: nil
+  def mutation({:set_target_stage, _, _}, _, _), do: nil
 
   def mutation({:subscribe_to_pool, pool}, event, state) do
-    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
-    tell({:subscribe, event}, process)
+    process = Moongate.Pool.Service.pool_process_name(state.id, Moongate.Atoms.to_strings(pool))
+    tell({:subscribe, event}, "pool", process)
     nil
   end
 
   def mutation({:create_in_pool, pool, params}, event, state) do
-    process = Moongate.Pool.Service.pool_process(state.id, Moongate.Atoms.to_strings(pool))
-    tell({:add_to_pool, Map.put(params, :origin, event.origin)}, process)
+    process = Moongate.Pool.Service.pool_process_name(state.id, Moongate.Atoms.to_strings(pool))
+    tell({:add_to_pool, Map.put(params, :origin, event.origin)}, "pool", process)
     nil
   end
 end

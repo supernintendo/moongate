@@ -6,10 +6,11 @@ defmodule Moongate.Stage do
   use Moongate.Macros.Mutations
   use Moongate.Macros.Processes
 
-  def arrive(event, stage_name) do
+  def arrive(event, stage_module), do: arrive(event, stage_module, "🔮")
+  def arrive(event, stage_module, id) do
     event
-    |> mutate({:join_stage, stage_name})
-    |> mutate({:set_target_stage, stage_name})
+    |> mutate({:join_stage, stage_module, id})
+    |> mutate({:set_target_stage, stage_module, id})
   end
 
   def clean(event) do
@@ -31,10 +32,16 @@ defmodule Moongate.Stage do
     Moongate.Pool.Service.member_attr(member, key)
   end
 
-  def travel(event, stage_name) do
+  def travel(event, stage_module, id) do
     event
     |> depart
-    |> arrive(stage_name)
+    |> arrive(stage_module, id)
+  end
+
+  def travel(event, stage_module) do
+    event
+    |> depart
+    |> arrive(stage_module)
   end
 
   def subscribe(event, pool_name) do
@@ -43,7 +50,7 @@ defmodule Moongate.Stage do
   end
 
   def is_authenticated?(t) do
-    {:ok, result} = ask({:check_auth, t.origin}, :auth)
+    {:ok, result} = ask({:check_auth, t.origin}, "tree_auth")
 
     result
   end

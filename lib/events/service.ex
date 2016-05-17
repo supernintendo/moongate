@@ -23,7 +23,7 @@ defmodule Moongate.Event.Service do
         message |> to_pool_or_deed
       ":" == message |> hd |> String.codepoints |> hd ->
         if whitelisted(hd(message)) do
-          {:process, [String.lstrip(hd(message), ?:)] ++ tl(message)}
+          {:tree, [String.lstrip(hd(message), ?:)] ++ tl(message)}
         else
           {:none}
         end

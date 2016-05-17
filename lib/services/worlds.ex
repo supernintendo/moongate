@@ -22,7 +22,10 @@ defmodule Moongate.Worlds do
   @doc """
     Call a function within the `World` module of the
     current world.
-  """
+    """
+  def world_apply(func) do
+    apply(world_module, func, [])
+  end
   def world_apply(args, func) do
     cond do
       is_list(args) -> apply(world_module, func, args)

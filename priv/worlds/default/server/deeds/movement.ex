@@ -1,4 +1,4 @@
-defmodule Default.Deeds.Movement do
+defmodule Default.Deed.Movement do
   import Moongate.Deed
 
   attributes %{

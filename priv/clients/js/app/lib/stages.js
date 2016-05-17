@@ -6,12 +6,10 @@ class Stages {
     constructor() {
     }
     static addStage(id) {
-        let key = Utils.camelize(id);
+        if (!this[id]) {
+            this[id] = new Stage();
 
-        if (!this[key]) {
-            this[key] = new Stage();
-
-            return this[key];
+            return this[id];
         }
     }
     static leave(parts) {

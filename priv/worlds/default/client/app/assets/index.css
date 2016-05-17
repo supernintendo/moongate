@@ -23,6 +23,7 @@ html, body {
     text-align: center;
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 h1 {
     font-family: 'Berkshire Swash';

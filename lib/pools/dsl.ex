@@ -11,7 +11,7 @@ defmodule Moongate.Pool do
     These modules are expected to import Moongate.Pool
     and use the following naming convention:
 
-    <ProjectName>.Pools.<NameOfPool>
+    <ProjectName>.Pool.<NameOfPool>
   """
 
   # Data macros

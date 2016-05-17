@@ -1,7 +1,6 @@
 defmodule Default.Stage.Level do
   import Moongate.Stage
 
-  meta %{}
   pools [Player]
 
   @doc """
@@ -23,6 +22,7 @@ defmodule Default.Stage.Level do
     stage.
   """
   def departure(client) do
-    client |> depart
+    client
+    |> depart
   end
 end

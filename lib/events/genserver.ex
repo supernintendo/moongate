@@ -73,7 +73,7 @@ defmodule Moongate.Event.GenServer do
       origin: state.origin
     }
     Enum.map(state.stages, fn(stage) ->
-      tell({:depart, event}, :"stage_#{Atom.to_string(stage)}")
+      tell({:depart, event}, stage)
     end)
     tell({:deauth, state.origin.id}, :auth)
 
@@ -130,7 +130,8 @@ defmodule Moongate.Event.GenServer do
   # message should be delivered to.
   def target_process(message, state) do
     state.target_stage
-    |> Moongate.Pool.Service.pool_process(
+    |> String.replace("stage_", "")
+    |> Moongate.Pool.Service.pool_process_name(
       message
       |> Moongate.Event.Service.delimited_values
       |> hd
@@ -158,7 +159,7 @@ defmodule Moongate.Event.GenServer do
       origin: state.origin,
       use_deed: message |> hd |> String.split(".") |> tl |> hd
     }}
-    |> tell(target_process(message, state))
+    |> tell("pool", target_process(message, state))
   end
 
   # Pass a message off to the target pool to be used
@@ -171,12 +172,12 @@ defmodule Moongate.Event.GenServer do
        params: message |> tl |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell(target_process(message, state))
+    |> tell("pool", target_process(message, state))
   end
 
   # Pass a message off to a named process.
-  defp use_message({:process, message}, state) do
-    target = message |> hd |> String.to_atom
+  defp use_message({:tree, message}, state) do
+    target = "tree_" <> hd(message)
 
     {message |> tl |> hd,
      %Moongate.ClientEvent{
@@ -198,7 +199,7 @@ defmodule Moongate.Event.GenServer do
        params: message |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell("stage", state.target_stage)
+    |> tell(state.target_stage)
   end
 
   # Do nothing. This happens when the original packet

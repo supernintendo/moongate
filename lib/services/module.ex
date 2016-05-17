@@ -9,4 +9,13 @@ defmodule Moongate.Modules do
       "#{func}" == func_name
     end)
   end
+
+  @doc """
+    Converts a naked (no preceding namespaces) module
+    atom to a string.
+  """
+  def to_string(module) do
+    "#{module}"
+    |> String.replace("Elixir.", "")
+  end
 end

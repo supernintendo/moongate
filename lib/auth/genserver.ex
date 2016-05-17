@@ -18,9 +18,13 @@ defmodule Moongate.Auth.GenServer do
   """
   def start_link(config) do
     if config.anonymous do
-      link(%Moongate.Auth.GenServer.State{anonymous: true}, "auth")
+      %Moongate.Auth.GenServer.State{
+        anonymous: true
+      }
+      |> link("auth")
     else
-      link(%Moongate.Auth.GenServer.State{}, "auth")
+      %Moongate.Auth.GenServer.State{}
+      |> link("auth")
     end
   end
 

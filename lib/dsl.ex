@@ -11,23 +11,17 @@ defmodule Moongate do
     Causes the origin of a client event to join
     a stage.
   """
-  def arrive(event, stage_name) do
+  def arrive(event, stage_module), do: arrive(event, stage_module, "🔮")
+  def arrive(event, stage_module, id) do
     event
-    |> mutate({:join_stage, stage_name})
-    |> mutate({:set_target_stage, stage_name})
+    |> mutate({:join_stage, stage_module, id})
+    |> mutate({:set_target_stage, stage_module, id})
   end
 
-  @doc """
-    Defines the list of stages within a world.
-    Each module name in this map will be passed
-    to a new stage process when Moongate starts.
-  """
-  defmacro stages(stage_map) do
-    quote do
-      def __moongate_stages(_), do: __moongate_stages
-      def __moongate_stages do
-        unquote(stage_map)
-      end
-    end
+  def stage(module_name), do: stage(module_name, "🔮")
+  def stage(module_name, id) do
+    name = "#{Moongate.Modules.to_string(module_name)}_#{id}"
+
+    register(:stage, name, [id: name, stage: Moongate.Service.Stages.stage_module(module_name)])
   end
 end
