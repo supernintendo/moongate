@@ -3,6 +3,7 @@
 _A server with a little magic_.
 
 [![Build Status](https://travis-ci.org/supernintendo/moongate.svg?branch=master)](https://travis-ci.org/supernintendo/moongate)
+[![Deps Status](https://beta.hexfaktor.org/badge/all/github/supernintendo/moongate.svg)](https://beta.hexfaktor.org/github/supernintendo/moongate)
 [![Inline docs](http://inch-ci.org/github/supernintendo/moongate.svg?branch=master)](http://inch-ci.org/github/supernintendo/moongate)
 [![Gitter](https://badges.gitter.im/supernintendo/moongate.svg)](https://gitter.im/supernintendo/moongate?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
