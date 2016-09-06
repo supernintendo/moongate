@@ -38,7 +38,7 @@ defmodule Moongate.Say do
     ]
     |> ansi
 
-    ["Your current world is: "] ++ [:magenta, "#{Moongate.Worlds.get_world}"]
+    ["Your current world is: "] ++ [:magenta, "#{Moongate.World.Service.get_world}"]
     |> ansi
 
     IO.puts ""
@@ -66,10 +66,6 @@ defmodule Moongate.Say do
     string to use to represent that origin.
   """
   def origin(o) do
-    if o.auth != nil and o.auth.email != nil do
-      o.auth.email
-    else
-      "Anonymous (#{o.id})"
-    end
+    "(#{o.id})"
   end
 end

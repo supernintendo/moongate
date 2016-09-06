@@ -10,15 +10,15 @@ defmodule Moongate.Supervisor do
   """
   def init(config) do
     [
-      worker(Moongate.Registry.GenServer, [], [id: :registry]),
-      worker(Moongate.Repo, [], [id: :repo]),
-      worker(Moongate.Auth.GenServer, [config], [id: :auth]),
-      supervisor(Moongate.Event.Supervisor, [], [id: :event]),
+      worker(Moongate.Registry.Node, [], [id: :registry]),
+      worker(Moongate.Logger.Node, [], [id: :logger]),
+      supervisor(Moongate.Fiber.Supervisor, [], [id: :fiber]),
       supervisor(Moongate.Pool.Supervisor, [], [id: :pool]),
+      supervisor(Moongate.Session.Supervisor, [], [id: :session]),
       supervisor(Moongate.Stage.Supervisor, [], [id: :stage]),
       supervisor(Moongate.Socket.TCP.Supervisor, [], [id: :tcp]),
       supervisor(Moongate.Socket.UDP.Supervisor, [], [id: :udp]),
-      supervisor(Moongate.Socket.Web.Supervisor, [], [id: :ws]),
+      supervisor(Moongate.Socket.WebSocket.Supervisor, [], [id: :ws]),
       supervisor(Moongate.HTTP.Supervisor, [], [id: :http])
     ]
     |> supervise(strategy: :one_for_one)

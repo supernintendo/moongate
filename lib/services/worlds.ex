@@ -1,10 +1,10 @@
-defmodule Moongate.Worlds do
+defmodule Moongate.World.Service do
   @moduledoc """
     Provides functions related to working with worlds
     (worlds are user-made projects that run on the
     Moongate platform).
   """
-  use Moongate.Macros.Worlds
+  use Moongate.OS
 
   @doc """
     Return the name of the world. This name is used

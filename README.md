@@ -13,12 +13,12 @@ Moongate is a server and application platform for the [Elixir Programming Langua
 
 ### Dependencies ###
 
-* Elixir 1.2.3
-* PostgreSQL 9.3.5+
+* Elixir 1.3.2
+* [Rebar3](https://github.com/erlang/rebar3)
 
-### Installation ###
+### Setup ###
 
-Clone this repository, `cd` to its directory and run `./scripts/setup.sh`. This script creates a database, fetches dependencies and runs Ecto migrations. Once this is done, run `iex -S mix` or `mix` to start the server.
+Simply clone this directory and run `iex -S mix` or `mix` to start the server.
 
 ### Status ###
 

@@ -1,5 +1,5 @@
 defmodule Default.Deed.Movement do
-  import Moongate.Deed
+  import Moongate.Deeds
 
   attributes %{
     x: :float,

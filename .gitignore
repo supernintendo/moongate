@@ -40,6 +40,9 @@ doc/
 .tern-port
 
 # Moongate
+priv/worlds/*
+!priv/worlds/default
+!priv/worlds/test
 priv/temp/*
 
 # ...but always keep .gitkeep.

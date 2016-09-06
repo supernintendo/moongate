@@ -1,7 +1,7 @@
 {
-    "name": "moongate.js",
-    "private": true,
-    "description": ".",
+    "name": "moongate",
+    "description": "JS client for Moongate, a realtime server application",
+    "main": "public/moongate.js",
     "author": "supernintendo",
     "version": "0.1.0",
     "repository": {

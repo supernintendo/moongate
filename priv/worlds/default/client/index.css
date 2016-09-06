@@ -1,0 +1,169 @@
+@font-face {
+    font-family: 'Berkshire Swash';
+    src: url(fonts/BerkshireSwash-Regular.ttf);
+}
+@font-face {
+    font-family: 'Crimson Text';
+    src: url(fonts/CrimsonText-Roman.ttf);
+}
+html, body {
+    -webkit-animation: sky 4s;
+    -moz-animation: sky 4s;
+    -o-animation: sky 4s;
+    animation: sky 4s;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #ECECEC;
+    cursor: crosshair;
+    font-family: 'Crimson Text', serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+h1 {
+    font-family: 'Berkshire Swash';
+    font-size: 3.75rem;
+    position: absolute;
+    margin-left: -0.75rem;
+    top: 6.2rem;
+    width: 100%;
+}
+p {
+    -webkit-animation: float 1.25s infinite;
+    -moz-animation: float 1.25s infinite;
+    -o-animation: float 1.25s infinite;
+    animation: float 1.25s infinite;
+    background-color: #000000;
+    color: #FFFFFF;
+    display: inline-block;
+    left: 25%;
+    position: fixed;
+    width: 50%;
+    z-index: 2;
+}
+code {
+    background-color: #1C1C1C;
+    color: #09AFC7;
+}
+.blink {
+    -webkit-animation: blink 1s steps(5, start) infinite;
+    -moz-animation: blink 1s steps(5, start) infinite;
+    -o-animation: blink 1s steps(5, start) infinite;
+    animation: blink 1s steps(5, start) infinite;
+
+}
+.rainbow {
+    -webkit-animation: rainbow 100s infinite;
+    -moz-animation: rainbow 100s infinite;
+    -o-animation: rainbow 100s infinite;
+    animation: rainbow 100s infinite;
+}
+.rainbow-fast {
+    -webkit-animation: rainbow 20s infinite;
+    -moz-animation: rainbow 20s infinite;
+    -o-animation: rainbow 20s infinite;
+    animation: rainbow 20s infinite;
+}
+img.sphere {
+    height: 18rem;
+    margin-right: 1rem;
+    margin-top: 3rem;
+    pointer-events: none;
+    position: relative;
+    width: 18rem;
+    z-index: 1;
+}
+[data-board] div {
+    transition-property: transform;
+    margin-left: -0.25rem;
+    margin-top: -0.25rem;
+    height: 0.5rem;
+    width: 0.5rem;
+    background-color: blue;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* Keyframes */
+@-webkit-keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+@-webkit-keyframes float {
+    0% {
+        bottom: 1.25rem;
+    }
+    50% {
+        bottom: 2rem;
+    }
+    100% {
+        bottom: 1.25rem;
+    }
+}
+@keyframes float {
+    0% {
+        bottom: 1.25rem;
+    }
+    50% {
+        bottom: 2rem;
+    }
+    100% {
+        bottom: 1.25rem;
+    }
+}
+@keyframes rainbow {
+    0% {
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    50%  {
+        -webkit-filter: hue-rotate(360deg);
+        filter: hue-rotate(180deg);
+    }
+    100% {
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+}
+@-webkit-keyframes rainbow {
+    0% {
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    50%  {
+        -webkit-filter: hue-rotate(360deg);
+        filter: hue-rotate(180deg);
+    }
+    100% {
+        -webkit-filter: hue-rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+}
+@-webkit-keyframes sky {
+    0% {
+        background-color: #000000;
+    }
+    100% {
+        background-color: #ECECEC;
+    }
+}
+@keyframes sky {
+    0% {
+        background-color: #000000;
+    }
+    100% {
+        background-color: #ECECEC;
+    }
+}

@@ -1,5 +1,5 @@
 defmodule Default.Pool.Player do
-  import Moongate.Pool
+  import Moongate.Pools
 
   attributes %{
     origin: :origin,

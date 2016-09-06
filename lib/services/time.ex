@@ -2,8 +2,6 @@ defmodule Moongate.Time do
   @moduledoc """
     Provides functions related to time.
   """
-  use Timex
-
   @months {
     "January",
     "February",
@@ -20,7 +18,7 @@ defmodule Moongate.Time do
   }
 
   def current_ms do
-    Time.now(:milliseconds) |> round
+    :erlang.system_time()
   end
 
   def now_formatted do

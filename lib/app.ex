@@ -3,9 +3,7 @@ defmodule Moongate.Application do
     The Moongate Application Platform.
   """
   use Application
-  use Moongate.Macros.ExternalResources
-  use Moongate.Macros.Processes
-  use Moongate.Macros.Worlds
+  use Moongate.OS
 
   ### Public
 
@@ -17,31 +15,37 @@ defmodule Moongate.Application do
     load_world
     config = load_config
     supervisor = start_supervisor(config)
+    spawn_fibers(config)
     spawn_sockets(config)
-    create_manifest
-    Moongate.Worlds.world_apply(:start)
+    create_handshake(config)
+    Moongate.World.Service.world_apply(:start)
 
     if Mix.env() == :prod, do: recur
 
     {:ok, supervisor}
   end
 
+  def stop(_state) do
+    :ok
+  end
+
   ### Private
 
-  defp create_manifest do
-    if File.exists?("priv/temp/manifest.json") do
-      File.rm("priv/temp/manifest.json")
+  defp create_handshake(config) do
+    if File.exists?("priv/temp/handshake.json") do
+      File.rm("priv/temp/handshake.json")
     end
-    manifest = %{
-      ip: Moongate.Network.get_ip
+    handshake = %{
+      ip: Moongate.Network.get_ip,
+      sockets: config.sockets || %{}
     }
-    {:ok, json} = JSON.encode(manifest)
-    {:ok, file} = File.open("priv/temp/manifest.json", [:write])
+    {:ok, json} = JSON.encode(handshake)
+    {:ok, file} = File.open("priv/temp/handshake.json", [:write])
     IO.binwrite(file, json)
   end
 
   # Load the server.json file for the world.
-  defp load_config, do: load_config(Moongate.Worlds.get_world)
+  defp load_config, do: load_config(Moongate.World.Service.get_world)
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/moongate.eon") do
       {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.eon")
@@ -57,7 +61,7 @@ defmodule Moongate.Application do
   # server through modules using the Moongate DSL.
   # This is the entry point for your world
   # directory.
-  defp load_world, do: load_world(Moongate.Worlds.get_world, "#{Moongate.Worlds.get_world}/server")
+  defp load_world, do: load_world(Moongate.World.Service.get_world, "#{Moongate.World.Service.get_world}/server")
   defp load_world(world, path) do
     dir = File.ls("priv/worlds/#{path}")
     load_all_in_directory(dir, world, path)
@@ -81,6 +85,13 @@ defmodule Moongate.Application do
     |> Enum.map(&(load_world(world, "#{path}/#{&1}")))
   end
 
+  defp spawn_fibers(config) do
+    if config[:fibers] do
+      config[:fibers]
+      |> Enum.map(&Moongate.Fiber.Service.spawn_fiber/1)
+    end
+  end
+
   # Spawn socket listeners as they are defined in
   # the world's ports.json.
   defp spawn_sockets(config) do
@@ -102,11 +113,11 @@ defmodule Moongate.Application do
 
   # Give an entry from ports.json, spawn a socket with the
   # appropriate protocol on the provided port.
-  defp spawn_socket(socket) do
-    case socket do
-      {protocol, port} -> register(protocol, "#{port}", port)
-      {protocol, port, params} -> register(protocol, "#{port}", {port, params})
-    end
+  defp spawn_socket({protocol, {port, params}}) do
+    register(protocol, "#{port}", {port, params})
+  end
+  defp spawn_socket({protocol, port}) do
+    register(protocol, "#{port}", port)
   end
 
   # Fairly straightforward.

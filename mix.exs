@@ -4,31 +4,33 @@ defmodule Moongate.Mixfile do
 
   def project do
     [app: :moongate,
-     version: "0.1.1",
-     codename: "Neophyte",
-     elixir: "1.2.3",
+     version: "0.2.0",
+     codename: "Novice",
+     elixir: "1.3.2",
      deps: deps,
      default_task: "run"]
   end
 
   def application do
-    [applications: [:logger, :postgrex, :ecto, :tzdata],
+    [applications: [:bunt, :logger, :porcelain],
      mod: {Moongate.Application, []}]
   end
 
   defp deps do
     [
+      {:bunt, "~> 0.1.0"},
       {:cowboy, "1.0.3"},
       {:earmark, "~> 0.1", only: :dev},
-      {:ecto, "~> 1.0.2"},
       {:eon, ">= 2.0.0"},
       {:ex_doc, "~> 0.11", only: :dev},
+      {:hackney, "1.3.2"},
+      {:hexate,  ">= 0.6.0"},
       {:inch_ex, ">= 0.0.0", only: :docs},
       {:json, "~> 0.3.2"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
-      {:postgrex, ">= 0.7.0"},
+      {:moebius, "~> 2.0.0"},
+      {:porcelain, "~> 2.0"},
       {:socket, "~> 0.3.1"},
-      {:timex, ">= 0.13.1"},
       {:uuid, "~> 1.1.0"}
     ]
   end

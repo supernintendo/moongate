@@ -1,5 +1,5 @@
 defmodule Default.Stage.Level do
-  import Moongate.Stage
+  import Moongate.Stages
 
   pools [Player]
 
@@ -8,21 +8,17 @@ defmodule Default.Stage.Level do
     stage.
   """
   def arrival(client) do
-    attributes = %{
-      x: random(1028),
-      y: random(1028)
-    }
     client
     |> subscribe(Player)
-    |> create(Player, attributes)
+    |> create(Player, %{
+      x: random(1028),
+      y: random(1028)
+    })
   end
 
   @doc """
     This is called when a player leaves this
     stage.
   """
-  def departure(client) do
-    client
-    |> depart
-  end
+  def departure(client), do: client |> depart
 end
