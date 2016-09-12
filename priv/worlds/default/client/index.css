@@ -7,18 +7,17 @@
     src: url(fonts/CrimsonText-Roman.ttf);
 }
 html, body {
-    -webkit-animation: sky 4s;
-    -moz-animation: sky 4s;
-    -o-animation: sky 4s;
-    animation: sky 4s;
+    -webkit-animation: sky 6s;
+    -moz-animation: sky 6s;
+    -o-animation: sky 6s;
+    animation: sky 6s;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    background-color: #ECECEC;
-    cursor: crosshair;
+    background-color: #130313;
     font-family: 'Crimson Text', serif;
     text-align: center;
     margin: 0;
@@ -26,6 +25,7 @@ html, body {
     overflow: hidden;
 }
 h1 {
+    color: #FF1E00;
     font-family: 'Berkshire Swash';
     font-size: 3.75rem;
     position: absolute;
@@ -34,21 +34,34 @@ h1 {
     width: 100%;
 }
 p {
-    -webkit-animation: float 1.25s infinite;
-    -moz-animation: float 1.25s infinite;
-    -o-animation: float 1.25s infinite;
-    animation: float 1.25s infinite;
-    background-color: #000000;
-    color: #FFFFFF;
+    -webkit-animation: float 1.25s infinite, rainbow 200s infinite;
+    -moz-animation: float 1.25s infinite, rainbow 200s infinite;
+    -o-animation: float 1.25s infinite, rainbow 200s infinite;
+    animation: float 1.25s infinite, rainbow 200s infinite;
+    background-color: #54ADC1;
+    color: #191111;
+    cursor: default;
     display: inline-block;
     left: 25%;
+    padding: 8px;
     position: fixed;
     width: 50%;
-    z-index: 2;
+    z-index: 3;
 }
 code {
     background-color: #1C1C1C;
-    color: #09AFC7;
+    color: #FF1E00;
+    font-weight: bold;
+    padding: 2px 6px 2px 6px;
+}
+#board {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    cursor: crosshair;
 }
 .blink {
     -webkit-animation: blink 1s steps(5, start) infinite;
@@ -69,7 +82,7 @@ code {
     -o-animation: rainbow 20s infinite;
     animation: rainbow 20s infinite;
 }
-img.sphere {
+img#sphere {
     height: 18rem;
     margin-right: 1rem;
     margin-top: 3rem;
@@ -153,17 +166,17 @@ img.sphere {
 }
 @-webkit-keyframes sky {
     0% {
-        background-color: #000000;
+        background-color: #ECECEC;
     }
     100% {
-        background-color: #ECECEC;
+        background-color: #130313;
     }
 }
 @keyframes sky {
     0% {
-        background-color: #000000;
+        background-color: #ECECEC;
     }
     100% {
-        background-color: #ECECEC;
+        background-color: #130313;
     }
 }
