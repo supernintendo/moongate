@@ -40,7 +40,7 @@ defmodule Moongate.HTTP.Node do
   defp routes(path) do
     [
       {"/", :cowboy_static, {:priv_file, :moongate, "#{world_directory}/#{path}/index.html"}},
-      {"/handshake.json", :cowboy_static, {:priv_file, :moongate, "temp/handshake.json"}},
+      {"/handshake.json", :cowboy_static, {:priv_file, :moongate, "#{world_directory}/.handshake.json"}},
       {"/moongate.js", :cowboy_static, {:priv_file, :moongate, "client/bin/moongate.js"}},
       {"/moongate.js.mem", :cowboy_static, {:priv_file, :moongate, "client/bin/moongate.js.mem"}},
       {"/[...]", :cowboy_static, {:priv_dir,  :moongate, "#{world_directory}/#{path}"}}

@@ -1,0 +1,125 @@
+#!/bin/sh
+
+# Environment
+git_source="https://github.com/elixir-lang/elixir.git"
+world=$(printenv MOONGATE_WORLD)
+elixir_tag=$(head -n 1 priv/common/elixir_tag)
+elixir_version=$(head -n 1 priv/common/elixir_version)
+declare -a args=($1 $2)
+
+# Colors
+beige=$(tput setaf 224)
+green=$(tput setaf 64)
+gold=$(tput setaf 220)
+gray=$(tput setaf 242)
+orange=$(tput setaf 172)
+magenta=$(tput setaf 89)
+normal=$(tput sgr0)
+pink=$(tput setaf 171)
+purple=$(tput setaf 93)
+white=$(tput setaf 231)
+
+# Functions
+build_elixir() {
+  cd .moongate/elixir
+  git checkout "${elixir_tag}"
+  make clean
+  make
+  reset_wd
+}
+contains() {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+fetch_elixir() {
+  git clone "${git_source}" .moongate/elixir
+}
+greeting() {
+  # Greeting
+  version=$(head -n 1 priv/common/version)
+  declare -a message=(
+  "\n"
+  █▀▄▀█.████▄.████▄....▄.....▄▀..██.....▄▄▄▄▀.▄███▄..."\n"
+  █.█.█.█...█.█...█.....█..▄▀....█.█.▀▀▀.█....█▀...▀.."\n"
+  █.▄.█.█...█.█...█.██...█.█.▀▄..█▄▄█....█....██▄▄...."\n"
+  █...█.▀████.▀████.█.█..█.█...█.█..█...█.....█▄...▄▀."\n"
+  ...█..............█..█.█..███.....█..▀......▀███▀..."\n"
+  ..▀...............█...██.........█
+  .................▀
+  "\n"
+  )
+  start=$(date '+%d')
+
+  for i in $(seq $start 255) ; do tput setaf $i ; printf "${message[i - $start]}" ; done ; tput setaf 15 ; echo
+  echo "Server version ${version}."
+  echo ""
+}
+reset_wd() {
+  # Set proper directory.
+  cd "${0%/*}"
+}
+say() {
+  contains "--verbose" "${args[@]}"
+  if [ $? -eq 1 ]; then
+    printf "  $@"
+  else
+    printf "  $@${normal}\n"
+  fi
+}
+spin() {
+  pid=$! # Process Id of the previous running command
+  frames='🌑🌒🌓🌔🌕🌖🌗🌘'
+
+  i=0
+  while kill -0 $pid 2>/dev/null
+  do
+    i=$(( (i+1) %8 ))
+    printf "\r${frames:$i:1} "
+    sleep .1
+  done
+  echo ""
+}
+step() {
+  contains "--verbose" "${args[@]}"
+  if [ $? -eq 1 ]; then
+    $@ >& "priv/worlds/${world}/.log--last-build" & spin
+  else
+    $@
+  fi
+}
+
+reset_wd
+source sourcefile
+
+# Suppress greeting if passed --no-greet.
+contains "--no-greet" "${args[@]}"
+[[ $? -eq 1 ]] && greeting
+
+[[ ! -z "${world// }" ]] && say "${normal}Using world ${gold}${world}${normal}.\n"
+[[ -z "${world// }" ]] && world="default" && say "${gray}MOONGATE_WORLD not set, using default world.\n"
+
+if [ ! -d ".moongate" ]; then
+  say "${gold}Hail! This appears to be your first time running Moongate. Startup will take longer than usual.\n"
+  rm -rf _build
+  rm -rf deps
+  mkdir .moongate
+  say "${purple} Downloading Elixir from ${git_source} ..."
+  step "fetch_elixir"
+  say "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."
+  step "build_elixir"
+fi
+say "${pink} Cleaning old build artifacts ..."
+step "rm -rf _build/dev/lib/moongate"
+if [ ! -d "deps" ]; then
+  say "${magenta} Fetching dependencies ..."
+  step "mix deps.get"
+  say "${magenta} Building dependencies ..."
+  step "mix compile"
+fi
+say "${beige} Building server ..."
+step "mix compile"
+say "${green} Moongate will spawn shortly. \n"
+say "${orange}"
+echo " "
+MOONGATE_WORLD="${world}" iex -S mix

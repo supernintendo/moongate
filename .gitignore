@@ -44,6 +44,8 @@ priv/worlds/*
 !priv/worlds/default
 !priv/worlds/test
 priv/temp/*
+.handshake.json
+.log--last-build
 
 # ...but always keep .gitkeep.
 !.gitkeep

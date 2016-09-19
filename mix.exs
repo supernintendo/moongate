@@ -2,11 +2,14 @@ defmodule Moongate.Mixfile do
   use Mix.Project
   Code.compiler_options([ignore_module_conflict: true])
 
+  @elixir_version File.read!("priv/common/elixir_version") |> String.strip
+  @version File.read!("priv/common/version") |> String.strip
+
   def project do
     [app: :moongate,
-     version: "0.2.0",
+     version: @version,
      codename: "Novice",
-     elixir: "1.3.2",
+     elixir: @elixir_version,
      deps: deps,
      default_task: "run"]
   end

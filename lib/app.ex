@@ -32,15 +32,15 @@ defmodule Moongate.Application do
   ### Private
 
   defp create_handshake(config) do
-    if File.exists?("priv/temp/handshake.json") do
-      File.rm("priv/temp/handshake.json")
+    if File.exists?("priv/#{world_directory}/.handshake.json") do
+      File.rm("priv/#{world_directory}/.handshake.json")
     end
     handshake = %{
       ip: Moongate.Network.get_ip,
       sockets: config.sockets || %{}
     }
     {:ok, json} = JSON.encode(handshake)
-    {:ok, file} = File.open("priv/temp/handshake.json", [:write])
+    {:ok, file} = File.open("priv/#{world_directory}/.handshake.json", [:write])
     IO.binwrite(file, json)
   end
 
