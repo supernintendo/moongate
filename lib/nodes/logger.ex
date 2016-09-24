@@ -16,7 +16,7 @@ defmodule Moongate.Logger.Node do
     {:noreply, nil}
   end
 
-  def handle_cast({:log, status, message}, state) do
+  def handle_cast({:log, status, message}, _state) do
     Moongate.Logger.Service.log(status, message)
 
     {:noreply, nil}

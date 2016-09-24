@@ -104,7 +104,7 @@ defmodule Moongate.Application do
 
     supervisor
     |> Supervisor.which_children
-    |> Enum.map(fn({name, pid, type, params}) ->
+    |> Enum.map(fn({name, pid, _type, _params}) ->
       Moongate.Processes.insert({"tree_#{name}", pid})
     end)
 

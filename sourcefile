@@ -1,7 +1,0 @@
-#!/bin/sh
-pushd `dirname $0` > /dev/null
-scriptpath=`pwd`
-popd > /dev/null
-path="${scriptpath}/.moongate/elixir/bin"
-escaped_path=$(echo $path | sed 's/ /\\ /g')
-export PATH=$escaped_path:$PATH

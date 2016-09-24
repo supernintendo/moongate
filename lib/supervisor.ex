@@ -8,7 +8,7 @@ defmodule Moongate.Supervisor do
   @doc """
     Prepare the supervision tree.
   """
-  def init(config) do
+  def init(_config) do
     [
       worker(Moongate.Registry.Node, [], [id: :registry]),
       worker(Moongate.Logger.Node, [], [id: :logger]),

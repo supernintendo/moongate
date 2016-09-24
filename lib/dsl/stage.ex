@@ -68,7 +68,7 @@ defmodule Moongate.Stages do
   end
 
   def random(max) do
-    :random.uniform(max)
+    :rand.uniform(max)
   end
 
   def random_from(items) do

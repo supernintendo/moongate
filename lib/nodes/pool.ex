@@ -73,7 +73,7 @@ defmodule Moongate.Pool.Node do
     Call a function within a deed defined on this pool.
   """
   def handle_cast({:use_deed, event}, state) do
-    updated = event.origin
+    event.origin
     |> find_owned_member(state)
     |> deed_callback(event, state)
     |> replace_member(state)
@@ -293,7 +293,7 @@ defmodule Moongate.Pool.Node do
     state
   end
 
-  defp member_update(state, member, action, origin) do
+  defp member_update(_state, _member, _action, _origin) do
   end
 
   defp pool_attributes_string(state) do
@@ -304,27 +304,6 @@ defmodule Moongate.Pool.Node do
       end
     end)
     |> Enum.join(" ")
-  end
-
-  # Call a function defined on the pool module with a member of
-  # the pool designated as a target. That member, along with
-  # a list of all members and any provided params will be
-  # passed to the callback function.
-  defp pool_callback(callback, member, state, params) do
-    world = String.to_atom(String.capitalize(world_name))
-    pool_module = Module.safe_concat([world, Pool, state.spec])
-    pools = Map.put(%{}, state.spec, state.members)
-    event = %{
-      this: member,
-      params: params,
-      pools: pools,
-      stage: state.stage
-    }
-    if params do
-      apply(pool_module, callback, [event, params])
-    else
-      apply(pool_module, callback, [event])
-    end
   end
 
   defp publishable(state) do
@@ -347,7 +326,7 @@ defmodule Moongate.Pool.Node do
     Keyword.put(member, attribute, {new_value, transforms})
   end
 
-  defp write_to_all_subscribers(message, action, state) do
+  defp write_to_all_subscribers(_message, _action, _state) do
     # write_to_all(state.subscribers, action, "pool", message)
   end
 end

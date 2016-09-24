@@ -4,11 +4,7 @@ defmodule Moongate.OS.Resources do
     our Mix config.
   """
   defmacro __before_compile__(_env) do
-    if Mix.env() == :test do
-      world = "test"
-    else
-      world = Application.get_env(:moongate, :world) || "default"
-    end
+    world = Application.get_env(:moongate, :world) || "default"
     {:ok, modules} = File.ls("priv/worlds/#{world}/server")
 
     Enum.map(modules, fn(resource) ->

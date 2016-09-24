@@ -6,10 +6,10 @@ defmodule Moongate.Processes do
   def ask_pid(message, pid) do
     it = capabilities(pid)
 
-    if it.can_be_called, do: result = GenServer.call(pid, message)
-    if it.can_receive, do: result = send(pid, message)
-
-    result
+    cond do
+      it.can_be_called -> GenServer.call(pid, message)
+      it.can_receive -> send(pid, message)
+    end
   end
 
   def capabilities(pid) do
@@ -61,7 +61,7 @@ defmodule Moongate.Processes do
 
   def of(namespace) do
     all
-    |> Enum.filter(fn({name, pid}) ->
+    |> Enum.filter(fn({name, _pid}) ->
       (name
        |> String.split("_")
        |> hd) == namespace

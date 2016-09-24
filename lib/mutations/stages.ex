@@ -1,7 +1,7 @@
 defmodule Moongate.Stage.Mutations do
   use Moongate.OS
 
-  def mutation({:join_stage, stage_name, id}, event, state) do
+  def mutation({:join_stage, _stage_name, _id}, event, _state) do
     ask_pid({:mutations, event}, event.origin.events)
     nil
   end
@@ -10,7 +10,7 @@ defmodule Moongate.Stage.Mutations do
     {:members, state.members ++ [origin]}
   end
 
-  def mutation({:leave_from, origin}, event, state) do
+  def mutation({:leave_from, origin}, _event, state) do
     state.pools
     |> Enum.map(&(tell({:remove_from_pool, origin}, :pool, &1)))
     socket_message(origin, {:leave, :stage, "#{state.id}", ""})

@@ -30,6 +30,6 @@ defmodule Moongate.Registry.Node do
     {:ok, state}
   end
 
-  def handle_call({:shutdown}, _from, state) do
+  def handle_call({:shutdown}, _from, _state) do
   end
 end

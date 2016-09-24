@@ -1,13 +1,10 @@
 defmodule Moongate.OS.Worlds do
   defmacro __using__(_) do
-    if Mix.env() == :test do
-      world = "test"
-    else
-      world = Application.get_env(:moongate, :world) || "default"
-    end
-    camel_world = world
-    |> String.replace("-", "_")
-    |> Mix.Utils.camelize
+    world = Application.get_env(:moongate, :world) || "default"  
+    camel_world =
+      world
+      |> String.replace("-", "_")
+      |> Mix.Utils.camelize
 
     quote do
       defp world_directory, do: world_directory(nil)

@@ -54,6 +54,20 @@ defmodule Moongate.Session.Node do
   end
 
   @doc """
+    Prepare a packet to send to this event process' origin socket.
+    `tag` generally represents the process or domain that the
+    message relates to, `name` refers to the name of the event
+    and `message` is the rest of the message body (typically
+    parameters).
+  """
+  def handle_cast({:write, message}, state) do
+    IO.inspect message
+    write(state.origin.protocol, state.origin, message)
+
+    {:noreply, state}
+  end
+
+  @doc """
     Let every stage know to clean up after this event. This
     happens when the client logs out, disconnects, etc.
   """
@@ -67,20 +81,6 @@ defmodule Moongate.Session.Node do
     log(:down, {:session, "Session (#{state.origin.id})"})
 
     {:reply, :ok, state}
-  end
-
-  @doc """
-    Prepare a packet to send to this event process' origin socket.
-    `tag` generally represents the process or domain that the
-    message relates to, `name` refers to the name of the event
-    and `message` is the rest of the message body (typically
-    parameters).
-  """
-  def handle_cast({:write, message}, state) do
-    IO.inspect message
-    write(state.origin.protocol, state.origin, message)
-
-    {:noreply, state}
   end
 
   ### Private

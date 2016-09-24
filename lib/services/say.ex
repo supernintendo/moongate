@@ -4,8 +4,6 @@ defmodule Moongate.Say do
   """
 
   def ansi(list, options) do
-    modified = list
-
     if options[:timestamp] do
       [IO.ANSI.color(3, 3, 3) <> "#{Moongate.Time.now_formatted} " <> IO.ANSI.reset] ++ list
       |> ansi
