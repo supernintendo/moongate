@@ -1,12 +1,12 @@
 defmodule Moongate.Deeds do
   @moduledoc """
     Provides the DSL for deeds (a deed is a
-    set of functions on a pool)
+    set of functions on a ring)
   """
   use Moongate.Mutations
 
   @doc """
-    Mark the pool member with a linear transformation
+    Mark the ring member with a linear transformation
     over an attribute with a given delta and tag.
   """
   def lin(member, attribute, tag, delta) do
@@ -19,7 +19,7 @@ defmodule Moongate.Deeds do
     a member, including transformations.
   """
   def get(member, key) do
-    Moongate.Pool.Service.member_attr(member, key)
+    Moongate.Ring.Service.member_attr(member, key)
   end
 
   @doc """
@@ -31,19 +31,19 @@ defmodule Moongate.Deeds do
   end
 
   @doc """
-    Send a message to all subscribers of this pool
-    containing the index of a pool member.
+    Send a message to all subscribers of this ring
+    containing the index of a ring member.
   """
   def tagged(_event, member, _message) do
     {:tagged,
       :drop,
-      "pool_#{member[:__moongate_pool_name]}",
-      "#{member[:__moongate_pool_index]}"}
+      "ring_#{member[:__moongate_ring_name]}",
+      "#{member[:__moongate_ring_index]}"}
   end
 
   @doc """
     Find a transformation in the `transforms` map and
-    apply it to a pool member with no parameters.
+    apply it to a ring member with no parameters.
   """
   defmacro transform(target, name) do
     quote do
@@ -53,7 +53,7 @@ defmodule Moongate.Deeds do
 
   @doc """
     Find a transformation in the `transforms` map and
-    apply it to a pool member.
+    apply it to a ring member.
   """
   defmacro transform(target, name, params) do
     quote do
@@ -80,7 +80,7 @@ defmodule Moongate.Deeds do
   # Data macros
 
   @doc """
-    Defines the attributes that a pool needs in order
+    Defines the attributes that a ring needs in order
     for the deed to be used on it.
   """
   defmacro attributes(attribute_map) do
@@ -95,7 +95,7 @@ defmodule Moongate.Deeds do
   end
 
   @doc """
-    Defines the list of pool members transformations
+    Defines the list of ring members transformations
     on this deed. These can be references using
     &transform/2 and &transform/3.
   """

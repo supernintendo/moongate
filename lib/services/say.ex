@@ -19,29 +19,6 @@ defmodule Moongate.Say do
     |> IO.puts
   end
 
-  @doc """
-    A greeting message, output when the server is started.
-  """
-  def greeting do
-    IO.puts ""
-    pretty(" )\/)  _   _   _   _   _  _)_ _", :blue, [suppress_timestamp: true])
-    pretty("(  ( (_) (_) ) ) (_( (_( (_ )_)", :blue, [suppress_timestamp: true])
-    pretty("                   _)      (_", :blue, [suppress_timestamp: true])
-    IO.puts ""
-
-    [:inverse,
-     "v#{Moongate.Mixfile.project[:version]}"
-     <> IO.ANSI.reset
-     <> " #{Moongate.Mixfile.project[:codename]}"
-    ]
-    |> ansi
-
-    ["Your current world is: "] ++ [:magenta, "#{Moongate.World.Service.get_world}"]
-    |> ansi
-
-    IO.puts ""
-  end
-
   def pretty(string, modifier) do
     pretty(string, modifier, [])
   end

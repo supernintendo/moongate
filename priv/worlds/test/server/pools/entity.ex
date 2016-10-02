@@ -1,5 +1,5 @@
-defmodule Test.Pool.Entity do
-  import Moongate.Pool
+defmodule Test.Ring.Entity do
+  import Moongate.Ring
 
   attributes %{
     float:  {:float, 0.0},

@@ -1,9 +1,9 @@
-defmodule Test.Stage.TestStage do
-  import Moongate.Stage
+defmodule Test.Zone.TestZone do
+  import Moongate.Zone
   import Moongate.Macros.SocketWriter
 
   meta %{}
-  pools []
+  rings []
 
   def arrival(event) do
     event

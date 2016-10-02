@@ -6,11 +6,6 @@ defmodule Moongate.OS.Sockets do
   @brace_target_close ">"
   @brace_target_open "<"
   @digit_length 2
-  @domains %{
-    world: 0x00,
-    stage: 0x01,
-    pool: 0x02
-  }
   @operations %{
     message: 0x00,
     add: 0x01,
@@ -35,16 +30,16 @@ defmodule Moongate.OS.Sockets do
 
   def socket_msg_tmpl(op, domain, body) do
     "#{@fence}#{@pad}"
+    <> "#{@brace_domain_open}#{domain}#{@brace_domain_close}"
     <> "#{@brace_op_open}#{Hexate.encode(@operations[op], @digit_length)}#{@brace_op_close}"
-    <> "#{@brace_domain_open}#{Hexate.encode(@domains[domain], @digit_length)}#{@brace_domain_close}"
     <> body
     <> "#{@pad}#{@fence}"
   end
 
   def socket_msg_tmpl(op, domain, target, body) do
     "#{@fence}#{@pad}"
+    <> "#{@brace_domain_open}#{domain}#{@brace_domain_close}"
     <> "#{@brace_op_open}#{Hexate.encode(@operations[op], @digit_length)}#{@brace_op_close}"
-    <> "#{@brace_domain_open}#{Hexate.encode(@domains[domain], @digit_length)}#{@brace_domain_close}"
     <> "#{@brace_target_open}#{target}#{@brace_target_close}"
     <> body
     <> "#{@pad}#{@fence}"

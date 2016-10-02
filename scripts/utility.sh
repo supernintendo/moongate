@@ -1,17 +1,5 @@
 #!/bin/sh
 
-# Execute a command and show a spinning moon
-# animation while it runs (animation hides
-# when --verbose is passed).
-brewing() {
-    peek "--verbose" "${args[@]}"
-    if [ $? -eq 1 ]; then
-        $@ >& "priv/worlds/${world}/.log--last-build" & spin
-    else
-        $@
-    fi
-}
-
 # Compile Elixir from source.
 build_elixir() {
     cd ".moongate/elixirs/${elixir_version}"
@@ -23,8 +11,20 @@ build_elixir() {
 
 # Clone Elixir from the URL specified in
 # scripts/constants.sh.
-fetch_elixir() {
+download_elixir() {
     git clone "${git_source}" ".moongate/elixirs/${elixir_version}"
+}
+
+# Execute a command and show a spinning moon
+# animation while it runs (animation hides
+# when --verbose is passed).
+loading() {
+    peek "--verbose" "${args[@]}"
+    if [ $? -eq 1 ]; then
+        $@ >& "priv/worlds/${world}/.log--last-build" & spin
+    else
+        $@
+    fi
 }
 
 # Takes a string and array (constructed

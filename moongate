@@ -7,14 +7,14 @@ reset_wd
 
 # Steps
 greeting
-initiation
-scrying
-cleansing
-fealty
-creation
+initialize
+fetch_elixir
+clean_moongate
+fetch_deps
+compile_moongate
 
-poem "${green} Moongate will spawn shortly. \n"
-poem "${orange}"
+message "${green} Moongate will spawn shortly. \n"
+message "${orange}"
 echo " "
 
 # Extend path temporarily

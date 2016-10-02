@@ -4,10 +4,10 @@ defmodule Moongate.Logger.Service do
     error: :coral,
     fiber: :blue,
     up: :green,
-    pool: :mediumblue,
+    ring: :mediumblue,
     session: :color128,
     socket: :color190,
-    stage: :deepskyblue,
+    zone: :deepskyblue,
     status: :lightcyan,
     success: :springgreen,
     warning: :gold

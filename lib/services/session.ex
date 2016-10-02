@@ -8,7 +8,7 @@ defmodule Moongate.Session.Service do
   @doc """
     Determine the best category of target process for
     an incoming message. This is where a message is
-    determined to pertain to a deed, pool or stage based
+    determined to pertain to a deed, ring or zone based
     on its structure. For messages that don't conform to
     an indicative structure but do define a specific
     target, the target must be within @whitelist for
@@ -20,7 +20,7 @@ defmodule Moongate.Session.Service do
       List.first(message) == nil ->
         {:none}
       is_uppercase(message) ->
-        message |> to_pool_or_deed
+        message |> to_ring_or_deed
       ":" == message |> hd |> String.codepoints |> hd ->
         if whitelisted(hd(message)) do
           {:tree, [String.lstrip(hd(message), ?:)] ++ tl(message)}
@@ -28,7 +28,7 @@ defmodule Moongate.Session.Service do
           {:none}
         end
       true ->
-        {:stage, message}
+        {:zone, message}
     end
   end
 
@@ -64,15 +64,15 @@ defmodule Moongate.Session.Service do
 
   @doc """
     Return whether a message should target a deed or
-    a pool based on how the target defined in the
+    a ring based on how the target defined in the
     message is formatted.
   """
-  def to_pool_or_deed(message) do
+  def to_ring_or_deed(message) do
     cond do
       message |> delimited_values |> length == 2 ->
         {:deed, message}
       true ->
-        {:pool, message}
+        {:ring, message}
     end
   end
 

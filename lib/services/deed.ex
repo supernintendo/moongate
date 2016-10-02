@@ -2,7 +2,7 @@ defmodule Moongate.Deed do
   @moduledoc """
     Provides functions related to working with deeds
     (deeds contain functions which are used to interact
-    with members of pools).
+    with members of rings).
   """
   use Moongate.OS
 

@@ -1,13 +1,13 @@
-defmodule Moongate.Stage do
+defmodule Moongate.Zone do
   @moduledoc """
-    Represents the state of a stage process. `into` is
+    Represents the state of a zone process. `into` is
     implemented to allow the use of mutations.
   """
   defstruct(
     id: nil,
     members: [],
-    pools: [],
-    stage: nil
+    rings: [],
+    zone: nil
   )
   defimpl Collectable do
     defdelegate into(original), to: Moongate.Mutations, as: :into

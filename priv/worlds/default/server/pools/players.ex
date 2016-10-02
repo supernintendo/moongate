@@ -1,5 +1,5 @@
-defmodule Default.Pool.Player do
-  import Moongate.Pools
+defmodule Default.Ring.Player do
+  import Moongate.Rings
 
   attributes %{
     origin: :origin,

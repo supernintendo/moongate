@@ -1,6 +1,6 @@
-defmodule Moongate.PoolTransform do
+defmodule Moongate.RingTransform do
   @moduledoc """
-    Represents a transformation of one of a pool
+    Represents a transformation of one of a ring
     member's attributes over time.
   """
   defstruct(

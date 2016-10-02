@@ -1,25 +1,25 @@
-defmodule Moongate.Pools do
+defmodule Moongate.Rings do
   @moduledoc """
     Provides macros which describe the foundational data
-    structures and functions of a Moongate pool. A Pool
+    structures and functions of a Moongate ring. A Ring
     may be thought of as a collection of similar entities
-    within a game. Pools are a fundamental part of the
+    within a game. Rings are a fundamental part of the
     Elixir DSL.
 
-    When Moongate launches, all modules in the server/pools
+    When Moongate launches, all modules in the server/rings
     directory of active world's directory are compiled.
-    These modules are expected to import Moongate.Pool
+    These modules are expected to import Moongate.Ring
     and use the following naming convention:
 
-    <ProjectName>.Pool.<NameOfPool>
+    <ProjectName>.Ring.<NameOfRing>
   """
 
   # Data macros
 
   defmacro attributes(attribute_map) do
     quote do
-      def __moongate__pool_attributes(_), do: __moongate__pool_attributes
-      def __moongate__pool_attributes do
+      def __moongate__ring_attributes(_), do: __moongate__ring_attributes
+      def __moongate__ring_attributes do
         Map.merge(unquote(attribute_map), %{
           origin: {:origin}
         })
@@ -29,8 +29,8 @@ defmodule Moongate.Pools do
 
   defmacro deeds(deed_list) do
     quote do
-      def __moongate__pool_deeds(_), do: __moongate__pool_deeds
-      def __moongate__pool_deeds do
+      def __moongate__ring_deeds(_), do: __moongate__ring_deeds
+      def __moongate__ring_deeds do
         unquote(deed_list)
       end
     end
@@ -38,8 +38,8 @@ defmodule Moongate.Pools do
 
   defmacro events(event_list) do
     quote do
-      def __moongate__pool_events(_), do: __moongate__pool_events
-      def __moongate__pool_events do
+      def __moongate__ring_events(_), do: __moongate__ring_events
+      def __moongate__ring_events do
         unquote(event_list)
       end
     end
@@ -47,8 +47,8 @@ defmodule Moongate.Pools do
 
   defmacro public(publish_list) do
     quote do
-      def __moongate__pool_publishes(_), do: __moongate__pool_publishes
-      def __moongate__pool_publishes do
+      def __moongate__ring_publishes(_), do: __moongate__ring_publishes
+      def __moongate__ring_publishes do
         unquote(publish_list)
       end
     end
@@ -56,8 +56,8 @@ defmodule Moongate.Pools do
 
   defmacro listens(listener_list) do
     quote do
-      def __moongate__pool_listens(_), do: __moongate__pool_listens
-      def __moongate__pool_listens do
+      def __moongate__ring_listens(_), do: __moongate__ring_listens
+      def __moongate__ring_listens do
         unquote(listener_list)
       end
     end
@@ -65,8 +65,8 @@ defmodule Moongate.Pools do
 
   defmacro upon(upon_map) do
     quote do
-      def __moongate__pool_upons(_), do: __moongate__pool_upons
-      def __moongate__pool_upons do
+      def __moongate__ring_upons(_), do: __moongate__ring_upons
+      def __moongate__ring_upons do
         unquote(upon_map)
       end
     end

@@ -3,24 +3,24 @@ defmodule Moongate.Session.Mutations do
     Provides functions which mutate the state of an
     event process.
   """
-  def mutation({:join_stage, stage_name, id}, event, state) do
-    Moongate.Stage.Service.arrive(event.origin, stage_name, id)
+  def mutation({:join_zone, zone_name, id}, event, state) do
+    Moongate.Zone.Service.arrive(event.origin, zone_name, id)
 
-    {:stages, state.stages ++ [Moongate.Stage.Service.stage_process_name(stage_name, id)]}
+    {:zones, state.zones ++ [Moongate.Zone.Service.zone_process_name(zone_name, id)]}
   end
 
   @doc """
-    Remove a stage from the joined stages list.
+    Remove a zone from the joined zones list.
   """
   def mutation({:leave_from, _origin}, event, state) do
-    {:stages, Enum.filter(state.stages, &(&1 != event.from)) }
+    {:zones, Enum.filter(state.zones, &(&1 != event.from)) }
   end
 
   @doc """
-    Set a stage as the target stage, causing incoming messages
-    to be sent to that stage.
+    Set a zone as the target zone, causing incoming messages
+    to be sent to that zone.
   """
-  def mutation({:set_target_stage, stage_module, id}, _event, _state) do
-    {:target_stage, Moongate.Stage.Service.stage_process_name(stage_module, id)}
+  def mutation({:set_target_zone, zone_module, id}, _event, _state) do
+    {:target_zone, Moongate.Zone.Service.zone_process_name(zone_module, id)}
   end
 end

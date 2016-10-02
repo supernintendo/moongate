@@ -1,46 +1,46 @@
 #!/bin/sh
 
 # Sets up the .moongate directory if it doesn't exist.
-initiation() {
+initialize() {
     if [ ! -d ".moongate" ]; then
-        poem "${gold}This appears to be your first time running Moongate. Startup will take longer than usual.\n"
+        message "${gold}This appears to be your first time running Moongate. Startup will take longer than usual.\n"
         rm -rf _build
         rm -rf deps
         mkdir .moongate
     fi
 
-    [[ ! -z "${world// }" ]] && poem "${normal}Using world ${gold}${world}${normal}.\n"
-    [[ -z "${world// }" ]] && world="default" && poem "${gray}MOONGATE_WORLD not set, using default world.\n"
+    [[ ! -z "${world// }" ]] && message "${normal}Using world ${gold}${world}${normal}.\n"
+    [[ -z "${world// }" ]] && world="default" && message "${gray}MOONGATE_WORLD not set, using default world.\n"
 }
 
-scrying() {
+fetch_elixir() {
     mkdir -p .moongate/elixirs
 
     if [ ! -d ".moongate/elixirs/${elixir_version}" ]; then
-        poem "${purple}Downloading Elixir ${elixir_version} from ${git_source} ..."
-        brewing "fetch_elixir"
-        poem "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."
-        brewing "build_elixir"
+        message "${purple}Downloading Elixir ${elixir_version} from ${git_source} ..."
+        loading "download_elixir"
+        message "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."
+        loading "build_elixir"
     fi
 }
 
-cleansing() {
-    poem "${pink} Cleaning old build artifacts ..."
-    brewing "rm -rf _build/dev/lib/moongate"
-    poem "${pink} Resetting symbolic links ..."
-    brewing "reset_symlinks"
+clean_moongate() {
+    message "${pink} Cleaning old build artifacts ..."
+    loading "rm -rf _build/dev/lib/moongate"
+    message "${pink} Resetting symbolic links ..."
+    loading "reset_symlinks"
 }
 
-fealty() {
+fetch_deps() {
     if [ ! -d "deps" ]; then
-        poem "${magenta} Fetching dependencies ..."
-        brewing "mix deps.get"
-        poem "${magenta} Building dependencies ..."
-        brewing "mix deps.compile"
+        message "${magenta} Fetching dependencies ..."
+        loading "mix deps.get"
+        message "${magenta} Building dependencies ..."
+        loading "mix deps.compile"
     fi
 }
 
-creation() {
-    poem "${beige} Building server ..."
-    brewing "mix compile"
+compile_moongate() {
+    message "${beige} Building server ..."
+    loading "mix compile"
 }

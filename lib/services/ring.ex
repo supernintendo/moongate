@@ -1,26 +1,26 @@
-defmodule Moongate.Pool.Service do
+defmodule Moongate.Ring.Service do
   @moduledoc """
-    Provides functions related to working with pools.
+    Provides functions related to working with rings.
   """
   use Moongate.OS
 
   @doc """
-    Get the member attributes as they are defined on a pool
+    Get the member attributes as they are defined on a ring
     module.
  """
   def get_attributes(module_name) do
-    apply(pool_module(module_name), :__moongate__pool_attributes, [])
+    apply(ring_module(module_name), :__moongate__ring_attributes, [])
   end
 
   @doc """
-    Get the deeds as they are defined on a pool module.
+    Get the deeds as they are defined on a ring module.
   """
   def get_deeds(module_name) do
-    apply(pool_module(module_name), :__moongate__pool_deeds, [])
+    apply(ring_module(module_name), :__moongate__ring_deeds, [])
   end
 
   @doc """
-    Return the current value of an attribute on a pool
+    Return the current value of an attribute on a ring
     member, applying all mutations.
   """
   def member_attr(member, key) do
@@ -50,34 +50,34 @@ defmodule Moongate.Pool.Service do
   end
 
   @doc """
-    Return the actual module name for a pool when only
+    Return the actual module name for a ring when only
     given its first part.
   """
-  def pool_module(module_name) do
+  def ring_module(module_name) do
     [world_name
      |> String.capitalize
      |> String.replace("-", "_")
      |> Mix.Utils.camelize
-     |> String.to_atom, Pool, module_name]
+     |> String.to_atom, Ring, module_name]
     |> Module.safe_concat
   end
 
   @doc """
-    Return the globally registered name for a pool process
-    when given a stage name and a pool module name.
+    Return the globally registered name for a ring process
+    when given a zone name and a ring module name.
   """
-  def pool_process_name(stage_process_name, module_name) do
-    "#{Moongate.Modules.to_string(module_name)}@#{stage_process_name}"
+  def ring_process_name(zone_process_name, module_name) do
+    "#{Moongate.Modules.to_string(module_name)}@#{zone_process_name}"
   end
 
   @doc """
-    Transform a list of atoms representing pool process
+    Transform a list of atoms representing ring process
     names to a string containing the comma-separate
-    pool names. The stage name is removed from each
+    ring names. The zone name is removed from each
     name.
   """
-  def to_string_list(pools) do
-    pools
+  def to_string_list(rings) do
+    rings
     |> Enum.map(&(String.split(&1, "@")))
     |> Enum.map(&(&1 |> hd))
     |> Enum.join(" ")

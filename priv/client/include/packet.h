@@ -1,19 +1,10 @@
 enum operation {
-    MESSAGE
-    ADD
-    REMOVE
-    JOIN
-    LEAVE
-    SET
-    MUTATE
-    REQUEST
-    PING
-    STATUS
+    VOID
+    #include "operations"
 }
 enum domain {
-    WORLD
-    STAGE
-    POOL
+    VOID
+    #include "domains"
 }
 class Packet {
 public:

@@ -1,6 +1,6 @@
-defmodule Moongate.Stage.Supervisor do
+defmodule Moongate.Zone.Supervisor do
   @moduledoc """
-    Supervisor for Moongate.Stage.Node. Follows the
+    Supervisor for Moongate.Zone.Node. Follows the
     simple_one_for_one strategy.
   """
   use Supervisor
@@ -9,14 +9,14 @@ defmodule Moongate.Stage.Supervisor do
     This is called when the supervision tree initializes.
   """
   def start_link do
-    Supervisor.start_link(__MODULE__, nil, [name: :stage])
+    Supervisor.start_link(__MODULE__, nil, [name: :zone])
   end
 
   @doc """
     This is called after start_link has resolved.
   """
   def init(_) do
-    [worker(Moongate.Stage.Node, [], [])]
+    [worker(Moongate.Zone.Node, [], [])]
     |> supervise(strategy: :simple_one_for_one)
   end
 end

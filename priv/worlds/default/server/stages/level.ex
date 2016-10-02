@@ -1,11 +1,11 @@
-defmodule Default.Stage.Level do
-  import Moongate.Stages
+defmodule Default.Zone.Level do
+  import Moongate.Zones
 
-  pools [Player]
+  rings [Player]
 
   @doc """
     This is called when a player joins this
-    stage.
+    zone.
   """
   def arrival(client) do
     client
@@ -18,7 +18,7 @@ defmodule Default.Stage.Level do
 
   @doc """
     This is called when a player leaves this
-    stage.
+    zone.
   """
   def departure(client), do: client |> depart
 end

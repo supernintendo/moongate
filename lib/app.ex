@@ -11,7 +11,6 @@ defmodule Moongate.Application do
     Initialize the game server.
   """
   def start(_type, _args) do
-    Moongate.Say.greeting
     load_world
     config = load_config
     supervisor = start_supervisor(config)

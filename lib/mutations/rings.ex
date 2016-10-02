@@ -1,4 +1,4 @@
-defmodule Moongate.Pool.Mutations do
+defmodule Moongate.Ring.Mutations do
   def mutation({:transform, :lin, key, tag, value}, _event, member) do
     {current, _transformations} = member[key]
 

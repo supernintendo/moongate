@@ -29,7 +29,7 @@ defmodule Moongate.Session.Node do
   def handle_cast({:init}, state) do
     log(:up, {:session, "Session (#{state.origin.id})"})
 
-    %Moongate.StageEvent{
+    %Moongate.ZoneEvent{
       origin: %{ state.origin | events: self }
     }
     |> Moongate.World.Service.world_apply(:connected)
@@ -68,15 +68,15 @@ defmodule Moongate.Session.Node do
   end
 
   @doc """
-    Let every stage know to clean up after this event. This
+    Let every zone know to clean up after this event. This
     happens when the client logs out, disconnects, etc.
   """
   def handle_call(:cleanup, _from, state) do
     event = %Moongate.Packet{
       origin: state.origin
     }
-    Enum.map(state.stages, fn(stage) ->
-      tell({:depart, event}, stage)
+    Enum.map(state.zones, fn(zone) ->
+      tell({:depart, event}, zone)
     end)
     log(:down, {:session, "Session (#{state.origin.id})"})
 
@@ -95,13 +95,13 @@ defmodule Moongate.Session.Node do
     |> use_message(state)
   end
 
-  # Using the stage which is currently set as the target
-  # stage, return the name of the pool process that a
+  # Using the zone which is currently set as the target
+  # zone, return the name of the ring process that a
   # message should be delivered to.
   def target_process(message, state) do
-    state.target_stage
-    |> String.replace("stage_", "")
-    |> Moongate.Pool.Service.pool_process_name(
+    state.target_zone
+    |> String.replace("zone_", "")
+    |> Moongate.Ring.Service.ring_process_name(
       message
       |> Moongate.Session.Service.delimited_values
       |> hd
@@ -117,10 +117,10 @@ defmodule Moongate.Session.Node do
     state.origin.port == port
   end
 
-  # Pass a message off to the target pool to be used
+  # Pass a message off to the target ring to be used
   # for behavior defined within a deed (deeds contain
   # functions which are used to interact with members
-  # of pools).
+  # of rings).
   defp use_message({:deed, message}, state) do
     {:use_deed, %Moongate.Packet{
       cast: message |> tl |> hd,
@@ -129,12 +129,12 @@ defmodule Moongate.Session.Node do
       origin: state.origin,
       use_deed: message |> hd |> String.split(".") |> tl |> hd
     }}
-    |> tell("pool", target_process(message, state))
+    |> tell("ring", target_process(message, state))
   end
 
-  # Pass a message off to the target pool to be used
+  # Pass a message off to the target ring to be used
   # for functions within all deeds.
-  defp use_message({:pool, message}, state) do
+  defp use_message({:ring, message}, state) do
     {:use_all_deeds,
      %Moongate.Packet{
        cast: message |> tl |> hd,
@@ -142,7 +142,7 @@ defmodule Moongate.Session.Node do
        params: message |> tl |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell("pool", target_process(message, state))
+    |> tell("ring", target_process(message, state))
   end
 
   # Pass a message off to a named process.
@@ -159,17 +159,17 @@ defmodule Moongate.Session.Node do
     |> tell(target)
   end
 
-  # Pass a message off to the stage currently marked
-  # as the target stage.
-  defp use_message({:stage, message}, state) do
+  # Pass a message off to the zone currently marked
+  # as the target zone.
+  defp use_message({:zone, message}, state) do
     {:tunnel,
      %Moongate.Packet{
        cast: hd(message),
-       to: state.target_stage,
+       to: state.target_zone,
        params: message |> tl |> List.to_tuple,
        origin: state.origin
      }}
-    |> tell(state.target_stage)
+    |> tell(state.target_zone)
   end
 
   # Do nothing. This happens when the original packet

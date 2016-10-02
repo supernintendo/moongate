@@ -1,5 +1,5 @@
-defmodule Moongate.Pool.Node do
-  import Moongate.Pool.Mutations
+defmodule Moongate.Ring.Node do
+  import Moongate.Ring.Mutations
   use GenServer
   use Moongate.OS
   use Moongate.Mutations, genserver: true
@@ -7,14 +7,14 @@ defmodule Moongate.Pool.Node do
   ### Public
 
   @doc """
-    Start the pool process.
+    Start the ring process.
   """
-  def start_link({name, stage, pool}) do
-    %Moongate.Pool{
-      attributes: Moongate.Pool.Service.get_attributes(pool),
+  def start_link({name, zone, ring}) do
+    %Moongate.Ring{
+      attributes: Moongate.Ring.Service.get_attributes(ring),
       name: name,
-      spec: pool,
-      stage: stage
+      spec: ring,
+      zone: zone
     }
     |> establish
   end
@@ -23,17 +23,17 @@ defmodule Moongate.Pool.Node do
     This is called after start_link has resolved.
   """
   def handle_cast({:init}, state) do
-    log(:up, {:pool, "Pool (#{state.stage} : #{Moongate.Modules.to_string(state.spec)})"})
+    log(:up, {:ring, "Ring (#{state.zone} : #{Moongate.Modules.to_string(state.spec)})"})
     {:noreply, state}
   end
 
   @doc """
-    Add a new member to the pool, merging default attributes
+    Add a new member to the ring, merging default attributes
     with those provided.
   """
-  def handle_cast({:add_to_pool, params}, state) do
+  def handle_cast({:add_to_ring, params}, state) do
     attributes = Enum.map(state.attributes, &(initial_attributes_for_member(&1, params)))
-    member = new_pool_member(attributes, state)
+    member = new_ring_member(attributes, state)
 
     state
     |> Map.put(:members, state.members ++ [member])
@@ -43,10 +43,10 @@ defmodule Moongate.Pool.Node do
   end
 
   @doc """
-    Remove a member from the pool as well as any associated
+    Remove a member from the ring as well as any associated
     subscribers.
   """
-  def handle_cast({:remove_from_pool, origin}, state) do
+  def handle_cast({:remove_from_ring, origin}, state) do
     member = state.members
     |> Enum.filter(&(elem(&1[:origin], 0).id == origin.id))
     |> List.first
@@ -54,15 +54,15 @@ defmodule Moongate.Pool.Node do
     state
     |> Map.put(:members, Enum.filter(state.members, &(&1 != member)))
     |> Map.put(:subscribers, Enum.filter(state.subscribers, &(&1.id != origin.id)))
-    |> member_removed(member[:__moongate_pool_index])
+    |> member_removed(member[:__moongate_ring_index])
     |> no_reply
   end
 
   @doc """
-    Call a function within all deeds defined on this pool.
+    Call a function within all deeds defined on this ring.
   """
   def handle_cast({:use_all_deeds, event}, state) do
-    deeds = Enum.map(Moongate.Pool.Service.get_deeds(state.spec), fn deed ->
+    deeds = Enum.map(Moongate.Ring.Service.get_deeds(state.spec), fn deed ->
       Moongate.Atoms.to_strings(deed)
     end)
     Enum.map(deeds, &(tell_pid({:use_deed, %{event | use_deed: &1}}, self)))
@@ -70,7 +70,7 @@ defmodule Moongate.Pool.Node do
   end
 
   @doc """
-    Call a function within a deed defined on this pool.
+    Call a function within a deed defined on this ring.
   """
   def handle_cast({:use_deed, event}, state) do
     event.origin
@@ -81,20 +81,20 @@ defmodule Moongate.Pool.Node do
   end
 
   @doc """
-    Handle a pool member transformation event.
+    Handle a ring member transformation event.
   """
   def handle_cast({:transform, target, attribute, delta, params}, state) do
-    member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
+    member = Enum.find(state.members, &(&1[:__moongate_ring_index] == target[:__moongate_ring_index]))
     members = List.delete(state.members, member)
     modified = %{state | members: members ++ [transform(member, attribute, delta, params)]}
     {:noreply, modified}
   end
 
   @doc """
-    Set an attribute of a pool member to a value.
+    Set an attribute of a ring member to a value.
   """
   def handle_cast({:set, target, attribute, value}, state) do
-    member = Enum.find(state.members, &(&1[:__moongate_pool_index] == target[:__moongate_pool_index]))
+    member = Enum.find(state.members, &(&1[:__moongate_ring_index] == target[:__moongate_ring_index]))
     members = List.delete(state.members, member)
     modified_member = set(member, attribute, value)
     modified = %{state | members: members ++ [modified_member]}
@@ -102,10 +102,10 @@ defmodule Moongate.Pool.Node do
   end
 
   @doc """
-    Add an origin to this pool's list of subscribers,
+    Add an origin to this ring's list of subscribers,
     effectively causing it to receiving all future
     packets related to changes and events within
-    this pool.
+    this ring.
   """
   def handle_cast({:subscribe, event}, state) do
     %{state | subscribers: state.subscribers ++ [event.origin]}
@@ -114,7 +114,7 @@ defmodule Moongate.Pool.Node do
   end
 
   @doc """
-    Synchronously return all members of the pool that match
+    Synchronously return all members of the ring that match
     the provided params.
   """
   def handle_call({:get, params}, _from, state) do
@@ -163,7 +163,7 @@ defmodule Moongate.Pool.Node do
   end
 
   defp deed_valid?(deed, state) do
-    Moongate.Pool.Service.get_deeds(state.spec)
+    Moongate.Ring.Service.get_deeds(state.spec)
     |> Enum.any?(&(Moongate.Atoms.to_strings(&1) == deed))
   end
 
@@ -177,7 +177,7 @@ defmodule Moongate.Pool.Node do
     end
   end
 
-  # Find the member of this pool that corresponds to
+  # Find the member of this ring that corresponds to
   # an origin.
   defp find_owned_member(origin, state) do
     results = Enum.filter(state.members, fn (member) ->
@@ -205,7 +205,7 @@ defmodule Moongate.Pool.Node do
     {key, {params[key] || initial_value, []}}
   end
 
-  # Return a transformed pool member.
+  # Return a transformed ring member.
   defp transform(member, attribute, delta, params) do
     {value, transforms} = member[attribute]
     transform = transform_from(delta, params)
@@ -228,29 +228,29 @@ defmodule Moongate.Pool.Node do
   end
 
   # Return a data structure which represents a
-  # transformation of one of a pool member's attributes
+  # transformation of one of a ring member's attributes
   # over time.
   defp transform_from(delta, params) do
-    %Moongate.PoolTransform{
+    %Moongate.RingTransform{
       by: delta,
       mode: params[:mode],
       time_started: Moongate.Time.current_ms
     }
   end
 
-  # Return attributes for a new pool member.
-  defp new_pool_member(attributes, state) do
+  # Return attributes for a new ring member.
+  defp new_ring_member(attributes, state) do
     attributes
     |> Enum.into(%{
       __moongate_mutations: [],
-      __moongate_pool_index: state.index,
-      __moongate_pool_name: state.name,
-      __moongate_pool: state.spec
+      __moongate_ring_index: state.index,
+      __moongate_ring_name: state.name,
+      __moongate_ring: state.spec
     })
   end
 
   defp notify_subscribed(state, origin) do
-    socket_message(origin, {:join, :pool, "#{state.name}", "#{pool_attributes_string(state)}"})
+    socket_message(origin, {:join, :ring, "#{state.name}", "#{ring_attributes_string(state)}"})
 
     for member <- state.members do
       member_update(state, member, :refresh, origin)
@@ -263,10 +263,10 @@ defmodule Moongate.Pool.Node do
     for mutation <- member.__moongate_mutations do
       case mutation do
         {:transform, type, attribute, tag, amount} ->
-          "#{state.name} #{member.__moongate_pool_index} #{type}:#{tag} #{attribute} #{amount}"
+          "#{state.name} #{member.__moongate_ring_index} #{type}:#{tag} #{attribute} #{amount}"
           |> write_to_all_subscribers(:mutate, state)
         {:set, attribute, value} ->
-          "#{state.name} #{member.__moongate_pool_index} #{attribute}:#{value}"
+          "#{state.name} #{member.__moongate_ring_index} #{attribute}:#{value}"
           |> write_to_all_subscribers(:set, state)
         _ ->
           state
@@ -281,10 +281,10 @@ defmodule Moongate.Pool.Node do
   end
 
   defp member_update(state, member) do
-    "#{state.name} #{member[:__moongate_pool_index]} "
+    "#{state.name} #{member[:__moongate_ring_index]} "
     <> (member
         |> Moongate.Packets.whitelist(publishable(state))
-        |> Moongate.Pool.Service.member_to_string)
+        |> Moongate.Ring.Service.member_to_string)
   end
 
   defp member_update(state, member, action) do
@@ -296,7 +296,7 @@ defmodule Moongate.Pool.Node do
   defp member_update(_state, _member, _action, _origin) do
   end
 
-  defp pool_attributes_string(state) do
+  defp ring_attributes_string(state) do
     Enum.map(state.attributes, fn(attribute) ->
       case attribute do
         {key, {type, _value}} -> Atom.to_string(key) <> ":" <> Atom.to_string(type)
@@ -308,25 +308,25 @@ defmodule Moongate.Pool.Node do
 
   defp publishable(state) do
     state.spec
-    |> Moongate.Pool.Service.pool_module
-    |> apply(:__moongate__pool_publishes, [])
+    |> Moongate.Ring.Service.ring_module
+    |> apply(:__moongate__ring_publishes, [])
   end
 
   defp replace_member(member, state) do
     %{state | members:
       state.members
-      |> Enum.filter(&(&1.__moongate_pool_index != member.__moongate_pool_index))
+      |> Enum.filter(&(&1.__moongate_ring_index != member.__moongate_ring_index))
       |> List.insert_at(0, member)
      }
   end
 
-  # Set one of a pool member's attributes to a new value.
+  # Set one of a ring member's attributes to a new value.
   defp set(member, attribute, new_value) do
     {_old_value, transforms} = member[attribute]
     Keyword.put(member, attribute, {new_value, transforms})
   end
 
   defp write_to_all_subscribers(_message, _action, _state) do
-    # write_to_all(state.subscribers, action, "pool", message)
+    # write_to_all(state.subscribers, action, "ring", message)
   end
 end

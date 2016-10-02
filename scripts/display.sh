@@ -8,19 +8,19 @@ greeting() {
         version=$(head -n 1 priv/common/version)
         declare -a message=(
             "\n"
-            █▀▄▀█.████▄.████▄....▄.....▄▀..██.....▄▄▄▄▀.▄███▄..."\n"
-            █.█.█.█...█.█...█.....█..▄▀....█.█.▀▀▀.█....█▀...▀.."\n"
-            █.▄.█.█...█.█...█.██...█.█.▀▄..█▄▄█....█....██▄▄...."\n"
-            █...█.▀████.▀████.█.█..█.█...█.█..█...█.....█▄...▄▀."\n"
-            ...█..............█..█.█..███.....█..▀......▀███▀..."\n"
-            ..▀...............█...██.........█
-            .................▀
+            █▀▄▀█ ████▄ ████▄    ▄     ▄▀  ██     ▄▄▄▄▀ ▄███▄   "\n"
+            █ █ █ █   █ █   █     █  ▄▀    █ █ ▀▀▀ █    █▀   ▀  "\n"
+            █ ▄ █ █   █ █   █ ██   █ █ ▀▄  █▄▄█    █    ██▄▄    "\n"
+            █   █ ▀████ ▀████ █ █  █ █   █ █  █   █     █▄   ▄▀ "\n"
+               █              █  █ █  ███     █  ▀      ▀███▀   "\n"
+              ▀               █   ██         █
+                             ▀
             "\n"
         )
         start=$(date '+%d')
 
         for i in $(seq $start 255) ; do tput setaf $i ; printf "${message[i - $start]}" ; done ; tput setaf 15 ; echo
-        echo "Server version ${version}."
+        echo "Server version ${green}${version}."
         echo ""
     fi
 }
@@ -29,7 +29,7 @@ greeting() {
 # resetting colorized text if --verbose
 # is passed to avoid polluting output
 # from other processes.
-poem() {
+message() {
     peek "--verbose" "${args[@]}"
     if [ $? -eq 1 ]; then
         printf "  $@"
