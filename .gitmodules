@@ -1,0 +1,6 @@
+[submodule "priv/client/vendor/moonshine"]
+	path = priv/client/vendor/moonshine
+	url = https://github.com/gamesys/moonshine
+[submodule "priv/client/vendor/lua.vm.js"]
+	path = priv/client/vendor/lua.vm.js
+	url = https://github.com/daurnimator/lua.vm.js

@@ -3,7 +3,7 @@ defmodule Moongate.Deeds do
     Provides the DSL for deeds (a deed is a
     set of functions on a ring)
   """
-  use Moongate.Mutations
+  use Moongate.State
 
   @doc """
     Mark the ring member with a linear transformation
@@ -31,17 +31,6 @@ defmodule Moongate.Deeds do
   end
 
   @doc """
-    Send a message to all subscribers of this ring
-    containing the index of a ring member.
-  """
-  def tagged(_event, member, _message) do
-    {:tagged,
-      :drop,
-      "ring_#{member[:__moongate_ring_name]}",
-      "#{member[:__moongate_ring_index]}"}
-  end
-
-  @doc """
     Find a transformation in the `transforms` map and
     apply it to a ring member with no parameters.
   """
@@ -59,7 +48,7 @@ defmodule Moongate.Deeds do
     quote do
       tag = String.split(unquote(name), " ") |> List.first
 
-      case __moongate__deed_transforms[unquote(name)] do
+      case __deed_transforms[unquote(name)] do
         {:add, attribute, :by, delta} ->
           unquote(target)
           |> lin(attribute, tag, get(unquote(target), delta))
@@ -85,8 +74,8 @@ defmodule Moongate.Deeds do
   """
   defmacro attributes(attribute_map) do
     quote do
-      def __moongate__deed_attributes(_), do: __moongate__deed_attributes
-      def __moongate__deed_attributes do
+      def __deed_attributes(_), do: __deed_attributes
+      def __deed_attributes do
         Map.merge(unquote(attribute_map), %{
           origin: {:origin}
         })
@@ -101,8 +90,8 @@ defmodule Moongate.Deeds do
   """
   defmacro transforms(transform_map) do
     quote do
-      def __moongate__deed_transforms(_), do: __moongate__deed_transforms
-      def __moongate__deed_transforms do
+      def __deed_transforms(_), do: __deed_transforms
+      def __deed_transforms do
         unquote(transform_map)
       end
     end

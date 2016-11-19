@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# Sets up the .moongate directory if it doesn't exist.
+# Sets up the _moongate directory if it doesn't exist.
 initialize() {
-    if [ ! -d ".moongate" ]; then
+    if [ ! -d "_moongate" ]; then
         message "${gold}This appears to be your first time running Moongate. Startup will take longer than usual.\n"
         rm -rf _build
         rm -rf deps
-        mkdir .moongate
+        mkdir _moongate
     fi
 
     [[ ! -z "${world// }" ]] && message "${normal}Using world ${gold}${world}${normal}.\n"
@@ -14,9 +14,9 @@ initialize() {
 }
 
 fetch_elixir() {
-    mkdir -p .moongate/elixirs
+    mkdir -p _moongate/elixirs
 
-    if [ ! -d ".moongate/elixirs/${elixir_version}" ]; then
+    if [ ! -d "_moongate/elixirs/${elixir_version}" ]; then
         message "${purple}Downloading Elixir ${elixir_version} from ${git_source} ..."
         loading "download_elixir"
         message "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."

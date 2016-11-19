@@ -6,7 +6,6 @@ source scripts/utility.sh
 reset_wd
 
 # Steps
-greeting
 initialize
 fetch_elixir
 clean_moongate
@@ -17,10 +16,12 @@ message "${green} Moongate will spawn shortly. \n"
 message "${orange}"
 echo " "
 
+greeting
+
 # Extend path temporarily
 pushd `dirname $0` > /dev/null
 current_path=`pwd`
 popd > /dev/null
 
-export PATH="${current_path}/.moongate":$PATH
+export PATH="${current_path}/_moongate":$PATH
 exec iex -S mix

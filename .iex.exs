@@ -6,4 +6,4 @@ IEx.configure(
     eval_result: [:blue, :bright]
   ]
 )
-import Moongate.OS.Iex
+import Moongate.Core.Iex

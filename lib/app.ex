@@ -3,7 +3,7 @@ defmodule Moongate.Application do
     The Moongate Application Platform.
   """
   use Application
-  use Moongate.OS
+  use Moongate.Core
 
   ### Public
 
@@ -17,7 +17,7 @@ defmodule Moongate.Application do
     spawn_fibers(config)
     spawn_sockets(config)
     create_handshake(config)
-    Moongate.World.Service.world_apply(:start)
+    Moongate.Utility.world_apply(:start)
 
     if Mix.env() == :prod, do: recur
 
@@ -34,9 +34,13 @@ defmodule Moongate.Application do
     if File.exists?("priv/#{world_directory}/.handshake.json") do
       File.rm("priv/#{world_directory}/.handshake.json")
     end
+    {:ok, version} = :application.get_key(:moongate, :vsn)
+
     handshake = %{
-      ip: Moongate.Network.get_ip,
-      sockets: config.sockets || %{}
+      ip: Moongate.Utility.local_ip,
+      operations: socket_operations,
+      sockets: config.sockets || %{},
+      version: "#{version}"
     }
     {:ok, json} = JSON.encode(handshake)
     {:ok, file} = File.open("priv/#{world_directory}/.handshake.json", [:write])
@@ -44,10 +48,10 @@ defmodule Moongate.Application do
   end
 
   # Load the server.json file for the world.
-  defp load_config, do: load_config(Moongate.World.Service.get_world)
+  defp load_config, do: load_config(Moongate.Utility.get_world)
   defp load_config(world) do
-    if File.exists?("priv/worlds/#{world}/moongate.eon") do
-      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.eon")
+    if File.exists?("priv/worlds/#{world}/moongate.exs") do
+      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.exs")
 
       config
     else
@@ -60,7 +64,7 @@ defmodule Moongate.Application do
   # server through modules using the Moongate DSL.
   # This is the entry point for your world
   # directory.
-  defp load_world, do: load_world(Moongate.World.Service.get_world, "#{Moongate.World.Service.get_world}/server")
+  defp load_world, do: load_world(Moongate.Utility.get_world, "#{Moongate.Utility.get_world}/server")
   defp load_world(world, path) do
     dir = File.ls("priv/worlds/#{path}")
     load_all_in_directory(dir, world, path)
@@ -104,7 +108,7 @@ defmodule Moongate.Application do
     supervisor
     |> Supervisor.which_children
     |> Enum.map(fn({name, pid, _type, _params}) ->
-      Moongate.Processes.insert({"tree_#{name}", pid})
+      Moongate.Core.Processes.insert({"tree_#{name}", pid})
     end)
 
     supervisor

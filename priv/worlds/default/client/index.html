@@ -4,21 +4,97 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
         <title>Moongate</title>
-        <link href="/index.css" rel="stylesheet" type="text/css">
-        <script type="text/javascript" src="moongate.js"></script>
+        <script src="moongate.js"></script>
+        <script src="vendor/jquery-3.1.1.min.js"></script>
+        <style>
+         @font-face {
+             font-family: 'Berkshire Swash';
+             src: url('assets/title.ttf');
+         }
+         html, body {
+             background-color: #F9F9F9;
+             font-family: 'Helvetica', 'Arial', sans-serif;
+             margin: 0;
+             overflow: hidden;
+             padding: 0;
+             text-align: center;
+         }
+         a {
+             color: #D2A8FD;
+             text-decoration: none;
+         }
+         a:visited {
+             color: #A278ED;
+         }
+         a:hover {
+             text-decoration: underline;
+         }
+         h1 {
+             color: #191414;
+             font-family: 'Berkshire Swash';
+             font-size: 3.75rem;
+             position: absolute;
+             top: 6.8rem;
+             width: 100%;
+         }
+         p {
+             background-color: #333333;
+             bottom: 16px;
+             color: #F9F9F9;
+             left: 25%;
+             line-height: 1.5rem;
+             padding: 0.725rem;
+             position: fixed;
+             right: 25%;
+             z-index: 10;
+         }
+         #board {
+             cursor: crosshair;
+             height: 100%;
+             left: 0;
+             position: fixed;
+             top: 0;
+             width: 100%;
+             z-index: 2;
+         }
+         #board .member {
+             background-image: url('assets/sparkle.gif');
+             position: absolute;
+             height: 32px;
+             width: 32px;
+             z-index: 3;
+         }
+         img#sphere {
+             height: 22.5rem;
+             margin-top: 1.75rem;
+             pointer-events: none;
+             position: relative;
+             width: 18rem;
+             z-index: 1;
+         }
+        </style>
     </head>
     <body>
         <div id="info">
-            <h1 class="rainbow"><span class="blink">No World</span></h1>
-            <img id="sphere" class="rainbow" src="images/sphere.svg">
+            <h1>
+                <span>
+                    I<span style="top: 6px; position: relative;">t</span><span style="top: 21px; position: relative;">W</span><span style="position: relative; top: 12px;">o</span><span style="position: relative; top: 2px;">r</span>ks!
+                </span>
+            </h1>
+            <img id="sphere" src="assets/sphere.svg">
             <p>
-                This is the default page for the Moongate
-                server. Use <code>mix moongate.load</code>
-                from the <code>moongate</code> directory
-                to select a world.
+                This is the default page for <a href="https://github.com/supernintendo/moongate" target="_blank">Moongate</a>.
+                If you're just getting started, you may want to <a>read the tutorial</a>.
             </p>
         </div>
         <div id="board"></div>
     </body>
-    <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript">
+     (function() {
+         Moongate.init();
+         Moongate.callbacks.connected = function() {
+             $(window).on('mousemove', function(e) {});
+         }
+     })();
+    </script>
 </html>

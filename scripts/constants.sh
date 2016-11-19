@@ -3,8 +3,8 @@
 # Environment
 git_source="https://github.com/elixir-lang/elixir.git"
 world=$(printenv MOONGATE_WORLD)
-elixir_tag=$(head -n 1 priv/common/elixir_tag)
-elixir_version=$(head -n 1 priv/common/elixir_version)
+elixir_tag=$(head -n 1 priv/metadata/elixir_tag)
+elixir_version=$(head -n 1 priv/metadata/elixir_version)
 declare -a args=($1 $2)
 
 # Colors

@@ -5,7 +5,7 @@ greeting() {
     # Greeting
     peek "--no-greet" "${args[@]}"
     if [ $? -eq 1 ]; then
-        version=$(head -n 1 priv/common/version)
+        version=$(head -n 1 priv/metadata/version)
         declare -a message=(
             "\n"
             █▀▄▀█ ████▄ ████▄    ▄     ▄▀  ██     ▄▄▄▄▀ ▄███▄   "\n"
@@ -17,11 +17,14 @@ greeting() {
                              ▀
             "\n"
         )
-        start=$(date '+%d')
+	for (( i = 0; i < 8; i++ )); do
+        printf "$(tput setaf 5)${message[$i]}$(tput sgr0)"
+	done
 
-        for i in $(seq $start 255) ; do tput setaf $i ; printf "${message[i - $start]}" ; done ; tput setaf 15 ; echo
-        echo "Server version ${green}${version}."
+        # for i in $(seq $start 256) ; do tput setaf $i ; printf "${message[i - $start]}" ; done ; tput setaf 15 ; echo
         echo ""
+	echo "                                    version ${green}${version}."
+        echo "${normal}"
     fi
 }
 

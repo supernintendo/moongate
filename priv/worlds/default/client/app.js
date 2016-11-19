@@ -1,1 +1,0 @@
-Moongate.up();

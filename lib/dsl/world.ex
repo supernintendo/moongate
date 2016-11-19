@@ -4,8 +4,8 @@ defmodule Moongate.Worlds do
     Moongate world (the World module is the
     entry point of the world).
   """
-  use Moongate.Mutations
-  use Moongate.OS
+  use Moongate.Core
+  use Moongate.State
 
   @doc """
     Causes the origin of a client event to join
@@ -20,7 +20,7 @@ defmodule Moongate.Worlds do
 
   def zone(module_name), do: zone(module_name, "$")
   def zone(module_name, id) do
-    name = "#{Moongate.Modules.to_string(module_name)}_#{id}"
+    name = "#{Moongate.Utility.module_to_string(module_name)}_#{id}"
 
     register(:zone, name, [
       id: name,

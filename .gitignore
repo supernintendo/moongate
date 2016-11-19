@@ -40,13 +40,15 @@ doc/
 .tern-port
 
 # Moongate
-.moongate
+_moongate
 .handshake.json
 .log--last-build
 priv/worlds/*
 !priv/worlds/default
 !priv/worlds/test
 priv/temp/*
+priv/client/build
+!priv/client/build/js
 
 # ...but always keep .gitkeep.
 !.gitkeep

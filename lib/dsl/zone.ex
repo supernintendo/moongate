@@ -3,8 +3,8 @@ defmodule Moongate.Zones do
     Provides the DSL for zones (a zone is a
     collection of rings)
   """
-  use Moongate.OS
-  use Moongate.Mutations
+  use Moongate.Core
+  use Moongate.State
 
   def arrive(event, zone_module), do: arrive(event, zone_module, "$")
   def arrive(event, zone_module, id) do
@@ -84,7 +84,7 @@ defmodule Moongate.Zones do
     quote do
       ring_name(unquote(module_name))
       |> GenServer.call({:get, unquote(params)})
-      |> Enum.map(&(&1 ++ [__moongate_ring: unquote(module_name)]))
+      |> Enum.map(&(&1 ++ [__ring: unquote(module_name)]))
     end
   end
 
@@ -96,8 +96,8 @@ defmodule Moongate.Zones do
 
   defmacro meta(zone_meta) do
     quote do
-      def __moongate__zone_meta(_), do: __moongate__zone_meta
-      def __moongate__zone_meta do
+      def __zone_meta(_), do: __zone_meta
+      def __zone_meta do
         unquote(zone_meta)
       end
     end
@@ -105,8 +105,8 @@ defmodule Moongate.Zones do
 
   defmacro rings(ring_list) do
     quote do
-      def __moongate__zone_rings(_), do: __moongate__zone_rings
-      def __moongate__zone_rings do
+      def __zone_rings(_), do: __zone_rings
+      def __zone_rings do
         unquote(ring_list)
       end
     end
