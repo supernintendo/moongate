@@ -1,4 +1,4 @@
- defmodule Moongate.Tests.Core do
+defmodule Moongate.Tests.Core do
   use ExUnit.Case, async: true
   alias Moongate.Core
 
@@ -59,4 +59,4 @@
   test "&world_module/0" do
     assert Core.world_module == Test.World
   end
- end
+end
