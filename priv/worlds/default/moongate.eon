@@ -1,9 +1,0 @@
-%{
-  anonymous: true,
-  db: "localhost/moongate",
-  db_user: {"moongate", "moongate"},
-  sockets: [
-    {:ws, 2593},
-    {:http, 2594, "client/public"}
-  ]
-}

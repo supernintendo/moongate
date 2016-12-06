@@ -1,21 +1,14 @@
 defmodule Default.World do
-  import Moongate
+  use Moongate.DSL
 
-  @doc """
-    This is called when the server
-    is started.
-  """
+  @doc "This is called when the server is started."
   def start do
-    stage(LoginScreen)
-    stage(Level)
+  	zone(Level)
   end
 
-  @doc """
-    This is called when a client connects
-    to the server.
-  """
+  @doc "This is called when a client connects."
   def connected(event) do
-    event
-    |> arrive(LoginScreen)
+  	event
+  	|> join(Level)
   end
 end

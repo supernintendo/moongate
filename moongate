@@ -1,0 +1,27 @@
+#!/bin/sh
+source scripts/constants.sh
+source scripts/display.sh
+source scripts/steps.sh
+source scripts/utility.sh
+reset_wd
+
+# Steps
+initialize
+fetch_elixir
+clean_moongate
+fetch_deps
+compile_moongate
+
+message "${green} Moongate will spawn shortly. \n"
+message "${orange}"
+echo " "
+
+greeting
+
+# Extend path temporarily
+pushd `dirname $0` > /dev/null
+current_path=`pwd`
+popd > /dev/null
+
+export PATH="${current_path}/_moongate":$PATH
+exec iex -S mix
