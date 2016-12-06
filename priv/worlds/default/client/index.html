@@ -39,10 +39,7 @@
                             $('<div class="member"></div>')
                                 .appendTo('#board')
                                 .attr('data-index', key)
-                                .attr('data-drift', member.drift)
-                                .attr('data-origin', member.origin)
-                                .attr('data-x', member.x)
-                                .attr('data-y', member.y);
+                                .attr('data-origin', member.origin);
                         }
                     });
                     $('[data-origin]').each(function() {
@@ -53,7 +50,9 @@
                             $(this)
                                 .css('transform', 'translate(' + member.x + 'px' + ',' + member.y + 'px)')
                                 .css('-webkit-animation-duration', member.drift + 's')
-                                .css('animation-duration', member.drift + 's');
+                                .css('animation-duration', member.drift + 's')
+                                .css('-webkit-transition-duration', member.speed + 'ms')
+                                .css('transition-duration', member.speed + 'ms');
 
                             if (Moongate.state.origin_id === member.origin) {
                                 $(this).addClass('me');

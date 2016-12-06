@@ -3,17 +3,19 @@ defmodule Default.Ring.Player do
 
   attributes %{
     origin: :origin,
-    drift: :float,
-    x: :float,
-    y: :float
+    drift: :integer,
+    speed: :integer,
+    x: :integer,
+    y: :integer
   }
   deeds [XY]
-  public [:origin, :drift, :x, :y]
+  public [:origin, :drift, :speed, :x, :y]
 
   def client_subscribed(event) do
     params = %{
       origin: event.origin,
       drift: 2 + :rand.uniform(6),
+      speed: 256 + :rand.uniform(512),
       x: :rand.uniform(512),
       y: :rand.uniform(512)
     }

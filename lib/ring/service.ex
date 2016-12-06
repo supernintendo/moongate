@@ -57,13 +57,17 @@ defmodule Moongate.Ring.Service do
     |> Enum.into(%{})
   end
 
+  def member_value({:float, value}) when is_float(value), do: value
+  def member_value({:float, value}) when is_integer(value), do: (value / 1)
   def member_value({:float, value}) do
     case Float.parse(value) do
-      {result, _remain} -> result
+      {result, _remain} -> result |> IO.inspect
       _ -> nil
     end
   end
 
+  def member_value({:integer, value}) when is_integer(value), do: value
+  def member_value({:integer, value}) when is_float(value), do: round(value)
   def member_value({:integer, value}) do
     case Integer.parse(value) do
       {result, _remain} -> result

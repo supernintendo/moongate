@@ -86,8 +86,8 @@ p {
     -moz-animation:    float 5s infinite;
     -o-animation:      float 5s infinite;
     animation:         float 5s infinite;
-    -webkit-transition: -webkit-transform 1s;
-    transition:         transform 1s;
+    -webkit-transition: -webkit-transform 500ms;
+    transition:         transform 500ms;
     background-image: url('assets/lightorb.gif');
     opacity: 0.75;
     position: absolute;
