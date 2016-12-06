@@ -27,7 +27,7 @@ Moongate supports WebSockets out-of-the-box but is protocol agnostic (packet enc
 2. `cd` to the directory where you cloned Moongate and run `./moongate`.
 3. Open a web browser and go to [localhost:5920](http://localhost:5920/).
 
-If it worked, you should see a page telling you so. Open a second browser window and click anywhere on the page to move your character. The character should move on both windows. Finally, try opening Developer Tools and running `console.log(Moongate);`. This object contains the current state and allows you to send messages back to the server as well as implement callbacks to messages from the server.
+If it worked, you should see a page telling you so. Open a second browser window and click anywhere on the page to move your character. The character should move on both windows. Finally, try opening Developer Tools and logging `Moongate`. This object contains the current state and allows you to send messages back to the server as well as implement callbacks to messages from the server.
 
 ### Usage ###
 
