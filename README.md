@@ -8,7 +8,7 @@ _A server with a little magic_.
 
 ### Overview ###
 
-Moongate is an experimental web server built with [Elixir](http://elixir-lang.org/). It aims to provide a platform for the development of synchronized experiences using a simple DSL (domain-specific language). Applications built with Moongate (known as _worlds_) follow a simple paradigm:
+Moongate is an experimental web server written in [Elixir](http://elixir-lang.org/). It aims to provide a platform for the development of synchronized experiences using a simple DSL (domain-specific language). Applications built with Moongate (known as _worlds_) follow a simple paradigm:
 
 - **Zones**: Zones are general containers of logic that clients can join and leave. Once within a zone, a client can subscribe to and interact with the zone's rings. _Zone examples: game levels, chat rooms, web app routes, etc._<br>
 - **Rings**: Rings are groups of objects. Every object within a ring conforms to a shared schema and set of behavior. Ring members can be added, removed and mutated dynamically. _Ring examples: characters, messages, photo uploads, etc._<br>
