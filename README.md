@@ -31,7 +31,7 @@ If it worked, you should see a page telling you so. Open a second browser window
 
 ### Usage ###
 
-The default project, located in `priv/worlds/default`, should give you a basic idea of how to use Moongate to develop your own applications. To load a different world, set the `MOONGATE_WORLD` environment variable to the name of the world's directory / symlink within `priv/worlds` (for example, `MOONGATE_WORLD=myworld ./moongate` to load `priv/worlds/myworld`).
+Projects are placed in `priv/worlds` as directories or symlinks. On startup, Moongate looks at the `MOONGATE_WORLD` environment variable to determine which world to load, falling back to `default`. This default project should give you a basic idea of how to use Moongate to develop your own applications.
 
 ### Project Status ###
 
