@@ -1,97 +1,87 @@
 defmodule Moongate.Zone.GenServer do
-  import Moongate.Zone.Mutations
   use GenServer
-  use Moongate.Core
-  use Moongate.State, genserver: true
+  use Moongate.State, :server
 
-  @doc """
-    Start the zone process.
-  """
   def start_link(params) do
-    %Moongate.Zone{
-      id: params[:id],
-      zone: params[:zone]
-    }
-    |> establish
+    %Moongate.Zone{}
+    |> Map.merge(params)
+    |> Moongate.Network.establish(__MODULE__)
   end
 
-  @doc """
-    This is called after start_link has resolved.
-  """
   def handle_cast({:init}, state) do
-    log(:up, {:zone, "Zone (#{state.id})"})
-    {:noreply, state |> init_rings}
+    Moongate.Core.log(:up, {:zone, "Zone (#{state.id})"})
+
+    {:noreply, init_rings(state)}
   end
 
-  @doc """
-    Receive a message from an event listener and call
-    the callback defined on the zone module.
-  """
-  def handle_cast({:tunnel, event}, state) do
-    apply(state.zone, :takes, [{event.cast, event.params}, %{ event | from: state.id }])
-    |> apply_state_mutations(state)
-    |> no_reply
+  def handle_cast({:depart, origin}, state) do
+    state =
+      state
+      |> apply_on_zone(:client_left, [new_event(state, %{targets: [origin]})])
+      |> mutate({:remove_member, origin})
+      |> apply_state_mutations(state)
+
+    {:noreply, state}
   end
 
-  @doc """
-    Mutate the zone state to account for a dropped
-    member.
-  """
-  def handle_cast({:depart, event}, state) do
-    notify_depart(state, event.origin)
-
-    apply(state.zone, :departure, [event])
-    |> apply_state_mutations(state)
-    |> no_reply
-  end
-
-  @doc """
-    Mutate the zone state to account for a new
-    member based on the result of calling `arrival`
-    on the zone module.
-  """
   def handle_call({:arrive, origin}, _from, state) do
-    notify_arrive(state, origin)
+    state =
+      state
+      |> notify_arrive(origin)
+      |> apply_on_zone(:client_joined, [new_event(state, %{targets: [origin]})])
+      |> mutate({:add_member, origin})
+      |> apply_state_mutations(state)
 
-    apply(state.zone, :arrival, [
-      %Moongate.ZoneEvent{
-        from: Process.info(self)[:registered_name],
-        origin: origin
-    }])
-    |> mutate({:join_this_zone, origin})
-    |> apply_state_mutations(state)
-    |> reply(:ok)
+    {:reply, :ok, state}
   end
 
-  @doc """
-    Initialize all rings.
-  """
-  def init_rings(state) do
-    rings = state.zone
-    |> apply(:__zone_rings, [])
-    |> Enum.map(&(init_ring(&1, state)))
+  defp apply_on_zone(state, function_name, args) do
+    apply(state.zone, function_name, args)
+  end
+
+  defp init_rings(state) do
+    rings =
+      state.zone
+      |> apply(:__zone_rings, [])
+      |> Enum.map(&(init_ring(&1, state)))
+      |> Enum.into(%{})
 
     %{state | rings: rings}
   end
 
-  @doc """
-    Initialize one ring.
-  """
-  def init_ring(ring, state) do
-    name = Moongate.Ring.Service.ring_process_name(state.id, ring)
-    register(:ring, name, {name, state.id, ring})
-    name
+  defp init_ring(ring, state) do
+    registered_name = Moongate.Ring.Service.process_name({state.name, state.id, ring})
+
+    state = %Moongate.Ring{
+      attributes: Moongate.Ring.Service.get_attributes(ring),
+      name: Moongate.Core.module_to_string(ring),
+      ring: Moongate.Ring.Service.ring_module(ring),
+      zone: state.name,
+      zone_id: state.id
+    }
+    Moongate.Network.register(:ring, registered_name, state)
+
+    {ring, registered_name}
   end
 
   defp notify_arrive(state, origin) do
-    socket_message(origin, {:join, :zone, state.id,
-      "#{Moongate.Ring.Service.to_string_list(state.rings)}"
-    })
+    %Moongate.Packet{
+      body: deed_names(state),
+      domain: {:join, :zone},
+      zone: {state.name, state.id}
+    }
+    |> Moongate.Network.send_packet(origin)
+
     state
   end
 
-  def notify_depart(state, origin) do
-    socket_message(origin, {:leave, :zone, state.id, ""})
+  def notify_depart(state, _origin) do
     state
+  end
+
+  defp deed_names(state) do
+    state.rings
+    |> Map.keys
+    |> Enum.map(&Moongate.Core.module_to_string/1)
   end
 end

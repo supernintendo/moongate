@@ -14,9 +14,9 @@ initialize() {
 }
 
 fetch_elixir() {
-    mkdir -p _moongate/elixirs
+    mkdir -p _moongate/elixir
 
-    if [ ! -d "_moongate/elixirs/${elixir_version}" ]; then
+    if [ ! -d "_moongate/elixir/${elixir_version}" ]; then
         message "${purple}Downloading Elixir ${elixir_version} from ${git_source} ..."
         loading "download_elixir"
         message "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."

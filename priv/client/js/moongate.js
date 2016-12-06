@@ -1,29 +1,258 @@
 (function(exports) {
+    //
+    // Core functionality
+    //
+    var Core = {
+        capitalize: function(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        },
+        decimalToHex: function(d, padding) {
+            var hex = Number(d).toString(16);
+
+            padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+            while (hex.length < padding) {
+                hex = "0" + hex;
+            }
+            return hex;
+        },
+        decorate: function(object, changes, context) {
+            Object.keys(changes).forEach(function(key) {
+                if (changes[key] instanceof Function) {
+                    object[key] = changes[key].bind(context || object);
+                } else {
+                    object[key] = changes[key];
+                }
+            });
+
+            return object;
+        },
+        domainFromPayload: function(payload) {
+            if (payload.target) {
+                if (payload.target.ringName) {
+                    return 'ring';
+                } else if (payload.target.ZoneName) {
+                    return 'zone';
+                }
+            }
+            return 'world';
+        },
+        extend(target, source, shallow) {
+            var array = '[object Array]',
+                object = '[object Object]',
+                targetMeta, sourceMeta,
+                setMeta = function (value) {
+                    var meta,
+                        jclass = {}.toString.call(value);
+
+                    if (value === undefined) {
+                        return 0
+                    };
+                    if (typeof value !== 'object') {
+                        return false
+                    };
+                    if (jclass === array) {
+                        return 1;
+                    }
+                    if (jclass === object) {
+                        return 2
+                    };
+                };
+
+            for (var key in source) {
+                if (source.hasOwnProperty(key)) {
+                    targetMeta = setMeta(target[key]);
+                    sourceMeta = setMeta(source[key]);
+
+                    if (source[key] !== target[key]) {
+                        if (!shallow && sourceMeta && targetMeta && targetMeta === sourceMeta) {
+                            target[key] = extend(target[key], source[key], true);
+                        } else if (sourceMeta !== 0) {
+                            target[key] = source[key];
+                        }
+                    }
+                }
+                else break;
+            }
+            return target;
+        },
+        inherit: function(object, changes, context) {
+            Object.keys(changes).forEach(function(key) {
+                if (object.__proto__[key] instanceof Function) {
+                    object.__proto__[key] = changes[key].bind(context || object);
+                } else {
+                    object.__proto__[key] = changes[key];
+                }
+            });
+
+            return object;
+        },
+        matchPacketChunk: function(chunk, key) {
+            var match = chunk.match(Patterns[key]),
+                parts = [];
+
+            if (match && match[1]) {
+                parts = match[1].split(':');
+
+                if (parts.length === 1) {
+                    return parts[0];
+                }
+                return parts;
+            }
+            return null;
+        },
+        registerOperation: function(code, operation) {
+            this.operations[code] = operation;
+        },
+        parsePacketCallbackName: function(packet) {
+            var op;
+
+            if (packet.domain instanceof Array) {
+                op = this.operations[parseInt(packet.domain[0], 16)];
+
+                return op + Core.capitalize(packet.domain[1]);
+            }
+            op = this.operations[parseInt(packet.domain, 16)];
+
+            return op + 'Operation';
+        },
+        preparePacketBody: function(body, suffix) {
+            if (body) {
+                if (typeof body === 'object') {
+                    return '::' + JSON.stringify(body);
+                }
+                return '::' + body;
+            }
+        },
+        splitPacketChunk: function(chunk, key) {
+            var match = chunk.split(Patterns[key]);
+
+            return match.slice(1).join('');
+        },
+        touchRing: function(packet) {
+            if (!this.rings[packet.ring]) {
+                this.rings[packet.ring] = JSON.parse(packet.body);
+            }
+        },
+        touchZone: function(packet) {
+            var zoneName, zoneId;
+
+            if (packet.zone instanceof Array) {
+                zoneName = packet.zone[0],
+                zoneId = packet.zone[1];
+
+                if (!this.zones[zoneName]) {
+                    this.zones[zoneName] = new Zones();
+                }
+                if (!this.zones[zoneName][zoneId]) {
+                    this.zones[zoneName][zoneId] = new Zone();
+                    Core.inherit(this.zones[zoneName][zoneId], Behavior.zone);
+
+                    if (packet.body) {
+                        Core.touchZoneRings.call(this, packet);
+                    }
+                }
+            } else {
+                this.zones[packet.zone] = new Zones();
+            }
+        },
+        touchZoneRings: function(packet) {
+            var zoneName = packet.zone[0],
+                zoneId = packet.zone[1],
+                rings = packet.body.split(',');
+                l = rings.length;
+
+            while (l--) {
+                this.zones[zoneName][zoneId][rings[l]] = new Ring();
+                Core.decorate(this.zones[zoneName][zoneId][rings[l]], {
+                    members: {}
+                });
+                Core.inherit(this.zones[zoneName][zoneId][rings[l]], {
+                    payload: {
+                      domain: 'ring',
+                      ring: rings[l],
+                      zone: [zoneName, zoneId]
+                    }
+                });
+                Core.inherit(this.zones[zoneName][zoneId][rings[l]], Behavior.ring);
+                Core.inherit(this.zones[zoneName][zoneId][rings[l]], Behavior.operations.call(this));
+            }
+        },
+        wrapPacketChunk: function(chunk, left, right) {
+            if (chunk) {
+                if (chunk instanceof Array) {
+                    return left + chunk.join(':') + right;
+                }
+                return left + chunk + right;
+            }
+            return '';
+        },
+        writePacket: function(context, opCode, params) {
+            context.send(context.writePacket({
+                body: params.body,
+                deed: params.deed,
+                domain: [opCode, this.payload.domain],
+                ring: this.payload.ring,
+                zone: this.payload.zone,
+            }));
+        }
+    }
+
+    //
     // Classes
+    //
     function Ring() {}
     function Entity() {}
+    function Zones() {}
     function Zone() {}
 
-    // Class behavior
-    var behavior = {
+    //
+    // Behavior
+    //
+    var Behavior = {
         ring: {
-            contents: [],
+            members: {},
             all: function() {
-                return this.contents;
+                return this.members;
             },
             findBy: function(key, value) {
-                return this.contents.filter(function(member) {
+                return this.members.filter(function(member) {
                     return member[key] === value;
                 })[0] || null;
             }
         },
+        operations: function() {
+            var i,
+                gate = this,
+                result = {},
+                k = Object.keys(this.operations),
+                l = k.length;
+
+            Object.keys(this.operations).forEach(function(i) {
+                result[this.operations[i]] = function() {
+                    var args = Array.prototype.slice.call(arguments);
+
+                    Core.writePacket.call(this, gate, Core.decimalToHex(i), {
+                        body: args.slice(1).join('░'),
+                        deed: args[0]
+                    });
+                };
+            }, this);
+
+            return result;
+        },
         ws: {
             onopen: function() {
+                this.send(this.writePacket({
+                    body: 'init',
+                    domain: this.operation('request')
+                }))
+
                 return this.callback('connected', {});
             },
             onmessage: function(e) {
                 var packet = this.readPacket(e.data),
-                    callbackName = packet.command + capitalize(packet.domain);
+                    callbackName = Core.parsePacketCallbackName.call(this, packet);
 
                 return this.callback(callbackName, packet);
             },
@@ -34,72 +263,41 @@
         zone: {
             all: function(ring) {
                 if (this[ring]) {
-                    return this[ring].contents;
+                    return this[ring].members;
                 }
             }
         }
     };
 
     //
-    // Helper functions
+    // Packet regexes
     //
-
-    function capitalize(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    // Assign all attributes on one object to another.
-    function decorate(object, changes, context) {
-        Object.keys(changes).forEach(function(key) {
-            if (object instanceof Function) {
-                object = changes[key].bind(context || object);
-            } else {
-                object = changes[key];
-            }
-        });
-
-        return object;
-    }
-
-    function generateToken() {
-        return new Date().getTime();
-    }
-
-    // Assign all attributes on one object to the
-    // prototype of another.
-    function inherit(object, changes, context) {
-        Object.keys(changes).forEach(function(key) {
-            if (object.__proto__[key] instanceof Function) {
-                object.__proto__[key] = changes[key].bind(context || object);
-            } else {
-                object.__proto__[key] = changes[key];
-            }
-        });
-
-        return object;
-    }
-
-    function registerOperation(code, operation) {
-        this.operations[code] = operation;
-    }
+    var Patterns = {
+        body: /::(.+)?/,
+        domain: /\[(.*?)\]/,
+        ring: /{(.*?)}/,
+        zone: /\((.*?)\)/,
+    };
 
     //
     // Moongate instance
     //
+    exports.__proto__.init = function(params) {
+        var params = params || {};
 
-    // Initialization
-    exports.__proto__.init = function() {
         this['__🔮__'] = null;
         this.ws = null;
-        this.callbacks = {};
-        this.token = generateToken();
-        this.operations = {};
+        this.callbacks = params.callbacks || {};
+        this.operations = params.operations || {};
         this.rings = {};
+        this.state = params.state || {};
         this.zones = {};
         this.connect();
     }
 
+    //
     // HTTP
+    //
     exports.__proto__.request = function(type, url, callback) {
         var request = new XMLHttpRequest();
 
@@ -123,49 +321,52 @@
         return this.request('PUT', url, callback);
     }
 
+    //
     // WebSockets
-
-    // Request the handshake.json and use it to connect
-    // via WebSocket.
+    //
     exports.__proto__.connect = function() {
-        this.request('GET', 'handshake.json', function(e) {
+        this.request('GET', 'handshake', function(e) {
             var handshake = JSON.parse(e.target.response);
 
             this['__🔮__'] = handshake.version;
-            this.loop(handshake.operations || {}, registerOperation.bind(this));
-            this.ws = new WebSocket('ws://' + handshake.ip + ':' + handshake.sockets.ws);
-            this.ws.onopen = behavior.ws.onopen.bind(this);
-            this.ws.onmessage = behavior.ws.onmessage.bind(this);
-            this.ws.onclose = behavior.ws.onclose.bind(this);
+            this.rings = handshake.rings;
+            this.loop(handshake.operations || {}, Core.registerOperation.bind(this));
+            this.ws = new WebSocket('ws://' + handshake.ip + ':' + handshake.port + '/ws');
+            this.ws.onopen = Behavior.ws.onopen.bind(this);
+            this.ws.onmessage = Behavior.ws.onmessage.bind(this);
+            this.ws.onclose = Behavior.ws.onclose.bind(this);
         }.bind(this));
     }
-    exports.__proto__.constructPacket = function(body, params) {
-        var targetId = (params.targetId && '_' + params.targetId) || '',
-            zoneId = (params.zoneId && '_' + params.zoneId) || '_$',
-            zone = (params.zone) ? ('@' + params.zone + zoneId) : '';
-
-        return {
-            body: (body instanceof Array) ? body.join(' ') : body,
-            domain: (params.domain && params.domain + ':') || '',
-            target: (params.target && '<' + params.target + targetId + zone + '>') || ''
-        };
+    exports.__proto__.send = function(string) {
+        this.ws.send(string);
     }
-    exports.__proto__.send = function(packet) {
-        this.ws.send(packet);
+    exports.__proto__.operation = function(key) {
+        for (var prop in this.operations) {
+            if (this.operations.hasOwnProperty(prop)) {
+                if (this.operations[prop] === key) {
+                    return Core.decimalToHex(prop);
+                }
+            }
+        }
+        return '00';
     }
     exports.__proto__.readPacket = function(packet) {
-        var parts = packet.split('::'),
-            context = parts[0].match(/\(([^)]+)\)/)[1].split(':'),
-            target = parts[0].match(/\<([^)]+)\>/)[1].split('@');
-
         return {
-            body: parts.slice(1).join(''),
-            domain: context[0],
-            command: this.operations[parseInt(context[1], 16)],
-            ring: target.length > 1 ? target[0] : null,
-            zone: target[target.length - 1].split('_')[0],
-            zoneId: target[target.length - 1].split('_').slice(1).join('_')
-        };
+            body: Core.splitPacketChunk(packet, 'body'),
+            domain: Core.matchPacketChunk(packet, 'domain'),
+            ring: Core.matchPacketChunk(packet, 'ring'),
+            zone: Core.matchPacketChunk(packet, 'zone')
+        }
+    }
+    exports.__proto__.writePacket = function(payload) {
+        return (
+            '#' +
+            Core.wrapPacketChunk(payload.domain, '[', ']') +
+            Core.wrapPacketChunk(payload.zone, '(', ')') +
+            Core.wrapPacketChunk(payload.ring, '{', '}') +
+            Core.wrapPacketChunk(payload.deed, '<', '>') +
+            Core.preparePacketBody(payload.body, '::')
+        );
     }
 
     //
@@ -184,94 +385,59 @@
             this.callbacks[callbackName](packet);
         }
     }
-    // This is called every frame.
-    exports.__proto__.tick = function() {
-        window.requestAnimationFrame(this.tick.bind(this));
-    }
 
     //
     // State
     //
     exports.__proto__.addRing = function(packet) {
-        var member = packet.body.split(',').reduce(function(member, attribute, index) {
-            if (index === 0) {
-                member.__proto__.index = parseInt(attribute, 10);
+        var ring = this.rings[packet.ring[0]],
+            zone = this.zone(packet.zone[0], packet.zone[1]),
+            result;
 
-                return member;
-            } else {
-                if (this.rings[packet.ring].attributes[index - 1]) {
-                    var spec = this.rings[packet.ring].attributes[index - 1];
+        if (ring && zone) {
+            result = JSON.parse(packet.body);
+            result.__proto__.__index = packet.ring[1];
 
-                    switch (spec.type) {
-                        case 'float':
-                            member[spec.key] = parseFloat(attribute);
+            zone[packet.ring[0]].members[packet.ring[1]] = result;
 
-                            break;
-                        default:
-                            member[spec.key] = attribute;
-                    }
-                    return member;
-                }
-            }
-        }.bind(this), new Entity());
-        this.zones[packet.zone][packet.zoneId][packet.ring].contents.push(member);
-
-        return member;
+            return result;
+        }
+        return false;
     }
     exports.__proto__.joinRing = function(packet) {
-        var attributes = packet.body.split(' ').map(function(pair) {
-            var parts = pair.split(':');
-
-            return {
-                key: parts[0],
-                type: parts[1]
-            }
-        });
-        this.touchRing(packet.ring);
-        this.rings[packet.ring].attributes = attributes;
+        Core.touchRing.call(this, packet);
     }
     exports.__proto__.joinZone = function(packet) {
-        var rings = packet.body.split(','),
-            l = rings.length;
-
-        this.touchZone(packet.zone, packet.zoneId);
-
-        while (l--) {
-            this.touchRing(rings[l]);
-            this.touchZoneRing(packet.zone, rings[l], Object.keys(this.zones[packet.zone]));
-        }
+        Core.touchZone.call(this, packet);
     }
-    exports.__proto__.touchRing = function(ringName) {
-        if (!this.rings[ringName]) {
-            this.rings[ringName] = {};
-        }
-    }
-    exports.__proto__.touchZone = function(zoneName, zoneId) {
-        if (!this.zones[zoneName]) {
-            this.zones[zoneName] = new Zone();
-        }
-        if (zoneId && !this.zones[zoneName][zoneId]) {
-            this.zones[zoneName][zoneId] = inherit(new Zone(), behavior.zone);
-        }
-    }
+    exports.__proto__.removeRing = function(packet) {
+        var ring = this.rings[packet.ring[0]],
+            zone = this.zone(packet.zone[0], packet.zone[1]);
 
-    // Create an instance of a ring within a zone.
-    // z : zone name, r : ring name
-    exports.__proto__.touchZoneRing = function(z, r, keys) {
-        var zoneKeys = keys || Object.keys(this.zones[z]),
-            l = zoneKeys.length;
+        if (ring && zone && zone[packet.ring[0]].members[packet.ring[1]]) {
+            zone[packet.ring[0]].members[packet.ring[1]] = null;
+            delete zone[packet.ring[0]].members[packet.ring[1]];
 
-        while (l--) {
-            if (!this.zones[z][zoneKeys[l]][r]) {
-                this.zones[z][zoneKeys[l]][r] = new Ring();
-                inherit(this.zones[z][zoneKeys[l]][r], behavior.ring);
-                decorate(this.zones[z][zoneKeys[l]][r], {
-                    contents: []
-                });
-            }
+            return true;
         }
+        return false;
     }
+    exports.__proto__.setRing = function(packet) {
+        var ring = this.rings[packet.ring[0]],
+            zone = this.zone(packet.zone[0], packet.zone[1]),
+            body = JSON.parse(packet.body);
 
+        if (ring && zone && zone[packet.ring[0]].members[packet.ring[1]]) {
+            zone[packet.ring[0]].members[packet.ring[1]] = (
+                Core.extend(zone[packet.ring[0]].members[packet.ring[1]], body)
+            );
+            return zone[packet.ring[0]].members[packet.ring[1]];
+        }
+        return false;
+    }
+    exports.__proto__.stateOperation = function(packet) {
+        this.state = Core.extend(this.state, JSON.parse(packet.body));
+    }
     exports.__proto__.zone = function(name, id) {
         if (id && this.zones[name]) {
             return this.zones[name][id] || null;

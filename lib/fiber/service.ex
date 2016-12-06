@@ -1,7 +1,14 @@
 defmodule Moongate.Fiber.Service do
-  use Moongate.Core
+  @commands %{
+    npm: "client && npm run start"
+  }
+  @root "priv/#{Moongate.Core.world_directory}/"
 
-  def spawn_fiber({name, :npm}) do
-    register(:fiber, "#{name}", {name, "cd priv/#{world_directory}/client && npm run start"})
+  def spawn_fiber({name, command}) do
+    Moongate.Network.register(
+      :fiber,
+      "#{name}",
+      {name, "cd #{@root} && #{@commands[command]}"}
+    )
   end
 end

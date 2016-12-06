@@ -15,7 +15,7 @@ defmodule Moongate.Logger.Service do
 
   def ansi(list, options) do
     if options[:timestamp] do
-      [IO.ANSI.color(3, 3, 3) <> "#{Moongate.Utility.formatted_time} " <> IO.ANSI.reset] ++ list
+      [IO.ANSI.color(3, 3, 3) <> "#{Moongate.Core.formatted_time} " <> IO.ANSI.reset] ++ list
       |> ansi
     else
       ansi(list)
@@ -53,9 +53,6 @@ defmodule Moongate.Logger.Service do
     pretty(string, modifier, [])
   end
 
-  @doc """
-    Format and output a colorized ANSI string.
-  """
   def pretty(string, modifier, options) do
     if options[:suppress_timestamp] do
       [modifier, string]
@@ -66,10 +63,6 @@ defmodule Moongate.Logger.Service do
     end
   end
 
-  @doc """
-    Given a Moongate.Origin, return the appropriate
-    string to use to represent that origin.
-  """
   def origin(o) do
     "(#{o.id})"
   end

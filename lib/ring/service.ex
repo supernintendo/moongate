@@ -1,28 +1,24 @@
 defmodule Moongate.Ring.Service do
-  @moduledoc """
-    Provides functions related to working with rings.
-  """
-  use Moongate.Core
-
-  @doc """
-    Get the member attributes as they are defined on a ring
-    module.
- """
   def get_attributes(module_name) do
     apply(ring_module(module_name), :__ring_attributes, [])
   end
 
-  @doc """
-    Get the deeds as they are defined on a ring module.
-  """
   def get_deeds(module_name) do
     apply(ring_module(module_name), :__ring_deeds, [])
   end
 
-  @doc """
-    Return the current value of an attribute on a ring
-    member, applying all mutations.
-  """
+  def encode(member, schema) do
+    member
+    |> Enum.map(fn({key, value}) ->
+      case schema[key] do
+        :origin -> {key, value.id}
+        _type -> {key, value}
+      end
+    end)
+    |> Enum.into(%{})
+    |> Poison.encode!
+  end
+
   def member_attr(member, key) do
     mutations = elem(member[key], 1)
 
@@ -34,6 +30,49 @@ defmodule Moongate.Ring.Service do
     else
       elem(member[key], 0)
     end
+  end
+
+  def member_defaults(schema) do
+    schema
+    |> Enum.map(fn(attribute) ->
+      case attribute do
+        {key, :float} -> {key, 0.0}
+        {key, :integer} -> {key, 0}
+        {key, :string} -> {key, ""}
+        {key, _type} -> {key, nil}
+      end
+    end)
+    |> Enum.into(%{})
+  end
+
+  def member_params(params, schema) do
+    params
+    |> Enum.map(fn({key, value}) ->
+      case schema[key] do
+        :float -> {key, member_value({:float, value})}
+        :integer -> {key, member_value({:integer, value})}
+        _ -> {key, value}
+      end
+    end)
+    |> Enum.into(%{})
+  end
+
+  def member_value({:float, value}) do
+    case Float.parse(value) do
+      {result, _remain} -> result
+      _ -> nil
+    end
+  end
+
+  def member_value({:integer, value}) do
+    case Integer.parse(value) do
+      {result, _remain} -> result
+      _ -> nil
+    end
+  end
+
+  def member_value({_type, value}) do
+    value
   end
 
   def member_to_string(member) do
@@ -49,33 +88,31 @@ defmodule Moongate.Ring.Service do
     |> Enum.join(",")
   end
 
-  @doc """
-    Return the actual module name for a ring when only
-    given its first part.
-  """
+  def process_name({zone_process_name, zone_process_id, module_name}) do
+    "#{Moongate.Core.module_to_string(module_name)}@#{zone_process_name}_#{zone_process_id}"
+  end
+
   def ring_module(module_name) do
-    [world_name
-     |> String.capitalize
-     |> String.replace("-", "_")
-     |> Mix.Utils.camelize
-     |> String.to_atom, Ring, module_name]
+    [
+      Moongate.Core.world_name
+      |> String.capitalize
+      |> String.replace("-", "_")
+      |> Mix.Utils.camelize
+      |> String.to_atom, Ring, module_name
+    ]
     |> Module.safe_concat
   end
 
-  @doc """
-    Return the globally registered name for a ring process
-    when given a zone name and a ring module name.
-  """
-  def ring_process_name(zone_process_name, module_name) do
-    "#{Moongate.Utility.module_to_string(module_name)}@#{zone_process_name}"
+  def schema do
+    IO.inspect Moongate.Core.world_module
   end
 
-  @doc """
-    Transform a list of atoms representing ring process
-    names to a string containing the comma-separate
-    ring names. The zone name is removed from each
-    name.
-  """
+  def subscribe_to_ring(%Moongate.Origin{} = origin, {ring, name, id}) do
+    process = process_name({name, id, Moongate.Core.atom_to_string(ring)})
+
+    Moongate.Network.cast({:subscribe, origin}, "ring", process)
+  end
+
   def to_string_list(rings) do
     rings
     |> Enum.map(&(String.split(&1, "@")))

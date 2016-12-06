@@ -2,7 +2,7 @@
 
 # Compile Elixir from source.
 build_elixir() {
-    cd "_moongate/elixirs/${elixir_version}"
+    cd "_moongate/elixir/${elixir_version}"
     git checkout "${elixir_tag}"
     make clean
     make
@@ -12,7 +12,7 @@ build_elixir() {
 # Clone Elixir from the URL specified in
 # scripts/constants.sh.
 download_elixir() {
-    git clone "${git_source}" "_moongate/elixirs/${elixir_version}"
+    git clone "${git_source}" "_moongate/elixir/${elixir_version}"
 }
 
 # Execute a command and show a spinning moon
@@ -21,7 +21,7 @@ download_elixir() {
 loading() {
     peek "--verbose" "${args[@]}"
     if [ $? -eq 1 ]; then
-        $@ >& "priv/worlds/${world}/.log--last-build" & spin
+        $@ >& "priv/logs/${world}-build.log" & spin
     else
         $@
     fi
@@ -43,10 +43,10 @@ reset_symlinks() {
     rm _moongate/elixirc 2> /dev/null
     rm _moongate/iex 2> /dev/null
     rm _moongate/mix 2> /dev/null
-    ln -s "elixirs/${elixir_version}/bin/elixir" _moongate/elixir
-    ln -s "elixirs/${elixir_version}/bin/elixirc" _moongate/elixirc
-    ln -s "elixirs/${elixir_version}/bin/iex" _moongate/iex
-    ln -s "elixirs/${elixir_version}/bin/mix" _moongate/mix
+    ln -s "elixir/${elixir_version}/bin/elixir" _moongate/elixir
+    ln -s "elixir/${elixir_version}/bin/elixirc" _moongate/elixirc
+    ln -s "elixir/${elixir_version}/bin/iex" _moongate/iex
+    ln -s "elixir/${elixir_version}/bin/mix" _moongate/mix
 }
 
 # Set proper directory (or try to, anyhow).

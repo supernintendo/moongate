@@ -41,14 +41,10 @@ doc/
 
 # Moongate
 _moongate
-.handshake.json
-.log--last-build
 priv/worlds/*
 !priv/worlds/default
 !priv/worlds/test
-priv/temp/*
-priv/client/build
-!priv/client/build/js
+priv/logs/*
 
 # ...but always keep .gitkeep.
 !.gitkeep

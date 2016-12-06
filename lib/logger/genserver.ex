@@ -1,24 +1,18 @@
-defmodule Moongate.Logger.GenServer do
-  @moduledoc """
-    Provides a server for logging events.
-  """
+defmodule Moongate.Logger do
   use GenServer
-  use Moongate.Core
 
   def start_link do
-    nil |> establish("logger")
+    %{}
+    |> Moongate.Network.establish("logger", __MODULE__)
   end
 
-  @doc """
-    This is called after start_link has resolved.
-  """
-  def handle_cast({:init}, _state) do
-    {:noreply, nil}
+  def handle_cast({:init}, state) do
+    {:noreply, state}
   end
 
-  def handle_cast({:log, status, message}, _state) do
+  def handle_cast({:log, status, message}, state) do
     Moongate.Logger.Service.log(status, message)
 
-    {:noreply, nil}
+    {:noreply, state}
   end
 end

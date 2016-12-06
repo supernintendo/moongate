@@ -1,78 +1,14 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
+        <link href="favicon.ico" rel="icon" type="image/x-icon">
         <meta charset="UTF-8">
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
         <title>Moongate</title>
         <script src="moongate.js"></script>
         <script src="vendor/jquery-3.1.1.min.js"></script>
-        <style>
-         @font-face {
-             font-family: 'Berkshire Swash';
-             src: url('assets/title.ttf');
-         }
-         html, body {
-             background-color: #F9F9F9;
-             font-family: 'Helvetica', 'Arial', sans-serif;
-             margin: 0;
-             overflow: hidden;
-             padding: 0;
-             text-align: center;
-         }
-         a {
-             color: #D2A8FD;
-             text-decoration: none;
-         }
-         a:visited {
-             color: #A278ED;
-         }
-         a:hover {
-             text-decoration: underline;
-         }
-         h1 {
-             color: #191414;
-             font-family: 'Berkshire Swash';
-             font-size: 3.75rem;
-             position: absolute;
-             top: 6.8rem;
-             width: 100%;
-         }
-         p {
-             background-color: #333333;
-             bottom: 16px;
-             color: #F9F9F9;
-             left: 25%;
-             line-height: 1.5rem;
-             padding: 0.725rem;
-             position: fixed;
-             right: 25%;
-             z-index: 10;
-         }
-         #board {
-             cursor: crosshair;
-             height: 100%;
-             left: 0;
-             position: fixed;
-             top: 0;
-             width: 100%;
-             z-index: 2;
-         }
-         #board .member {
-             background-image: url('assets/sparkle.gif');
-             position: absolute;
-             height: 32px;
-             width: 32px;
-             z-index: 3;
-         }
-         img#sphere {
-             height: 22.5rem;
-             margin-top: 1.75rem;
-             pointer-events: none;
-             position: relative;
-             width: 18rem;
-             z-index: 1;
-         }
-        </style>
     </head>
     <body>
         <div id="info">
@@ -83,18 +19,63 @@
             </h1>
             <img id="sphere" src="assets/sphere.svg">
             <p>
-                This is the default page for <a href="https://github.com/supernintendo/moongate" target="_blank">Moongate</a>.
-                If you're just getting started, you may want to <a>read the tutorial</a>.
+                This is the default page for
+                <a href="https://github.com/supernintendo/moongate" target="_blank">Moongate</a>.
+                When running <code>moongate</code>, set the <code>MOONGATE_WORLD</code> environment variable to the name of the world directory you wish to load.
             </p>
         </div>
         <div id="board"></div>
     </body>
     <script type="text/javascript">
-     (function() {
-         Moongate.init();
-         Moongate.callbacks.connected = function() {
-             $(window).on('mousemove', function(e) {});
-         }
-     })();
+        (function() {
+            var tick = function() {
+                var zone = Moongate.zone('Level', '$');
+
+                if (zone && zone.Player) {
+                    Moongate.loop(zone.Player.members, function(member, key) {
+                        var node = $('[data-origin="' + member.origin + '"]');
+
+                        if (!node.length) {
+                            $('<div class="member"></div>')
+                                .appendTo('#board')
+                                .attr('data-index', key)
+                                .attr('data-drift', member.drift)
+                                .attr('data-origin', member.origin)
+                                .attr('data-x', member.x)
+                                .attr('data-y', member.y);
+                        }
+                    });
+                    $('[data-origin]').each(function() {
+                        var index = $(this).data('index'),
+                            member = zone.Player.members[index];
+
+                        if (member) {
+                            $(this)
+                                .css('transform', 'translate(' + member.x + 'px' + ',' + member.y + 'px)')
+                                .css('-webkit-animation-duration', member.drift + 's')
+                                .css('animation-duration', member.drift + 's');
+
+                            if (Moongate.state.origin_id === member.origin) {
+                                $(this).addClass('me');
+                            }
+                        } else {
+                            $(this).remove();
+                        }
+                    });
+                }
+                window.requestAnimationFrame(tick.bind(this));
+            };
+            Moongate.init();
+            Moongate.callbacks.connected = function() {
+                $('#board').on('click', function(e) {
+                    var level = Moongate.zone('Level', '$');
+
+                    level &&
+                    level.Player &&
+                    level.Player.call('XY', e.clientX, e.clientY);
+                });
+            }
+            window.requestAnimationFrame(tick.bind({entities: {}}));
+        })();
     </script>
 </html>

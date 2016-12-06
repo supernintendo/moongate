@@ -1,11 +1,13 @@
 use Mix.Config
 
-config :porcelain, driver: Porcelain.Driver.Basic
-default_world = "default"
+config :moongate,
+  logger: Moongate.Logger,
+  packets: %{
+    encoder: Moongate.Packets.Encoder,
+    decoder: Moongate.Packets.Decoder
+  },
+  session: Moongate.Session,
+  world: System.get_env("MOONGATE_WORLD") || "default"
 
-case System.get_env("MOONGATE_WORLD") do
-  nil ->
-    config :moongate, world: default_world
-  world_name ->
-    config :moongate, world: world_name
-end
+config :porcelain,
+  driver: Porcelain.Driver.Basic

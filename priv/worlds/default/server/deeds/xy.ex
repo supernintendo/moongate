@@ -1,14 +1,14 @@
 defmodule Default.Deed.XY do
-  import Moongate.Deeds
+  use Moongate.DSL, :deed
 
   attributes %{
     x: :float,
     y: :float
   }
 
-  def call(entity, {x, y}) do
-    entity
-    |> set(:x, x)
-    |> set(:y, y)
+  def call({x, y}, event) do
+    event
+    |> target(&(&1.origin.id == event.origin.id))
+    |> set(%{x: x, y: y})
   end
 end
