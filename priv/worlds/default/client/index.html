@@ -19,9 +19,8 @@
             </h1>
             <img id="sphere" src="assets/sphere.svg">
             <p>
-                This is the default page for
-                <a href="https://github.com/supernintendo/moongate" target="_blank">Moongate</a>.
-                When running <code>moongate</code>, set the <code>MOONGATE_WORLD</code> environment variable to the name of the world directory you wish to load.
+                This is the default world for
+                <a href="https://github.com/supernintendo/moongate" target="_blank">Moongate</a>. The environment variable <code>MOONGATE_WORLD</code> can be set to load a different world. Worlds are located in <code>priv/worlds</code>.
             </p>
         </div>
         <div id="board"></div>
@@ -66,13 +65,15 @@
             };
             Moongate.init();
             Moongate.callbacks.connected = function() {
-                $('#board').on('click', function(e) {
+                var move = function(e) {
                     var level = Moongate.zone('Level', '$');
 
                     level &&
                     level.Player &&
                     level.Player.call('XY', e.clientX, e.clientY);
-                });
+                };
+                $('#board').on('click', move);
+                $('#board').on('touchend', move);
             }
             window.requestAnimationFrame(tick.bind({entities: {}}));
         })();

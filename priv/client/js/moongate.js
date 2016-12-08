@@ -292,7 +292,7 @@
         this.rings = {};
         this.state = params.state || {};
         this.zones = {};
-        this.connect();
+        this.connect(params.handshakeEndpoint);
     }
 
     //
@@ -324,8 +324,8 @@
     //
     // WebSockets
     //
-    exports.__proto__.connect = function() {
-        this.request('GET', 'handshake', function(e) {
+    exports.__proto__.connect = function(handshakeEndpoint) {
+        this.request('GET', handshakeEndpoint || 'handshake', function(e) {
             var handshake = JSON.parse(e.target.response);
 
             this['__🔮__'] = handshake.version;
