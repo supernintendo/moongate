@@ -1,6 +1,8 @@
 use Mix.Config
 
 config :moongate,
+  console: Moongate.Console,
+  file_watcher: "fswatch",
   logger: Moongate.Logger,
   packets: %{
     encoder: Moongate.Packets.Encoder,
@@ -8,6 +10,3 @@ config :moongate,
   },
   session: Moongate.Session,
   world: System.get_env("MOONGATE_WORLD") || "default"
-
-config :porcelain,
-  driver: Porcelain.Driver.Basic

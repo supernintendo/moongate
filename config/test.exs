@@ -1,3 +1,4 @@
 use Mix.Config
 
-config :moongate, world: "test"
+config :moongate,
+  world: "test"

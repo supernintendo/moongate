@@ -25,9 +25,6 @@ defmodule Default.Ring.Player do
   end
 
   def client_unsubscribed(event) do
-    # IO.inspect find_by(event, :origin, event.origin)
-
     event
-    # |> drop(find_by(event, :origin, event.origin))
   end
 end

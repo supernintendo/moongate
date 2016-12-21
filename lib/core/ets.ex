@@ -14,14 +14,7 @@ defmodule Moongate.ETS do
       registry: new_ets_table(:registry),
       ring: new_ets_table(:ring)
     }
-    |> Moongate.Network.establish(__MODULE__)
-  end
-
-  def init(state) do
-    {:ok, state}
-  end
-
-  def handle_call({:shutdown}, _from, _state) do
+    |> Moongate.Network.establish("ets", __MODULE__)
   end
 
   def delete({table_key, key}) do

@@ -101,7 +101,7 @@ defmodule Moongate.Ring.Service do
       Moongate.Core.world_name
       |> String.capitalize
       |> String.replace("-", "_")
-      |> Mix.Utils.camelize
+      |> Moongate.Core.camelize
       |> String.to_atom, Ring, module_name
     ]
     |> Module.safe_concat

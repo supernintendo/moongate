@@ -1,18 +1,23 @@
 defmodule Moongate.Fiber.GenServer do
   use GenServer
 
-  def start_link({name, command}) do
-    %Moongate.Fiber{
-      command: command,
-      name: name,
-    }
+  def start_link({name, params}) do
+    %Moongate.Fiber{}
+    |> Map.merge(params)
     |> Moongate.Network.establish("fiber", "#{name}", __MODULE__)
   end
 
-  def handle_cast({:init}, state) do
-    proc = %Porcelain.Process{pid: _pid} = Porcelain.spawn_shell(state.command)
+  def handle_cast(:init, state) do
+    handler = spawn(state.fiber_module, :start, fiber_params(state.params) ++ [self])
+    Moongate.Core.log({:socket, "Fiber (#{Moongate.Core.module_to_string(state.fiber_module)})"}, :up)
 
-    Moongate.Core.log(:up, {:fiber, "Fiber ('#{state.name}')"})
-    {:noreply, Map.put(state, :process, proc)}
+    {:noreply, %{state | handler: handler}}
+  end
+
+  defp fiber_params(params) do
+    case params do
+      nil -> []
+      _ -> params
+    end
   end
 end

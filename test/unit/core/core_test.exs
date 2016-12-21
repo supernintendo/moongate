@@ -16,10 +16,6 @@ defmodule Moongate.Tests.Core do
     assert Core.deed_module("TestDeed") == Test.Deed.TestDeed
   end
 
-  test "&get_world/0" do
-    assert Core.get_world == "test"
-  end
-
   test "&handshake/0" do
     handshake = Core.handshake
 
@@ -58,5 +54,9 @@ defmodule Moongate.Tests.Core do
 
   test "&world_module/0" do
     assert Core.world_module == Test.World
+  end
+
+  test "&world_name/0" do
+    assert Core.world_name == "test"
   end
 end
