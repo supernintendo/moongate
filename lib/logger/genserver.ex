@@ -6,12 +6,14 @@ defmodule Moongate.Logger do
     |> Moongate.Network.establish("logger", __MODULE__)
   end
 
-  def handle_cast({:init}, state) do
+  def handle_cast({:log, message}, state) do
+    Moongate.Logger.Service.log(message)
+
     {:noreply, state}
   end
 
-  def handle_cast({:log, status, message}, state) do
-    Moongate.Logger.Service.log(status, message)
+  def handle_cast({:log, message, status}, state) do
+    Moongate.Logger.Service.log({message, status})
 
     {:noreply, state}
   end

@@ -1,5 +1,11 @@
 %{
-  sockets: %{
-    web: {5929, "client"}
+  endpoints: %{
+    "client" => {
+      :web,
+      %{
+        path: "client",
+        port: 5929
+      }
+    }
   }
 }

@@ -16,10 +16,10 @@ defmodule Moongate.Zone.Service do
 
   def zone_module(module_name) do
     [
-      Moongate.Core.get_world
+      Moongate.Core.world_name
       |> String.capitalize
       |> String.replace("-", "_")
-      |> Mix.Utils.camelize
+      |> Moongate.Core.camelize
       |> String.to_atom, Zone, module_name
     ]
     |> Module.safe_concat

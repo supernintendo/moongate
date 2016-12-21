@@ -45,6 +45,7 @@ priv/worlds/*
 !priv/worlds/default
 !priv/worlds/test
 priv/logs/*
+priv/temp/*
 
 # ...but always keep .gitkeep.
 !.gitkeep

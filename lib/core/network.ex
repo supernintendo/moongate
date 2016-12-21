@@ -81,7 +81,7 @@ defmodule Moongate.Network do
       [{^supervisor_name, supervisor}] ->
         {:ok, child} = Supervisor.start_child(supervisor, [params])
         Moongate.ETS.insert({:registry, "#{namespace}_#{name}", child})
-        GenServer.cast(child, {:init})
+        GenServer.cast(child, :init)
         child
       [] -> nil
     end

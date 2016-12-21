@@ -1,16 +1,15 @@
 defmodule Moongate.Web.GenServer do
   use GenServer
 
-  def start_link({port, path}) do
-    %Moongate.Web{
-      path: path,
-      port: port
-    }
-    |> Moongate.Network.establish("socket", "#{port}", __MODULE__)
+  def start_link({name, params}) do
+    %Moongate.Web{}
+    |> Map.merge(params)
+    |> Moongate.Network.establish("endpoint", "#{name}", __MODULE__)
   end
 
-  def handle_cast({:init}, state) do
-    Moongate.Core.log(:up, {:socket, "Web (#{state.port})"})
+  def handle_cast(:init, state) do
+    Process.flag(:trap_exit, true)
+    Moongate.Core.log({:socket, "Web (#{state.port})"}, :up)
     listen(state)
 
     {:noreply, state}

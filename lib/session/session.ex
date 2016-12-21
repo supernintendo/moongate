@@ -2,13 +2,14 @@ defmodule Moongate.Session do
   @decoder Application.get_env(:moongate, :packets).decoder
 
   def depart(state) do
-    Moongate.Network.cascade({:depart, state.origin}, "zone")
-    Moongate.Network.cascade({:unsubscribe, state.origin}, "ring")
+    origin = state.origin
+    Moongate.Network.cascade({:depart, origin}, "zone")
+    Moongate.Network.cascade({:unsubscribe, origin}, "ring")
 
     :ok
   end
 
-  def handle_packet(%Moongate.Event{body: "init", domain: :request} = event, _state) do
+  def handle_packet(%Moongate.Event{body: "init", domain: :request, origin: _origin} = event, _state) do
     event
     |> Moongate.Core.world_apply(:connected)
   end

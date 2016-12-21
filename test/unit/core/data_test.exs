@@ -21,8 +21,10 @@ defmodule Moongate.Tests.Core.Data do
     fixture = %Moongate.Fiber{}
     keys = [
       :command,
+      :handler,
       :name,
-      :process
+      :params,
+      :parent
     ]
 
     assert Enum.all?(keys, &(Map.has_key?(fixture, &1)))
@@ -68,13 +70,6 @@ defmodule Moongate.Tests.Core.Data do
       :zone_id,
       :subscribers
     ]
-
-    assert Enum.all?(keys, &(Map.has_key?(fixture, &1)))
-  end
-
-  test "%Moongate.Socket{}" do
-    fixture = %Moongate.Socket{}
-    keys = [:port]
 
     assert Enum.all?(keys, &(Map.has_key?(fixture, &1)))
   end
