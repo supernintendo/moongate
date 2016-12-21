@@ -9,9 +9,9 @@ defmodule Moongate.Ring.GenServer do
     |> Moongate.Network.establish(__MODULE__)
   end
 
-  def handle_cast({:init}, state) do
+  def handle_cast(:init, state) do
     Moongate.ETS.insert({:ring, state.name, state.attributes})
-    Moongate.Core.log(:up, {:ring, "Ring (#{state.zone} (#{state.zone_id}) : #{state.name})"})
+    Moongate.Core.log({:ring, "Ring (#{state.zone} (#{state.zone_id}) : #{state.name})"}, :up)
 
     deeds =
       state

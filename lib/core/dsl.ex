@@ -69,6 +69,12 @@ defmodule Moongate.DSL do
   end
 
   defmodule Rings do
+    defmacro create(event) do
+      quote do
+        mutate(unquote(event), {:add_member, %{}})
+      end
+    end
+
     defmacro create(event, attributes) do
       quote do
         mutate(unquote(event), {:add_member, unquote(attributes)})

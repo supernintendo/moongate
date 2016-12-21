@@ -18,8 +18,10 @@ defmodule Moongate do
   defmodule Fiber do
     defstruct(
       command: nil,
+      handler: nil,
       name: nil,
-      process: nil
+      params: nil,
+      parent: nil
     )
   end
 
@@ -61,12 +63,11 @@ defmodule Moongate do
     end
   end
 
-  defmodule Socket do
-    defstruct port: nil
-  end
-
   defmodule Web do
-    defstruct path: "client/", port: nil
+    defstruct(
+      path: "client/",
+      port: nil
+    )
   end
 
   defmodule Zone do

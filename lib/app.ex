@@ -10,11 +10,10 @@ defmodule Moongate.Application do
     load_world
     config = load_config
     supervisor = start_supervisor(config)
+    configure_console
     spawn_fibers(config)
-    spawn_sockets(config)
+    spawn_endpoints(config)
     Moongate.Core.world_apply(:start)
-
-    if Mix.env() == :prod, do: recur
 
     {:ok, supervisor}
   end
@@ -31,8 +30,18 @@ defmodule Moongate.Application do
 
   ### Private
 
+  def configure_console do
+    if IEx.started? do
+      Application.put_env(:elixir, :ansi_enabled, true)
+      IEx.configure(
+        default_prompt: "",
+        history_size: -1
+      )
+    end
+  end
+
   # Load the server.json file for the world.
-  defp load_config, do: load_config(Moongate.Core.get_world)
+  defp load_config, do: load_config(Moongate.Core.world_name)
   defp load_config(world) do
     if File.exists?("priv/worlds/#{world}/moongate.exs") do
       {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.exs")
@@ -43,7 +52,7 @@ defmodule Moongate.Application do
     end
   end
 
-  defp load_world, do: load_world(Moongate.Core.get_world, "#{Moongate.Core.get_world}/server")
+  defp load_world, do: load_world(Moongate.Core.world_name, "#{Moongate.Core.world_name}/server")
   defp load_world(world, path) do
     dir = File.ls("priv/worlds/#{path}")
     load_all_in_directory(dir, world, path)
@@ -63,14 +72,19 @@ defmodule Moongate.Application do
   end
 
   defp spawn_fibers(config) do
-    if config[:fibers] do
-      config[:fibers]
-      |> Enum.map(&Moongate.Fiber.Service.spawn_fiber/1)
+    unless Map.has_key?(config, :dont_watch) && config.dont_watch do
+      Moongate.Network.register(:fiber, "world_watcher", {"world_watcher", %{
+        fiber_module: Moongate.Fibers.WorldWatcher
+      }})
     end
   end
 
-  defp spawn_sockets(config) do
-    config.sockets |> Enum.map(&spawn_socket(&1))
+  defp spawn_endpoints(config) do
+    config.endpoints |> Enum.map(&spawn_endpoint(&1))
+  end
+
+  defp spawn_endpoint({name, {protocol, params}}) do
+    Moongate.Network.register(protocol, "endpoint_#{name}", {name, params})
   end
 
   defp start_supervisor(config) do
@@ -83,17 +97,5 @@ defmodule Moongate.Application do
     end)
 
     supervisor
-  end
-
-  defp spawn_socket({protocol, {port, params}}) do
-    Moongate.Network.register(protocol, "#{port}", {port, params})
-  end
-  defp spawn_socket({protocol, port}) do
-    Moongate.Network.register(protocol, "#{port}", port)
-  end
-
-  # Fairly straightforward.
-  defp recur do
-    recur
   end
 end

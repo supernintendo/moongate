@@ -8,8 +8,8 @@ defmodule Moongate.Zone.GenServer do
     |> Moongate.Network.establish(__MODULE__)
   end
 
-  def handle_cast({:init}, state) do
-    Moongate.Core.log(:up, {:zone, "Zone (#{state.id})"})
+  def handle_cast(:init, state) do
+    Moongate.Core.log({:zone, "Zone (#{state.id})"}, :up)
 
     {:noreply, init_rings(state)}
   end

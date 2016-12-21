@@ -2,9 +2,21 @@ defmodule Moongate.Core do
   use Moongate.Env
 
   defmodule Iex do
-    def exit do
-      IO.puts "Moongate is shutting down gracefully..."
-      :init.stop
+    def about do
+      Moongate.Core.about
+      :timer.sleep(1)
+    end
+
+    def help do
+      {:info, %{
+        about: "View version and system information.",
+        quit: "Terminate the server gracefully."
+      }}
+      |> Moongate.Core.log
+    end
+
+    def quit do
+      Moongate.Core.quit
     end
   end
 
@@ -33,6 +45,11 @@ defmodule Moongate.Core do
     "December"
   }
 
+  def about do
+    Moongate.Core.log(:moongate_banner)
+    IO.puts ""
+  end
+
   def atom_to_string(value) do
     if is_atom(value) do
       parts = value
@@ -51,8 +68,7 @@ defmodule Moongate.Core do
 
   def camelize(string) do
     string
-    |> String.replace("-", "_")
-    |> Mix.Utils.camelize
+    |> Inflex.camelize
   end
 
   def deed_module(module_name) do
@@ -71,14 +87,6 @@ defmodule Moongate.Core do
     "#{@months |> elem(month - 1)} #{day}, #{year} · #{hour}:#{min} "
   end
 
-  def get_world do
-    if Mix.env() == :test do
-      "test"
-    else
-      Application.get_env(:moongate, :world) || "default"
-    end
-  end
-
   def local_ip do
     {:ok, parts} = :inet.getif
     parts
@@ -86,6 +94,10 @@ defmodule Moongate.Core do
     |> elem(0)
     |> Tuple.to_list
     |> Enum.join(".")
+  end
+
+  def log(message) do
+    GenServer.cast(:logger, {:log, message})
   end
 
   def log(status, message) do
@@ -111,6 +123,10 @@ defmodule Moongate.Core do
   def module_to_string(module) do
     "#{module}"
     |> String.replace("Elixir.", "")
+  end
+
+  def quit do
+    :init.stop
   end
 
   def world_apply(func) do

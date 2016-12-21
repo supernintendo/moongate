@@ -16,12 +16,10 @@ message "${green} Moongate will spawn shortly. \n"
 message "${orange}"
 echo " "
 
-greeting
-
 # Extend path temporarily
 pushd `dirname $0` > /dev/null
 current_path=`pwd`
 popd > /dev/null
 
-export PATH="${current_path}/_moongate":$PATH
-exec iex -S mix
+export PATH="${current_path}/_moongate":"${current_path}/_moongate/goon":$PATH
+exec scripts/run.sh $world

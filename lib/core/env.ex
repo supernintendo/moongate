@@ -6,11 +6,30 @@ defmodule Moongate.Env do
         _ -> Application.get_env(:moongate, :world) || "default"
       end
     end).()
+    codename = (fn() ->
+      case File.read("priv/metadata/codename") do
+        {:ok, codename} ->
+          codename
+          |> String.split("\n")
+          |> hd
+        _ -> "Generic"
+      end
+    end).()
+    version = (fn() ->
+      case File.read("priv/metadata/version") do
+        {:ok, version} ->
+          "Version "
+          <> (version
+          |> String.split("\n")
+          |> hd)
+        _ -> "Unknown version"
+      end
+    end).()
 
     quote do
-      def world_name do
-        unquote(world_name)
-      end
+      def codename, do: unquote(codename)
+      def world_name, do: unquote(world_name)
+      def version, do: unquote(version)
     end
   end
 end

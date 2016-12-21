@@ -17,9 +17,9 @@ fetch_elixir() {
     mkdir -p _moongate/elixir
 
     if [ ! -d "_moongate/elixir/${elixir_version}" ]; then
-        message "${purple}Downloading Elixir ${elixir_version} from ${git_source} ..."
+        message "${beige}Downloading Elixir ${elixir_version} from ${git_source} ..."
         loading "download_elixir"
-        message "${purple} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."
+        message "${beige} Compiling Elixir ${elixir_version} (${elixir_tag}) from source (be patient) ..."
         loading "build_elixir"
     fi
 }
@@ -29,6 +29,10 @@ clean_moongate() {
     loading "rm -rf _build/dev/lib/moongate"
     message "${pink} Resetting symbolic links ..."
     loading "reset_symlinks"
+}
+
+clean_spawned_processes() {
+    pkill -f "*MOONGATE_CALLER=${world}*"
 }
 
 fetch_deps() {
@@ -41,6 +45,6 @@ fetch_deps() {
 }
 
 compile_moongate() {
-    message "${beige} Building server ..."
+    message "${blue} Building server ..."
     loading "mix compile"
 }
