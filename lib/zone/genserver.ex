@@ -52,14 +52,14 @@ defmodule Moongate.Zone.GenServer do
   defp init_ring(ring, state) do
     registered_name = Moongate.Ring.Service.process_name({state.name, state.id, ring})
 
-    state = %Moongate.Ring{
+    %Moongate.Ring{
       attributes: Moongate.Ring.Service.get_attributes(ring),
-      name: Moongate.Core.module_to_string(ring),
+      name: Moongate.Core.atom_to_string(ring),
       ring: Moongate.Ring.Service.ring_module(ring),
       zone: state.name,
       zone_id: state.id
     }
-    Moongate.Network.register(:ring, registered_name, state)
+    |> Moongate.Network.register(:ring, registered_name)
 
     {ring, registered_name}
   end
@@ -82,6 +82,6 @@ defmodule Moongate.Zone.GenServer do
   defp deed_names(state) do
     state.rings
     |> Map.keys
-    |> Enum.map(&Moongate.Core.module_to_string/1)
+    |> Enum.map(&Moongate.Core.atom_to_string/1)
   end
 end

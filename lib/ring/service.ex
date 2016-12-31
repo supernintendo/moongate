@@ -93,7 +93,7 @@ defmodule Moongate.Ring.Service do
   end
 
   def process_name({zone_process_name, zone_process_id, module_name}) do
-    "#{Moongate.Core.module_to_string(module_name)}@#{zone_process_name}_#{zone_process_id}"
+    "#{Moongate.Core.atom_to_string(module_name)}@#{zone_process_name}_#{zone_process_id}"
   end
 
   def ring_module(module_name) do

@@ -22,23 +22,11 @@ defmodule Moongate.Logger.Service do
     phosor: [:color239, :color22, :color28, :color34, :color40, :color46],
     shortcake: [:color199, :color205, :color211, :color217, :color223, :color229]
   }
+  @reset_code :reset
 
-  def ansi(list, options) do
-    if options[:timestamp] do
-      [IO.ANSI.color(3, 3, 3) <> "#{Moongate.Core.formatted_time} " <> IO.ANSI.reset] ++ list
-      |> ansi
-    else
-      ansi(list)
-    end
-  end
-
-  def ansi(list) do
-    list ++ [IO.ANSI.reset]
-    |> IO.ANSI.format_fragment(true)
-    |> IO.chardata_to_string
-    |> IO.puts
-  end
-
+  @doc """
+  Logs a message to the console.
+  """
   def log(:moongate_banner) do
     """
 
@@ -50,20 +38,17 @@ defmodule Moongate.Logger.Service do
         ▀               █   █          
     """
     |> print_with_palette(:ooze)
-    " #{Moongate.Core.version} (#{Moongate.Core.codename})"
+    "Version #{Moongate.Core.version} (#{Moongate.Core.codename})"
     |> print_with_palette(:cool)
   end
-
   def log({{type, message}, :up}) do
-    [color(type), message, :reset, " is ", color(:up), :bright, "UP", :reset]
+    [color(type), message, @reset_code, " is ", color(:up), :bright, "UP", @reset_code]
     |> print
   end
-
   def log({{type, message}, :down}) do
-    [color(type), message, :reset, " is ", color(:down), :bright, "DOWN", :reset]
+    [color(type), message, @reset_code, " is ", color(:down), :bright, "DOWN", @reset_code]
     |> print
   end
-
   def log({type, message}) when is_map(message) do
     gutter_width =
       Enum.sort(message, fn {k1, _v1}, {k2, _v2} ->
@@ -81,22 +66,43 @@ defmodule Moongate.Logger.Service do
 
       [
         color(type), :bright, "#{label} ",
-        :reset, :color252, "#{value}",
-        :reset, "\n"
+        @reset_code, :color252, "#{value}",
+        @reset_code, "\n"
       ]
     end)
     |> print
   end
-
   def log({type, message}) do
-    [color(type), message, :reset]
+    [color(type), message, @reset_code]
     |> print
   end
 
-  defp color(key) do
-    @colors[key] || :reset
+  @doc """
+  Prints a colorized string using one of the
+  preset color palettes. If ANSI is not enabled
+  for the current terminal session, the string
+  will be printed normally.
+  """
+  def print_with_palette(message, palette_name) do
+    case @palettes[palette_name] do
+      palette when is_list(palette) ->
+        format_with_palette(message, palette)
+        |> print
+      _ ->
+        IO.puts message
+    end
   end
 
+  # Returns a color by key, falling back to
+  # the predefined reset code.
+  defp color(key) do
+    @colors[key] || @reset_code
+  end
+
+  # Returns a list of ANSI codes such that color
+  # codes within the provided color palette are
+  # evenly distributed amongst characters within
+  # the string.
   defp format_with_palette(message, palette) do
     palette_length = length(palette)
     message_length = String.length(message)
@@ -104,7 +110,7 @@ defmodule Moongate.Logger.Service do
 
     String.codepoints(message)
     |> Enum.reduce({[], 0, palette}, fn char, {chunks, counter, current_palette} ->
-      current_color = List.first(current_palette) || :reset
+      current_color = List.first(current_palette) || @reset_code
       cond do
         rem(counter, weight) == weight - 1 ->
           [_palette_head | palette_tail] = current_palette
@@ -116,39 +122,11 @@ defmodule Moongate.Logger.Service do
     |> elem(0)
   end
 
-  defp print(chunks) do
-    chunks
+  # Print a list of ANSI codes.
+  defp print(ansi_codes) do
+    ansi_codes
     |> Bunt.ANSI.format
     |> IO.puts
-  end
-
-  def pretty(string, modifier) do
-    pretty(string, modifier, [])
-  end
-
-  def pretty(string, modifier, options) do
-    if options[:suppress_timestamp] do
-      [modifier, string]
-      |> ansi
-    else
-      [modifier, string]
-      |> ansi([timestamp: true])
-    end
-  end
-
-  def print_with_palette(message, palette_name) do
-    case @palettes[palette_name] do
-      palette when is_list(palette) ->
-        format_with_palette(message, palette)
-        |> print
-      _ ->
-        IO.puts message
-    end
-  end
-
-  def puts_colored(message, color) do
-    [color, message, :reset]
-    |> print
   end
 
   def origin(o) do

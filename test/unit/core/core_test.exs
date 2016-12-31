@@ -5,6 +5,7 @@ defmodule Moongate.Tests.Core do
   test "&atom_to_string/2" do
     assert Core.atom_to_string(:foo) == "foo"
     assert Core.atom_to_string(Foo) == "Foo"
+    assert Core.atom_to_string(Moongate.Core) == "Moongate.Core"
   end
 
   test "&camelize/1" do
@@ -31,10 +32,6 @@ defmodule Moongate.Tests.Core do
   test "&has_function/2" do
     assert Core.has_function?(Core, "handshake")
     refute Core.has_function?(Core, "nonexistent_function")
-  end
-
-  test "&module_to_string/2" do
-    assert Core.module_to_string(Core) == "Moongate.Core"
   end
 
   test "&world_apply/1" do

@@ -18,11 +18,10 @@ defmodule Moongate.Env do
     version = (fn() ->
       case File.read("priv/metadata/version") do
         {:ok, version} ->
-          "Version "
-          <> (version
+          version
           |> String.split("\n")
-          |> hd)
-        _ -> "Unknown version"
+          |> hd
+        _ -> "?.?.?"
       end
     end).()
 

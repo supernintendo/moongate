@@ -1,16 +1,46 @@
 defmodule Moongate.Packets.Decoder do
   @patterns %{
-  	body: ~r/(?<=::).+/,
+    body: ~r/(?<=::).+/,
     deed: ~r/<(.*?)>/,
     domain: ~r/\[(.*?)\]/,
-  	ring: ~r/{(.*?)}/,
+    ring: ~r/{(.*?)}/,
     zone: ~r/\((.*?)\)/,
   }
-  @param_splitter "░"
+  @param_delimiter "░"
   @prefix "#"
   @splitter ":"
-  @operations Moongate.Packets.Factory.operations_by_index
+  @operations Moongate.Packets.Operations.by_index
 
+  @doc """
+  Modifies a packet string over a series of
+  functions, converting it into a map.
+
+  ## Examples
+  The following example demonstrates decoding
+  a packet which contains all possible fields:
+
+      iex> Moongate.Packets.Decoder.decode("#[01:ring](Foo:$){Bar}<Lorem>::Ipsum")
+      %{
+        body: "Ipsum",
+        deed: "Lorem",
+        domain: {:call, :ring},
+        ring: "Bar",
+        zone: {"Foo", "$"}
+      }
+
+  Any field which is not present on the packet
+  string will have its corresponding map value
+  set to `nil`:
+
+      iex> Moongate.Packets.Decoder.decode("#[04:ring]::ok")
+      %{
+        body: "ok",
+        deed: nil,
+        domain: {:respond, :ring},
+        ring: nil,
+        zone: nil
+      }
+  """
   def decode(packet) do
   	{packet, []}
   	|> decode_packet(:body)
@@ -24,17 +54,30 @@ defmodule Moongate.Packets.Decoder do
     |> process_field(:domain)
   end
 
+  @doc """
+  Splits a string which represents the body
+  of a packet over a delimiter, returning the
+  list as a tuple so that it can be matched
+  against.
+
+      iex> Moongate.Packets.Decoder.split_body_params("128░64")
+      {"128", "64"}
+
+      iex> Moongate.Packets.Decoder.split_body_params("32")
+      {"32"}
+
+      iex> Moongate.Packets.Decoder.split_body_params("")
+      nil
+
+      iex> Moongate.Packets.Decoder.split_body_params(nil)
+      nil
+  """
+  def split_body_params(_chunk = ""), do: nil
+  def split_body_params(_chunk = nil), do: nil
   def split_body_params(chunk) do
     chunk
-    |> String.split(@param_splitter)
+    |> String.split(@param_delimiter)
     |> List.to_tuple
-  end
-
-  def whitelist(collection, list) do
-    collection
-    |> Enum.filter(fn ({key, _value}) ->
-      list |> Enum.any?(&(&1 == key))
-    end)
   end
 
   defp apply_pattern(packet, pattern) do
@@ -54,9 +97,11 @@ defmodule Moongate.Packets.Decoder do
   end
 
   defp decode_packet({packet, parts}, pattern_name) do
-  	case @patterns[pattern_name] do
-      nil -> throw "Moongate: #{pattern_name} is not a valid packet regex name. Check @patterns in lib/packets.ex."
-  	  pattern -> {packet, parts ++ [{pattern_name, apply_pattern(packet, pattern)}]}
+    case @patterns[pattern_name] do
+      nil ->
+        throw "Moongate: #{pattern_name} is not a valid packet regex name. Check @patterns in lib/packets.ex."
+      pattern ->
+        {packet, parts ++ [{pattern_name, apply_pattern(packet, pattern)}]}
     end
   end
 

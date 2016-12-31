@@ -10,6 +10,9 @@ defmodule Moongate.Supervisor do
     Supervisor.start_link(__MODULE__, config, [name: :supervisor])
   end
 
+  @doc """
+  Initializes the supervision tree.
+  """
   def init(_config) do
     [
       worker(Moongate.ETS, [], [id: :ets]),
@@ -24,6 +27,8 @@ defmodule Moongate.Supervisor do
     |> supervise(strategy: :one_for_one)
   end
 
+  # Returns a worker for the given module name
+  # if the module has been compiled and loaded.
   defp extension(module_name) do
     case @extensions[module_name] do
       module when is_atom(module) ->

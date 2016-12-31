@@ -2,8 +2,6 @@ defmodule Moongate.Ring.GenServer do
   use GenServer
   use Moongate.State, :server
 
-  ### Public
-
   def start_link(state) do
     state
     |> Moongate.Network.establish(__MODULE__)
@@ -16,7 +14,7 @@ defmodule Moongate.Ring.GenServer do
     deeds =
       state
       |> apply_on_ring(:__ring_deeds, [])
-      |> Enum.map(&({Moongate.Core.module_to_string(&1), Moongate.Core.deed_module(&1)}))
+      |> Enum.map(&({Moongate.Core.atom_to_string(&1), Moongate.Core.deed_module(&1)}))
       |> Enum.into(%{})
 
     {:noreply, %{state | deeds: deeds}}
@@ -66,7 +64,7 @@ defmodule Moongate.Ring.GenServer do
     end
   end
 
-  def subscribed?(origin, state) do
+  defp subscribed?(origin, state) do
     state.subscribers
     |> Enum.any?(&(&1.id == origin.id))
   end

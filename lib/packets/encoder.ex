@@ -8,10 +8,14 @@ defmodule Moongate.Packets.Encoder do
   }
   @separator ":"
   @prefix "#"
-  @operations Moongate.Packets.Factory.operations_by_key
+  @operations Moongate.Packets.Operations.by_key
 
   def operations, do: @operations
 
+  @doc """
+  Constructs a packet from values within a map or
+  %Moongate.Packet{}.
+  """
   def encode(packet) do
     @prefix
     <> append_chunk({packet, :domain})

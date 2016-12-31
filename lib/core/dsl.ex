@@ -1,6 +1,13 @@
 defmodule Moongate.DSL do
   defmacro __using__(type) do
-    type_module = Moongate.DSL.Helper.module_for_type(type)
+    type_module = (fn ->
+      case type do
+        :deed -> Moongate.DSL.Deeds
+        :ring -> Moongate.DSL.Rings
+        :zone -> Moongate.DSL.Zones
+        _ -> Moongate.DSL.Void
+      end
+    end).()
 
     quote do
       use Moongate.State
@@ -8,11 +15,31 @@ defmodule Moongate.DSL do
 
       @default_id "$"
 
+      @doc """
+      Gets the current value of a pool member attribute
+      by key.
+      """
       def get(member, key), do: Moongate.Ring.Service.member_attr(member, key)
 
+      @doc """
+      Mutates an event to cause its targets to join the
+      specified zone when the event is processed. If no
+      zone ID is passed, the default zone ID ($) is used
+      instead.
+      """
       def join(event, zone_module), do: join(event, zone_module, @default_id)
       def join(event, zone_module, id), do: mutate(event, {:join_zone, zone_module, id})
 
+      @doc """
+      Sends a state packet to all targets attached to an
+      event. For the default client reference
+      implementation, this effectively sets a key
+      value pair within the `state` object of the active
+      Moongate instance. If `value` is a function, that
+      function is called once for every target, with the
+      target being passed to the function call as a single
+      argument.
+      """
       def push_state(%Moongate.Event{} = event, {key, value}) when is_function(value) do
         for target <- event.targets do
           push_state(target, {key, apply(value, [target])})
@@ -35,8 +62,21 @@ defmodule Moongate.DSL do
         target
       end
       def push_state(target, _transaction), do: target
- 
-      def set(event, params), do: mutate(event, {:set, params})
+
+      @doc """
+      Mutates an event to modify attributes on all attached
+      targets when the event is processed. `&set/2` takes a
+      map as the second argument, in which case all key value
+      pairs within the map override the targets' attributes.
+      `&set/3` takes a key and a value, making it more
+      suitable for cases in which only a single attribute
+      is being set.
+      """
+      def set(event, params) when is_map(params), do: mutate(event, {:set, params})
+      def set(event, key, value) when is_atom(key) do
+        params = Map.put(%{}, key, value)
+        mutate(event, {:set, params})
+      end
 
       def subscribe(event, ring_name), do: mutate(event, {:subscribe_to_ring, ring_name})
 
@@ -44,14 +84,15 @@ defmodule Moongate.DSL do
 
       def zone(module_name), do: zone(module_name, @default_id)
       def zone(module_name, id) do
-        name = Moongate.Core.module_to_string(module_name)
+        name = Moongate.Core.atom_to_string(module_name)
 
-        Moongate.Network.register(:zone, "#{name}_#{id}", %{
+        %{
           id: id,
           name: name,
           zone: Moongate.Zone.Service.zone_module(module_name)
-        })
-      end    
+        }
+        |> Moongate.Network.register(:zone, "#{name}_#{id}")
+      end
     end
   end
 
@@ -141,17 +182,6 @@ defmodule Moongate.DSL do
         def __zone_rings do
           unquote(ring_list)
         end
-      end
-    end
-  end
-
-  defmodule Helper do
-    def module_for_type(type) do
-      case type do
-        :deed -> Moongate.DSL.Deeds
-        :ring -> Moongate.DSL.Rings
-        :zone -> Moongate.DSL.Zones
-        _ -> Moongate.DSL.Void
       end
     end
   end

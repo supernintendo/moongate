@@ -9,6 +9,7 @@
         <title>Moongate</title>
         <script src="moongate.js"></script>
         <script src="vendor/jquery-3.1.1.min.js"></script>
+        <script src="index.js"></script>
     </head>
     <body>
         <div id="info">
@@ -25,57 +26,4 @@
         </div>
         <div id="board"></div>
     </body>
-    <script type="text/javascript">
-        (function() {
-            var tick = function() {
-                var zone = Moongate.zone('Level', '$');
-
-                if (zone && zone.Player) {
-                    Moongate.loop(zone.Player.members, function(member, key) {
-                        var node = $('[data-origin="' + member.origin + '"]');
-
-                        if (!node.length) {
-                            $('<div class="member"></div>')
-                                .appendTo('#board')
-                                .attr('data-index', key)
-                                .attr('data-origin', member.origin);
-                        }
-                    });
-                    $('[data-origin]').each(function() {
-                        var index = $(this).data('index'),
-                            member = zone.Player.members[index];
-
-                        if (member) {
-                            $(this)
-                                .css('transform', 'translate(' + member.x + 'px' + ',' + member.y + 'px)')
-                                .css('-webkit-animation-duration', member.drift + 's')
-                                .css('animation-duration', member.drift + 's')
-                                .css('-webkit-transition-duration', member.speed + 'ms')
-                                .css('transition-duration', member.speed + 'ms');
-
-                            if (Moongate.state.origin_id === member.origin) {
-                                $(this).addClass('me');
-                            }
-                        } else {
-                            $(this).remove();
-                        }
-                    });
-                }
-                window.requestAnimationFrame(tick.bind(this));
-            };
-            Moongate.init();
-            Moongate.callbacks.connected = function() {
-                var move = function(e) {
-                    var level = Moongate.zone('Level', '$');
-
-                    level &&
-                    level.Player &&
-                    level.Player.call('XY', e.clientX, e.clientY);
-                };
-                $('#board').on('click', move);
-                $('#board').on('touchend', move);
-            }
-            window.requestAnimationFrame(tick.bind({entities: {}}));
-        })();
-    </script>
 </html>

@@ -11,7 +11,7 @@ defmodule Moongate.Zone.Service do
   end
 
   def process_name(zone_module, id) do
-    "zone_#{Moongate.Core.module_to_string(zone_module)}_#{id}"
+    "zone_#{Moongate.Core.atom_to_string(zone_module)}_#{id}"
   end
 
   def zone_module(module_name) do

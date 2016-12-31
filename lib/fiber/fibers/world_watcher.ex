@@ -2,7 +2,9 @@ defmodule Moongate.Fibers.WorldWatcher do
   @watch_command Application.get_env(:moongate, :file_watcher)
 
   def start(parent) do
-    proc = Port.open({:spawn, "#{@watch_command} #{Moongate.Core.world_directory}"}, [:binary])
+    proc =
+      {:spawn, "#{@watch_command} #{Moongate.Core.world_directory}"}
+      |> Port.open([:binary])
     os_pid = Port.info(proc)[:os_pid]
     Moongate.Support.trap_os_pid(os_pid)
 

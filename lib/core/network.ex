@@ -1,10 +1,18 @@
 defmodule Moongate.Network do
-  def cascade(message, namespace) do
-    for {_, pid, _, _} <- list(namespace) do
+  @doc """
+  Performs a GenServer.cast to every GenServer
+  under a given supervisor.
+  """
+  def cascade(message, supervisor_name) do
+    for {_, pid, _, _} <- list(supervisor_name) do
       cast(message, pid)
     end
   end
 
+  @doc """
+  Performs a GenServer.call to a GenServer by pid
+  or name within the registry ETS table.
+  """
   def call(message, pid) when is_pid(pid) do
     GenServer.call(pid, message)
   end
@@ -17,6 +25,10 @@ defmodule Moongate.Network do
     end
   end
 
+  @doc """
+  Performs a GenServer.cast to a GenServer by pid
+  or name within the registry ETS table.
+  """
   def cast(message, pid) when is_pid(pid) do
     GenServer.cast(pid, message)
   end
@@ -29,6 +41,10 @@ defmodule Moongate.Network do
     if is_pid(pid), do: cast(message, pid)
   end
 
+  @doc """
+  Performs a GenServer.start_link for the
+  specified module.
+  """
   def establish(params, module), do: GenServer.start_link(module, params)
   def establish(params, name, module) do
     GenServer.start_link(module, params, [name: String.to_atom(name)])
@@ -37,16 +53,25 @@ defmodule Moongate.Network do
     GenServer.start_link(module, params, [name: String.to_atom(namespace <> name)])
   end
 
+  @doc """
+  Returns a list of all processes within a supervisor,
+  specified by its name suffix within the ETS table
+  for the corresponding supervision tree.
+  """
   def list(namespace) do
     supervisor_name = "tree_#{namespace}"
 
     case Moongate.ETS.lookup({:registry, "tree_#{namespace}"}) do
       [{^supervisor_name, supervisor}] -> Supervisor.which_children(supervisor)
       [] -> []
-    end    
+    end
   end
 
-  def kill_pid(pid) when is_pid(pid) do
+  @doc """
+  Kills a process by pid or name suffix within the
+  process registry's ETS table.
+  """
+  def kill_process(pid) when is_pid(pid) do
     results = Moongate.ETS.match_object({:registry, {:_, pid}})
 
     results
@@ -55,8 +80,7 @@ defmodule Moongate.Network do
     end)
     :ok
   end
-
-  def kill_pid({namespace, pid}) do
+  def kill_process({namespace, pid}) do
     supervisor_name = "tree_#{namespace}"
 
     case Moongate.ETS.lookup({:registry, "tree_#{namespace}"}) do
@@ -65,6 +89,10 @@ defmodule Moongate.Network do
     end
   end
 
+  @doc """
+  Returns the PID for a process by its name within
+  the process registry's ETS table if it exists.
+  """
   def pid_for_name(name) do
     case Moongate.ETS.lookup({:registry, name}) do
       [{^name, pid}] -> pid
@@ -72,9 +100,16 @@ defmodule Moongate.Network do
     end
   end
 
-  def register(namespace), do: register(namespace, nil)
-  def register(namespace, params), do: register(namespace, UUID.uuid4(:hex), params)
-  def register(namespace, name, params) do
+  @doc """
+  Starts a new child process within the specified
+  supervisor and stores the PID in ETS. The namespace
+  refers to the suffix of the supervisor key and
+  process key in the ETS tables of the supervision
+  tree and process registry respectively.
+  """
+  def register(namespace), do: register(nil, namespace)
+  def register(params, namespace), do: register(params, namespace, UUID.uuid4(:hex))
+  def register(params, namespace, name) do
     supervisor_name = "tree_#{namespace}"
 
     case Moongate.ETS.lookup({:registry, supervisor_name}) do
@@ -87,6 +122,10 @@ defmodule Moongate.Network do
     end
   end
 
+  @doc """
+  Sends a packet string to a target or list of
+  targets.
+  """
   def send_packet(packet, targets) when is_list(targets) do
     for target <- targets, do: send_packet(packet, target)
   end

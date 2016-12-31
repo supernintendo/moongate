@@ -1,7 +1,7 @@
-defmodule Moongate.Packets.Factory do
+defmodule Moongate.Packets.Operations do
   use Moongate.Packets.Metadata
 
-  def operations, do: packet_operations
-  def operations_by_key, do: packet_operations.by_key
-  def operations_by_index, do: packet_operations.by_index
+  def all, do: packet_operations
+  def by_key, do: packet_operations.by_key
+  def by_index, do: packet_operations.by_index
 end

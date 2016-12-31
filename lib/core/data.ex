@@ -1,5 +1,18 @@
 defmodule Moongate do
+  @moduledoc """
+  The base namespace for Moongate. This module
+  is only used as a prefix for other modules -
+  it doesn't export or implement any functions.
+  """
+
   defmodule Event do
+    @moduledoc """
+    Provides a data container for events passed to
+    functions within world modules - this is the
+    fundamental data structure that Moongate's
+    DSL relies upon.
+    """
+
     defstruct(
       __pending_mutations: [],
       body: nil,
@@ -16,6 +29,10 @@ defmodule Moongate do
   end
 
   defmodule Fiber do
+    @moduledoc """
+    Represents the state of a Moongate.Fiber.GenServer.
+    """
+
     defstruct(
       command: nil,
       handler: nil,
@@ -26,6 +43,10 @@ defmodule Moongate do
   end
 
   defmodule Origin do
+    @moduledoc """
+    Represents a client.
+    """
+
     defstruct(
       events: nil,
       id: nil,
@@ -36,6 +57,10 @@ defmodule Moongate do
 	end
 
   defmodule Packet do
+    @moduledoc """
+    Represents a packet before it has been encoded.
+    """
+
     defstruct(
       body: nil,
       deed: nil,
@@ -46,6 +71,10 @@ defmodule Moongate do
   end
 
   defmodule Ring do
+    @moduledoc """
+    Represents the state of a Moongate.Ring.GenServer.
+    """
+
     defstruct(
       __pending_mutations: [],
       attributes: %{},
@@ -64,6 +93,10 @@ defmodule Moongate do
   end
 
   defmodule Web do
+    @moduledoc """
+    Represents the state of a Moongate.Web.GenServer.
+    """
+
     defstruct(
       path: "client/",
       port: nil
@@ -71,6 +104,10 @@ defmodule Moongate do
   end
 
   defmodule Zone do
+    @moduledoc """
+    Represents the state of a Moongate.Zone.GenServer.
+    """
+
     defstruct(
       __pending_mutations: [],
       id: nil,
