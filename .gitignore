@@ -40,6 +40,7 @@ doc/
 .tern-port
 
 # Moongate
+docs
 _moongate
 priv/worlds/*
 !priv/worlds/default

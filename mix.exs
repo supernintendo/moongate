@@ -31,7 +31,7 @@ defmodule Moongate.Mixfile do
         :poison,
         :uuid
       ],
-      mod: {Moongate.Application, []}
+      mod: {Moongate, []}
     ]
   end
 

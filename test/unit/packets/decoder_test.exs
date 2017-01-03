@@ -1,6 +1,6 @@
 defmodule Moongate.Tests.Packets.Decoder do
   use ExUnit.Case, async: true
-  alias Moongate.Packets.Decoder
+  alias Moongate.PacketsDecoder
 
   @body_fixture "#::Foo Bar"
   @deed_fixture "#<TestDeed>"

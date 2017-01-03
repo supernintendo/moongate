@@ -1,4 +1,4 @@
-defmodule Moongate.Web.Supervisor do
+defmodule Moongate.WebSupervisor do
   use Supervisor
 
   def start_link do
@@ -6,7 +6,7 @@ defmodule Moongate.Web.Supervisor do
   end
 
   def init(_) do
-    [worker(Moongate.Web.GenServer, [], [])]
+    [worker(Moongate.Web, [], [])]
     |> supervise(strategy: :simple_one_for_one)
   end
 end

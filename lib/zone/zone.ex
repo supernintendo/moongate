@@ -1,11 +1,11 @@
-defmodule Moongate.Zone.GenServer do
+defmodule Moongate.Zone do
   use GenServer
-  use Moongate.State, :server
+  use Moongate.CoreState, :server
 
   def start_link(params) do
-    %Moongate.Zone{}
+    %Moongate.ZoneState{}
     |> Map.merge(params)
-    |> Moongate.Network.establish(__MODULE__)
+    |> Moongate.CoreNetwork.establish(__MODULE__)
   end
 
   def handle_cast(:init, state) do
@@ -19,7 +19,7 @@ defmodule Moongate.Zone.GenServer do
       state
       |> apply_on_zone(:client_left, [new_event(state, %{targets: [origin]})])
       |> mutate({:remove_member, origin})
-      |> apply_state_mutations(state)
+      |> commit_mutation(state)
 
     {:noreply, state}
   end
@@ -30,7 +30,7 @@ defmodule Moongate.Zone.GenServer do
       |> notify_arrive(origin)
       |> apply_on_zone(:client_joined, [new_event(state, %{targets: [origin]})])
       |> mutate({:add_member, origin})
-      |> apply_state_mutations(state)
+      |> commit_mutation(state)
 
     {:reply, :ok, state}
   end
@@ -50,27 +50,27 @@ defmodule Moongate.Zone.GenServer do
   end
 
   defp init_ring(ring, state) do
-    registered_name = Moongate.Ring.Service.process_name({state.name, state.id, ring})
+    registered_name = Moongate.RingService.process_name({state.name, state.id, ring})
 
-    %Moongate.Ring{
-      attributes: Moongate.Ring.Service.get_attributes(ring),
+    %Moongate.RingState{
+      attributes: Moongate.RingService.get_attributes(ring),
       name: Moongate.Core.atom_to_string(ring),
-      ring: Moongate.Ring.Service.ring_module(ring),
+      ring: Moongate.RingService.ring_module(ring),
       zone: state.name,
       zone_id: state.id
     }
-    |> Moongate.Network.register(:ring, registered_name)
+    |> Moongate.CoreNetwork.register(:ring, registered_name)
 
     {ring, registered_name}
   end
 
   defp notify_arrive(state, origin) do
-    %Moongate.Packet{
+    %Moongate.CorePacket{
       body: deed_names(state),
       domain: {:join, :zone},
       zone: {state.name, state.id}
     }
-    |> Moongate.Network.send_packet(origin)
+    |> Moongate.CoreNetwork.send_packet(origin)
 
     state
   end

@@ -1,13 +1,13 @@
-defmodule Moongate.Zone.Service do
-  def arrive(%Moongate.Origin{} = target, zone_module, name) do
-    process_name = Moongate.Zone.Service.process_name(zone_module, name)
+defmodule Moongate.ZoneService do
+  def arrive(%Moongate.CoreOrigin{} = target, zone_module, name) do
+    process_name = Moongate.ZoneService.process_name(zone_module, name)
 
-    Moongate.Network.call({:arrive, target}, process_name)
+    Moongate.CoreNetwork.call({:arrive, target}, process_name)
   end
   def arrive(_origin, _zone_module, _name), do: nil
 
   def depart(event) do
-    Moongate.Network.cast({:depart, event}, event.to)
+    Moongate.CoreNetwork.cast({:depart, event}, event.to)
   end
 
   def process_name(zone_module, id) do

@@ -1,10 +1,10 @@
-defmodule Moongate.Fiber.GenServer do
+defmodule Moongate.Fiber do
   use GenServer
 
   def start_link({name, params}) do
-    %Moongate.Fiber{}
+    %Moongate.FiberState{}
     |> Map.merge(params)
-    |> Moongate.Network.establish("fiber", "#{name}", __MODULE__)
+    |> Moongate.CoreNetwork.establish("fiber", "#{name}", __MODULE__)
   end
 
   def handle_cast(:init, state) do

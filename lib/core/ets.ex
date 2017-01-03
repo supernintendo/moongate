@@ -1,4 +1,4 @@
-defmodule Moongate.ETS do
+defmodule Moongate.CoreETS do
   @moduledoc """
   A basic wrapper for ETS.
   """
@@ -18,7 +18,7 @@ defmodule Moongate.ETS do
       registry: new_ets_table(:registry),
       ring: new_ets_table(:ring)
     }
-    |> Moongate.Network.establish("ets", __MODULE__)
+    |> Moongate.CoreNetwork.establish("ets", __MODULE__)
   end
 
   @doc """

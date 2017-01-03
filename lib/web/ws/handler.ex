@@ -1,6 +1,6 @@
 defmodule Moongate.Web.WS.Handler do
   use Moongate.Core.Session
-  use Moongate.State, :server
+  use Moongate.CoreState, :server
 
   @behaviour :cowboy_websocket
   @decoder Application.get_env(:moongate, :packets).decoder
@@ -32,7 +32,7 @@ defmodule Moongate.Web.WS.Handler do
       |> @decoder.decode
       |> cast_to_event(state.origin)
       |> handle_packet(state)
-      |> apply_state_mutations(state, @session)
+      |> commit_mutation(state, @session.mutations)
 
     {:ok, req, result}
   end
@@ -42,7 +42,7 @@ defmodule Moongate.Web.WS.Handler do
   end
 
   defp cast_to_event(body, origin) do
-    Map.merge(%Moongate.Event{origin: origin, targets: [origin]}, body)
+    Map.merge(%Moongate.CoreEvent{origin: origin, targets: [origin]}, body)
   end
 
   defp get_req_ip(req) do
@@ -54,7 +54,7 @@ defmodule Moongate.Web.WS.Handler do
   end
 
   defp new_origin(req) do
-    %Moongate.Origin{
+    %Moongate.CoreOrigin{
       id: UUID.uuid4(:hex),
       ip: get_req_ip(req),
       port: self,

@@ -1,4 +1,4 @@
-defmodule Moongate.Ring.Mutations do
+defmodule Moongate.RingMutations do
   def mutate({:add_member, params}, event, state) do
     attributes =
       params
@@ -6,17 +6,17 @@ defmodule Moongate.Ring.Mutations do
       |> Enum.into(%{__index: state.index})
 
     member =
-      Moongate.Ring.Service.member_defaults(state.attributes)
+      Moongate.RingService.member_defaults(state.attributes)
       |> Map.merge(attributes)
 
     for subscriber <- state.subscribers do
-      %Moongate.Packet{
-        body: Moongate.Ring.Service.encode(member, state.attributes),
+      %Moongate.CorePacket{
+        body: Moongate.RingService.encode(member, state.attributes),
         domain: {:add, :ring},
         ring: {state.name, state.index},
         zone: {state.zone, state.zone_id}
       }
-      |> Moongate.Network.send_packet(subscriber)
+      |> Moongate.CoreNetwork.send_packet(subscriber)
     end
 
     {[{:index, state.index + 1}, {:members, state.members ++ [member]}], event}
@@ -24,13 +24,13 @@ defmodule Moongate.Ring.Mutations do
 
   def mutate({:add_subscriber, origin}, event, state) do
     for member <- state.members do
-      %Moongate.Packet{
-        body: Moongate.Ring.Service.encode(member, state.attributes),
+      %Moongate.CorePacket{
+        body: Moongate.RingService.encode(member, state.attributes),
         domain: {:add, :ring},
         ring: {state.name, member.__index},
         zone: {state.zone, state.zone_id}
       }
-      |> Moongate.Network.send_packet(origin)
+      |> Moongate.CoreNetwork.send_packet(origin)
     end
 
     {{:subscribers, state.subscribers ++ [origin]}, event}
@@ -44,12 +44,12 @@ defmodule Moongate.Ring.Mutations do
 
     if member do
       for subscriber <- subscribers do
-        %Moongate.Packet{
+        %Moongate.CorePacket{
           domain: {:remove, :ring},
           ring: {state.name, member.__index},
           zone: {state.zone, state.zone_id}
         }
-        |> Moongate.Network.send_packet(subscriber)
+        |> Moongate.CoreNetwork.send_packet(subscriber)
       end
     end
 
@@ -64,17 +64,17 @@ defmodule Moongate.Ring.Mutations do
       state.members
       |> Enum.map(fn(member) ->
         if member_is_targeted?(member, event.targets) do
-          updated_params = Moongate.Ring.Service.member_params(params, state.attributes)
+          updated_params = Moongate.RingService.member_params(params, state.attributes)
           updated_member = Map.merge(member, updated_params)
 
           for subscriber <- state.subscribers do
-            %Moongate.Packet{
-              body: Moongate.Ring.Service.encode(updated_params, state.attributes),
+            %Moongate.CorePacket{
+              body: Moongate.RingService.encode(updated_params, state.attributes),
               domain: {:set, :ring},
               ring: {state.name, member.__index},
               zone: {state.zone, state.zone_id}
             }
-            |> Moongate.Network.send_packet(subscriber)
+            |> Moongate.CoreNetwork.send_packet(subscriber)
           end
           updated_member
         else

@@ -1,4 +1,4 @@
-defmodule Moongate.Packets.Decoder do
+defmodule Moongate.PacketsDecoder do
   @patterns %{
     body: ~r/(?<=::).+/,
     deed: ~r/<(.*?)>/,
@@ -9,7 +9,7 @@ defmodule Moongate.Packets.Decoder do
   @param_delimiter "░"
   @prefix "#"
   @splitter ":"
-  @operations Moongate.Packets.Operations.by_index
+  @operations Moongate.Packets.operations_by_index
 
   @doc """
   Modifies a packet string over a series of
@@ -19,7 +19,7 @@ defmodule Moongate.Packets.Decoder do
   The following example demonstrates decoding
   a packet which contains all possible fields:
 
-      iex> Moongate.Packets.Decoder.decode("#[01:ring](Foo:$){Bar}<Lorem>::Ipsum")
+      iex> Moongate.PacketsDecoder.decode("#[01:ring](Foo:$){Bar}<Lorem>::Ipsum")
       %{
         body: "Ipsum",
         deed: "Lorem",
@@ -32,7 +32,7 @@ defmodule Moongate.Packets.Decoder do
   string will have its corresponding map value
   set to `nil`:
 
-      iex> Moongate.Packets.Decoder.decode("#[04:ring]::ok")
+      iex> Moongate.PacketsDecoder.decode("#[04:ring]::ok")
       %{
         body: "ok",
         deed: nil,
@@ -60,16 +60,16 @@ defmodule Moongate.Packets.Decoder do
   list as a tuple so that it can be matched
   against.
 
-      iex> Moongate.Packets.Decoder.split_body_params("128░64")
+      iex> Moongate.PacketsDecoder.split_body_params("128░64")
       {"128", "64"}
 
-      iex> Moongate.Packets.Decoder.split_body_params("32")
+      iex> Moongate.PacketsDecoder.split_body_params("32")
       {"32"}
 
-      iex> Moongate.Packets.Decoder.split_body_params("")
+      iex> Moongate.PacketsDecoder.split_body_params("")
       nil
 
-      iex> Moongate.Packets.Decoder.split_body_params(nil)
+      iex> Moongate.PacketsDecoder.split_body_params(nil)
       nil
   """
   def split_body_params(_chunk = ""), do: nil

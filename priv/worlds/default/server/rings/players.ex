@@ -19,7 +19,6 @@ defmodule Default.Ring.Player do
       x: :rand.uniform(512),
       y: :rand.uniform(512)
     }
-
     event
     |> create(params)
   end

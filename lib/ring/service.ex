@@ -1,4 +1,4 @@
-defmodule Moongate.Ring.Service do
+defmodule Moongate.RingService do
   def get_attributes(module_name) do
     apply(ring_module(module_name), :__ring_attributes, [])
   end
@@ -84,7 +84,7 @@ defmodule Moongate.Ring.Service do
     |> Enum.map(fn({key, _value}) -> {key, member_attr(member, key)} end)
     |> Enum.map(fn({key, value}) ->
       case value do
-        %Moongate.Origin{} -> {key, value.id}
+        %Moongate.CoreOrigin{} -> {key, value.id}
         _ -> {key, value}
       end
     end)
@@ -111,10 +111,10 @@ defmodule Moongate.Ring.Service do
     IO.inspect Moongate.Core.world_module
   end
 
-  def subscribe_to_ring(%Moongate.Origin{} = origin, {ring, name, id}) do
+  def subscribe_to_ring(%Moongate.CoreOrigin{} = origin, {ring, name, id}) do
     process = process_name({name, id, Moongate.Core.atom_to_string(ring)})
 
-    Moongate.Network.cast({:subscribe, origin}, "ring", process)
+    Moongate.CoreNetwork.cast({:subscribe, origin}, "ring", process)
   end
 
   def to_string_list(rings) do

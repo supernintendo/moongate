@@ -6,7 +6,7 @@ defmodule Moongate.Fibers.WorldWatcher do
       {:spawn, "#{@watch_command} #{Moongate.Core.world_directory}"}
       |> Port.open([:binary])
     os_pid = Port.info(proc)[:os_pid]
-    Moongate.Support.trap_os_pid(os_pid)
+    Moongate.CoreSupport.trap_os_pid(os_pid)
 
     state = %{
       parent => parent,

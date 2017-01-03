@@ -1,4 +1,4 @@
-defmodule Moongate.Supervisor do
+defmodule Moongate.CoreSupervisor do
   use Supervisor
 
   @extensions %{
@@ -15,12 +15,12 @@ defmodule Moongate.Supervisor do
   """
   def init(_config) do
     [
-      worker(Moongate.ETS, [], [id: :ets]),
-      worker(Moongate.Support, [], [id: :support]),
-      supervisor(Moongate.Fiber.Supervisor, [], [id: :fiber]),
-      supervisor(Moongate.Ring.Supervisor, [], [id: :ring]),
-      supervisor(Moongate.Zone.Supervisor, [], [id: :zone]),
-      supervisor(Moongate.Web.Supervisor, [], [id: :web])
+      worker(Moongate.CoreETS, [], [id: :ets]),
+      worker(Moongate.CoreSupport, [], [id: :support]),
+      supervisor(Moongate.FiberSupervisor, [], [id: :fiber]),
+      supervisor(Moongate.RingSupervisor, [], [id: :ring]),
+      supervisor(Moongate.ZoneSupervisor, [], [id: :zone]),
+      supervisor(Moongate.WebSupervisor, [], [id: :web])
     ]
     ++ [extension(:logger)]
     ++ [extension(:console)]

@@ -1,10 +1,10 @@
-defmodule Moongate.Web.GenServer do
+defmodule Moongate.Web do
   use GenServer
 
   def start_link({name, params}) do
-    %Moongate.Web{}
+    %Moongate.WebState{}
     |> Map.merge(params)
-    |> Moongate.Network.establish("endpoint", "#{name}", __MODULE__)
+    |> Moongate.CoreNetwork.establish("endpoint", "#{name}", __MODULE__)
   end
 
   def handle_cast(:init, state) do

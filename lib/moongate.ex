@@ -1,4 +1,4 @@
-defmodule Moongate.Application do
+defmodule Moongate do
   @moduledoc """
     The Moongate Application Platform.
   """
@@ -62,7 +62,7 @@ defmodule Moongate.Application do
       {"world_watcher", %{
         fiber_module: Moongate.Fibers.WorldWatcher
       }}
-      |> Moongate.Network.register(:fiber, "world_watcher")
+      |> Moongate.CoreNetwork.register(:fiber, "world_watcher")
     end
   end
 
@@ -72,16 +72,16 @@ defmodule Moongate.Application do
 
   defp spawn_endpoint({name, {protocol, params}}) do
     {name, params}
-    |> Moongate.Network.register(protocol, "endpoint_#{name}")
+    |> Moongate.CoreNetwork.register(protocol, "endpoint_#{name}")
   end
 
   defp start_supervisor(config) do
-    {:ok, supervisor} = Moongate.Supervisor.start_link(config)
+    {:ok, supervisor} = Moongate.CoreSupervisor.start_link(config)
 
     supervisor
     |> Supervisor.which_children
     |> Enum.map(fn({name, pid, _type, _params}) ->
-      Moongate.ETS.insert({:registry, "tree_#{name}", pid})
+      Moongate.CoreETS.insert({:registry, "tree_#{name}", pid})
     end)
 
     supervisor

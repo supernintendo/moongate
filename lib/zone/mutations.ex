@@ -1,5 +1,5 @@
-defmodule Moongate.Zone.Mutations do
-  use Moongate.State
+defmodule Moongate.ZoneMutations do
+  use Moongate.CoreState
 
   def mutate({:add_member, origin}, event, state) do
     {{:members, Map.put(state.members, origin.id, origin)}, event}
@@ -12,7 +12,7 @@ defmodule Moongate.Zone.Mutations do
   def mutate({:subscribe_to_ring, ring}, event, state) do
     for target <- event.targets do
       target
-      |> Moongate.Ring.Service.subscribe_to_ring({ring, state.name, state.id})
+      |> Moongate.RingService.subscribe_to_ring({ring, state.name, state.id})
     end
     {nil, event}
   end

@@ -1,13 +1,11 @@
-defmodule Moongate.State do
+defmodule Moongate.CoreState do
   defmacro __using__(type) do
     quote do
       if unquote(type == :server) do
-        def apply_state_mutations(event, state) do
-          apply_state_mutations(event, state, state.__struct__)
+        def commit_mutation(event, state) do
+          commit_mutation(event, state, state.__mutation_module)
         end
-        def apply_state_mutations(event, state, mutation_module) do
-          module = Module.safe_concat([mutation_module, Mutations])
-
+        def commit_mutation(event, state, mutation_module) do
           event.__pending_mutations
           |> Enum.sort(fn ({time_a, _}, {time_b, _}) -> time_a < time_b end)
           |> Enum.reduce({event, state}, fn({_timestamp, mut}, {current_event, current_state}) ->
@@ -16,7 +14,7 @@ defmodule Moongate.State do
               |> Map.put(:__pending_mutations, Enum.filter(current_event.__pending_mutations, &(&1 != mut)))
 
             {mutation_result, event_result} =
-              apply(module, :mutate, [mut, prepared_event, current_state])
+              apply(mutation_module, :mutate, [mut, prepared_event, current_state])
 
             case mutation_result do
               mutation_result when is_list(mutation_result) ->
@@ -31,7 +29,7 @@ defmodule Moongate.State do
         end
 
         def handle_call({:mutations, event}, _from, state) do
-          state = event |> apply_state_mutations(state)
+          state = event |> commit_mutation(state)
 
           {:reply, :ok, state}
         end
@@ -43,8 +41,8 @@ defmodule Moongate.State do
         %{map | __pending_mutations: map.__pending_mutations ++ [{timestamp, value}]}
       end
 
-      def new_event(%Moongate.Ring{} = state, params) do
-        %Moongate.Event{
+      def new_event(%Moongate.RingState{} = state, params) do
+        %Moongate.CoreEvent{
           __pending_mutations: state.__pending_mutations,
           ring: state.name,
           zone: {state.zone, state.zone_id}
@@ -52,8 +50,8 @@ defmodule Moongate.State do
         |> Map.merge(params)
       end
 
-      def new_event(%Moongate.Zone{} = state, params) do
-        %Moongate.Event{
+      def new_event(%Moongate.ZoneState{} = state, params) do
+        %Moongate.CoreEvent{
           __pending_mutations: state.__pending_mutations,
           zone: {state.name, state.id}
         }

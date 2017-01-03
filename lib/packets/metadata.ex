@@ -1,4 +1,4 @@
-defmodule Moongate.Packets.Metadata do
+defmodule Moongate.PacketsMetadata do
   defmacro __using__(_opts) do
     operations =
       File.read!("priv/metadata/operations")

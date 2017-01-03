@@ -1,6 +1,6 @@
-defmodule Moongate.Tests.Packets.Encoder do
+defmodule Moongate.Tests.PacketsEncoder do
   use ExUnit.Case, async: true
-  alias Moongate.Packets.Encoder
+  alias Moongate.PacketsEncoder
 
   @body_fixtures %{
     without_body: %Moongate.Packet{body: nil},

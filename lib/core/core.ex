@@ -4,16 +4,21 @@ defmodule Moongate.Core do
   for the Moongate application server.
   """
 
-  use Moongate.Env
+  use Moongate.CoreEnv
 
   defmodule Iex do
     defmacro __using__(_) do
-      commands_module =
-        Application.get_env(:moongate, :console)
-        |> Module.concat(Commands)
+      commands_module = String.to_atom("#{Application.get_env(:moongate, :console)}Commands")
 
-      quote do
-        import unquote(commands_module)
+      if Code.ensure_loaded?(commands_module) do
+        exports = commands_module.__info__(:exports)
+
+        if List.keymember?(exports, :init_message, 0) do
+          apply(commands_module, :init_message, [])
+        end
+        quote do
+          import unquote(commands_module)
+        end
       end
     end
   end
@@ -189,8 +194,8 @@ defmodule Moongate.Core do
   def handshake do
     %{
       ip: local_ip,
-      rings: Moongate.ETS.index(:ring),
-      version: Moongate.Application.version
+      rings: Moongate.CoreETS.index(:ring),
+      version: Moongate.version
     }
   end
 

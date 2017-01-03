@@ -1,4 +1,4 @@
-defmodule Moongate.Support do
+defmodule Moongate.CoreSupport do
   use GenServer
 
   @pids_file "priv/temp/#{Moongate.Core.world_name}.pids"
@@ -7,7 +7,7 @@ defmodule Moongate.Support do
     clear_trapped_pids
 
     %{}
-    |> Moongate.Network.establish("support", __MODULE__)
+    |> Moongate.CoreNetwork.establish("support", __MODULE__)
   end
 
   @doc """

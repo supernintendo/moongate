@@ -1,4 +1,4 @@
-defmodule Moongate.Env do
+defmodule Moongate.CoreEnv do
   defmacro __using__(_) do
     world_name = (fn() ->
       case Mix.env do

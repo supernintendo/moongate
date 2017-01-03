@@ -1,4 +1,6 @@
-defmodule Moongate.Logger.Service do
+defmodule Moongate.Logger do
+  use GenServer
+
   @colors %{
     down: :darkorange,
     error: :coral,
@@ -24,10 +26,24 @@ defmodule Moongate.Logger.Service do
   }
   @reset_code :reset
 
-  @doc """
-  Logs a message to the console.
-  """
-  def log(:moongate_banner) do
+  def start_link do
+    %{}
+    |> Moongate.CoreNetwork.establish("logger", __MODULE__)
+  end
+
+  def handle_cast({:log, message}, state) do
+    log(message)
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:log, message, status}, state) do
+    log({message, status})
+
+    {:noreply, state}
+  end
+
+  defp log(:moongate_banner) do
     """
 
       █▀▄▀█ ███▄  ███▄     ▄     ▄▀  ██     ▄▄▄▄▀ ▄███▄  
@@ -41,15 +57,15 @@ defmodule Moongate.Logger.Service do
     "Version #{Moongate.Core.version} (#{Moongate.Core.codename})"
     |> print_with_palette(:cool)
   end
-  def log({{type, message}, :up}) do
+  defp log({{type, message}, :up}) do
     [color(type), message, @reset_code, " is ", color(:up), :bright, "UP", @reset_code]
     |> print
   end
-  def log({{type, message}, :down}) do
+  defp log({{type, message}, :down}) do
     [color(type), message, @reset_code, " is ", color(:down), :bright, "DOWN", @reset_code]
     |> print
   end
-  def log({type, message}) when is_map(message) do
+  defp log({type, message}) when is_map(message) do
     gutter_width =
       Enum.sort(message, fn {k1, _v1}, {k2, _v2} ->
         String.length("#{k1}") > String.length("#{k2}")
@@ -72,18 +88,16 @@ defmodule Moongate.Logger.Service do
     end)
     |> print
   end
-  def log({type, message}) do
+  defp log({type, message}) do
     [color(type), message, @reset_code]
     |> print
   end
 
-  @doc """
-  Prints a colorized string using one of the
-  preset color palettes. If ANSI is not enabled
-  for the current terminal session, the string
-  will be printed normally.
-  """
-  def print_with_palette(message, palette_name) do
+  # Prints a colorized string using one of the
+  # preset color palettes. If ANSI is not enabled
+  # for the current terminal session, the string
+  # will be printed normally.
+  defp print_with_palette(message, palette_name) do
     case @palettes[palette_name] do
       palette when is_list(palette) ->
         format_with_palette(message, palette)
@@ -127,9 +141,5 @@ defmodule Moongate.Logger.Service do
     ansi_codes
     |> Bunt.ANSI.format
     |> IO.puts
-  end
-
-  def origin(o) do
-    "(#{o.id})"
   end
 end

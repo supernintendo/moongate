@@ -1,4 +1,4 @@
-defmodule Moongate.Packets.Encoder do
+defmodule Moongate.PacketsEncoder do
   @boundaries %{
     body: "::",
     deed: {"<", ">"},
@@ -8,13 +8,13 @@ defmodule Moongate.Packets.Encoder do
   }
   @separator ":"
   @prefix "#"
-  @operations Moongate.Packets.Operations.by_key
+  @operations Moongate.Packets.operations_by_key
 
   def operations, do: @operations
 
   @doc """
   Constructs a packet from values within a map or
-  %Moongate.Packet{}.
+  %Moongate.CorePacket{}.
   """
   def encode(packet) do
     @prefix

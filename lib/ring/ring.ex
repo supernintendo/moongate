@@ -1,14 +1,14 @@
-defmodule Moongate.Ring.GenServer do
+defmodule Moongate.Ring do
   use GenServer
-  use Moongate.State, :server
+  use Moongate.CoreState, :server
 
   def start_link(state) do
     state
-    |> Moongate.Network.establish(__MODULE__)
+    |> Moongate.CoreNetwork.establish(__MODULE__)
   end
 
   def handle_cast(:init, state) do
-    Moongate.ETS.insert({:ring, state.name, state.attributes})
+    Moongate.CoreETS.insert({:ring, state.name, state.attributes})
     Moongate.Core.log({:ring, "Ring (#{state.zone} (#{state.zone_id}) : #{state.name})"}, :up)
 
     deeds =
@@ -20,7 +20,7 @@ defmodule Moongate.Ring.GenServer do
     {:noreply, %{state | deeds: deeds}}
   end
 
-  def handle_cast({:subscribe, %Moongate.Origin{} = origin}, state) do
+  def handle_cast({:subscribe, %Moongate.CoreOrigin{} = origin}, state) do
     case subscribed?(origin, state) do
       false ->
         params = %{origin: origin, targets: [origin]}
@@ -29,7 +29,7 @@ defmodule Moongate.Ring.GenServer do
         result =
           updated_state
           |> apply_on_ring(:client_subscribed, [new_event(updated_state, params)])
-          |> apply_state_mutations(state)
+          |> commit_mutation(state)
 
         {:noreply, result}
       true ->
@@ -37,13 +37,13 @@ defmodule Moongate.Ring.GenServer do
     end
   end
 
-  def handle_cast({:unsubscribe, %Moongate.Origin{} = origin}, state) do
+  def handle_cast({:unsubscribe, %Moongate.CoreOrigin{} = origin}, state) do
     params = %{origin: origin, targets: [origin]}
     state =
       state
       |> apply_on_ring(:client_unsubscribed, [new_event(state, params)])
       |> mutate({:remove_subscriber, origin})
-      |> apply_state_mutations(state)
+      |> commit_mutation(state)
 
     {:noreply, state}
   end
@@ -56,7 +56,7 @@ defmodule Moongate.Ring.GenServer do
         result =
           deed_module
           |> apply_on_deed(callback, [params, event])
-          |> apply_state_mutations(state)
+          |> commit_mutation(state)
 
           {:noreply, result}
       _ ->

@@ -1,8 +1,26 @@
-defmodule Moongate.Console.Commands do
+defmodule Moongate.ConsoleCommands do
   @commands %{
     about: "View version and system information.",
     quit: "Terminate the server gracefully."
   }
+
+  def init_message do
+    [
+      :reset,
+      :inverse,
+      "Moongate IEx additions",
+      :color240,
+      " loaded. Type '",
+      :color86,
+      'help',
+      :color240,
+      "' to see a list of commands.",
+      :reset,
+      "\n"
+    ]
+    |> Bunt.ANSI.format
+    |> IO.puts
+  end
 
   @doc """
   Prints a graphical banner and version information.
