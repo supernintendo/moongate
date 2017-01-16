@@ -66,14 +66,14 @@ defmodule Moongate.Logger do
     |> print
   end
   defp log({type, message}) when is_map(message) do
-    gutter_width =
+    key =
       Enum.sort(message, fn {k1, _v1}, {k2, _v2} ->
         String.length("#{k1}") > String.length("#{k2}")
       end)
       |> List.first
       |> elem(0)
-      |> Atom.to_string
-      |> String.length
+
+    gutter_width = String.length("#{key}")
     spaces = Stream.repeatedly(fn -> " " end)
 
     Enum.flat_map(message, fn {key, value} ->

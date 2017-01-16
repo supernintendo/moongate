@@ -1,7 +1,9 @@
 defmodule Moongate.ConsoleCommands do
   @commands %{
-    about: "View version and system information.",
-    quit: "Terminate the server gracefully."
+    "cli :h" => "View this text.",
+    "moon :a" => "View version and system information.",
+    "moon :q" => "Terminate the server gracefully.",
+    "zone :l" => "View list of zones"
   }
 
   def init_message do
@@ -10,9 +12,9 @@ defmodule Moongate.ConsoleCommands do
       :inverse,
       "Moongate IEx additions",
       :color240,
-      " loaded. Type '",
+      " loaded. Enter '",
       :color86,
-      'help',
+      '`cli :h`',
       :color240,
       "' to see a list of commands.",
       :reset,
@@ -22,30 +24,26 @@ defmodule Moongate.ConsoleCommands do
     |> IO.puts
   end
 
-  @doc """
-  Prints a graphical banner and version information.
-  """
-  def about do
-    Moongate.Core.log(:moongate_banner)
+  def cli(command) do
+    case command do
+      :h ->
+        Moongate.Core.log({:info, @commands})
+      _ -> nil
+    end
   end
 
-  @doc """
-  Prints available Moongate console commands.
-  """
-  def help do
-    Moongate.Core.log({:info, @commands})
+  def moon(command) do
+    case command do
+      :a -> Moongate.Core.log(:moongate_banner)
+      :q ->  GenServer.cast(:support, :quit)
+      _ -> nil
+    end
   end
 
-  @doc """
-  Alias for &quit/0.
-  """
-  def exit, do: quit
-
-  @doc """
-  Requests that the support GenServer terminates Moongate
-  gracefully.
-  """
-  def quit do
-    GenServer.cast(:support, :quit)
+  def zone(command) do
+    case command do
+      :l -> Moongate.Core.zones
+      _ -> nil
+    end
   end
 end

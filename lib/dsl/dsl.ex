@@ -30,6 +30,23 @@ defmodule Moongate.DSL do
       def join(event, zone_module), do: join(event, zone_module, @default_id)
       def join(event, zone_module, id), do: mutate(event, {:join_zone, zone_module, id})
 
+      def pick(%{zone: {zone, zone_id}, ring: {ring, ring_id}} = params) when is_atom(zone) and is_atom(ring) do
+      end
+      def pick(%{zone: {zone, zone_id}, ring: ring} = params) when is_atom(zone) and is_atom(ring) do
+      end
+      def pick(%{zone: zone, ring: {ring, ring_id}} = params) when is_atom(zone) and is_atom(ring) do
+      end
+      def pick(%{zone: zone, ring: ring} = params) when is_atom(zone) and is_atom(ring) do
+      end
+      def pick(%{zone: {zone, zone_id}} = params) when is_atom(zone) do
+      end
+      def pick(%{ring: zone} = params) when is_atom(zone) do
+      end
+      def pick(%{ring: {ring, ring_id}} = params) when is_atom(ring) do
+      end
+      def pick(%{ring: {ring}} = params) when is_atom(ring) do
+      end
+
       @doc """
       Sends a state packet to all targets attached to an
       event. For the default client reference

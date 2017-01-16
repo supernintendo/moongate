@@ -9,7 +9,8 @@ defmodule Moongate.Zone do
   end
 
   def handle_cast(:init, state) do
-    Moongate.Core.log({:zone, "Zone (#{state.id})"}, :up)
+    # Moongate.CoreETS.insert({:zone, state.name, state.id})
+    Moongate.Core.log({:zone, "Zone (#{state.name} #{state.id})"}, :up)
 
     {:noreply, init_rings(state)}
   end

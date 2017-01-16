@@ -12,7 +12,7 @@ defmodule Moongate.Mixfile do
       version: @version,
       codename: @codename,
       elixir: @elixir_version,
-      deps: deps,
+      deps: deps(),
       default_task: "run"
     ]
   end
@@ -25,7 +25,6 @@ defmodule Moongate.Mixfile do
         :eon,
         :hexate,
         :inflex,
-        :json,
         :logger,
         :pbkdf2,
         :poison,
@@ -37,13 +36,12 @@ defmodule Moongate.Mixfile do
 
   defp deps do
     [
-      {:bunt, "~> 0.1.0"},
+      {:bunt, "~> 0.2.0"},
       {:cowboy, github: "ninenines/cowboy", tag: "2.0.0-pre.3"},
       {:distillery, "~> 1.0"},
-      {:eon, ">= 2.0.0"},
+      {:eon, "~> 3.0.1"},
       {:inflex, "~> 1.7.0"},
       {:hexate,  ">= 0.6.0"},
-      {:json, "~> 0.3.2"},
       {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
       {:poison, "~> 3.0"},
       {:uuid, "~> 1.1.0"}

@@ -14,7 +14,7 @@ defmodule Moongate.Ring do
     deeds =
       state
       |> apply_on_ring(:__ring_deeds, [])
-      |> Enum.map(&({Moongate.Core.atom_to_string(&1), Moongate.Core.deed_module(&1)}))
+      |> Enum.map(&({Moongate.Core.atom_to_string(&1), Moongate.Core.project_module(Deed, &1)}))
       |> Enum.into(%{})
 
     {:noreply, %{state | deeds: deeds}}

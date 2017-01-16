@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Moongate.KillExternalPids do
+defmodule Mix.Tasks.Moongate.Clean do
   use Mix.Task
 
   @shortdoc "Kills all processes started by the most recent Moongate instance"
@@ -14,7 +14,6 @@ defmodule Mix.Tasks.Moongate.KillExternalPids do
     cache[:pids]
     |> Enum.map(fn pid ->
       System.cmd("kill", ["#{pid}"])
-      IO.puts "Moongate : OS pid #{pid} killed"
     end)
   end
 end

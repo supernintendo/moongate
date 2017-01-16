@@ -7,7 +7,6 @@ defmodule Moongate.PacketsDecoder do
     zone: ~r/\((.*?)\)/,
   }
   @param_delimiter "░"
-  @prefix "#"
   @splitter ":"
   @operations Moongate.Packets.operations_by_index
 

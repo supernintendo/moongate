@@ -2,7 +2,7 @@ defmodule Default.World do
   use Moongate.DSL
 
   @doc "This is called when the server is started."
-  def start do
+  def start(_) do
   	zone(Level)
   end
 

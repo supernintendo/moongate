@@ -1,25 +1,29 @@
 #!/bin/sh
-source scripts/constants.sh
-source scripts/display.sh
-source scripts/steps.sh
-source scripts/utility.sh
-reset_wd
 
-# Steps
-initialize
-fetch_elixir
-clean_moongate
-fetch_deps
-compile_moongate
+# Update PATH to include binaries in _moongate/.
+mkdir -p _moongate/elixir/bin
+current_dir=`pwd`
+modified_path=$current_dir/_moongate/elixir/bin:$PATH
 
-message "${green} Moongate will spawn shortly. \n"
-message "${orange}"
-echo " "
+# Detect architecture.
+if [ "$(uname -m)" == "x86_64" ]; then
+  arch="64"
+else
+  arch="32"
+fi
 
-# Extend path temporarily
-pushd `dirname $0` > /dev/null
-current_path=`pwd`
-popd > /dev/null
+# Get Elixir if needed.
+PATH=$modified_path ./scripts/elixir.erl unix
+has_elixir=$?
 
-export PATH="${current_path}/_moongate":$PATH
-exec scripts/run.sh $world
+# Check world
+world=${1:-default}
+
+# Start the server.
+if [ $has_elixir -eq 0 ];then
+  MOONGATE_WORLD=$world PATH=$modified_path ./scripts/build.erl
+  MOONGATE_WORLD=$world PATH=$modified_path iex -S mix
+  PATH=$modified_path mix moongate.clean $world
+else
+  exit
+fi

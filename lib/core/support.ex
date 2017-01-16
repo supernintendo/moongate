@@ -4,7 +4,7 @@ defmodule Moongate.CoreSupport do
   @pids_file "priv/temp/#{Moongate.Core.world_name}.pids"
 
   def start_link do
-    clear_trapped_pids
+    clear_trapped_pids()
 
     %{}
     |> Moongate.CoreNetwork.establish("support", __MODULE__)

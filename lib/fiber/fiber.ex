@@ -8,7 +8,7 @@ defmodule Moongate.Fiber do
   end
 
   def handle_cast(:init, state) do
-    handler = spawn(state.fiber_module, :start, (state.params || []) ++ [self])
+    handler = spawn(state.fiber_module, :start, (state.params || []) ++ [self()])
     Moongate.Core.log({:socket, "Fiber (#{Moongate.Core.atom_to_string(state.fiber_module)})"}, :up)
 
     {:noreply, %{state | handler: handler}}

@@ -5,13 +5,16 @@ defmodule Moongate do
   use Application
 
   def start(_type, _args) do
-    load_world
-    config = load_config
+    config = load_config()
+
+    load_world()
     supervisor = start_supervisor(config)
     spawn_fibers(config)
     spawn_endpoints(config)
     GenServer.cast(:console, :refresh)
-    Moongate.Core.world_apply(:start)
+    config
+    |> Map.get(:project, %{})
+    |> Moongate.Core.world_apply(:start)
 
     {:ok, supervisor}
   end
@@ -58,7 +61,7 @@ defmodule Moongate do
   end
 
   defp spawn_fibers(config) do
-    unless Map.has_key?(config, :dont_watch) && config.dont_watch do
+    unless Map.has_key?(config, :autoreload) && config.autoreload == false do
       {"world_watcher", %{
         fiber_module: Moongate.Fibers.WorldWatcher
       }}

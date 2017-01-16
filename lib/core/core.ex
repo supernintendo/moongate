@@ -99,30 +99,6 @@ defmodule Moongate.Core do
   end
 
   @doc """
-  Returns the deed module for the current world
-  when passed the last part of the module.
-
-  ## Example
-
-  The following example assumes that the current
-  world name is "default":
-
-      iex> Moongate.Core.deed_module(XY)
-      Default.Deeds.XY
-  """
-  def deed_module(module_name) do
-    [
-      (world_name
-      |> String.capitalize
-      |> camelize
-      |> String.to_atom),
-      Deed,
-      module_name
-    ]
-    |> Module.safe_concat
-  end
-
-  @doc """
   Returns a string representation of the current
   local time.
 
@@ -135,6 +111,56 @@ defmodule Moongate.Core do
     {{year, month, day}, {hour, min, _sec}} = :calendar.local_time()
 
     "#{@months |> elem(month - 1)} #{day}, #{year} · #{hour}:#{min}"
+  end
+
+  @doc """
+  Returns values which can be used by clients to establish a
+  better understanding of the current Moongate instance and
+  its properties.
+
+  ## Example
+
+      iex> Moongate.Core.handshake
+      %{
+        ip: "10.11.12.1",
+        rings: %{
+          "Player" => %{
+            drift: :integer,
+            origin: :origin,
+            speed: :integer,
+            x: :integer,
+            y: :integer
+          }
+        },
+        version: "1.1.0"
+      }
+  """
+  def handshake do
+    %{
+      ip: local_ip(),
+      rings: Moongate.CoreETS.index(:ring),
+      version: Moongate.version
+    }
+  end
+
+  @doc """
+  Checks whether or not a module exports a function
+  by name.
+
+  ## Example
+
+      iex> Moongate.Core.has_function?(Moongate.Core, "has_function?")
+      true
+
+      iex> Moongate.Core.has_function?(Moongate.Core, "non_existent_function")
+      false
+  """
+  def has_function?(module, func_name) do
+    :functions
+    |> module.__info__
+    |> Enum.any?(fn ({func, _arity}) ->
+      "#{func}" == func_name
+    end)
   end
 
   @doc """
@@ -169,54 +195,16 @@ defmodule Moongate.Core do
     GenServer.cast(:logger, {:log, message, status})
   end
 
-  @doc """
-  Returns values which can be used by clients to establish a
-  better understanding of the current Moongate instance and
-  its properties.
-
-  ## Example
-
-      iex> Moongate.Core.handshake
-      %{
-        ip: "10.11.12.1",
-        rings: %{
-          "Player" => %{
-            drift: :integer,
-            origin: :origin,
-            speed: :integer,
-            x: :integer,
-            y: :integer
-          }
-        },
-        version: "1.1.0"
-      }
-  """
-  def handshake do
-    %{
-      ip: local_ip,
-      rings: Moongate.CoreETS.index(:ring),
-      version: Moongate.version
-    }
-  end
-
-  @doc """
-  Checks whether or not a module exports a function
-  by name.
-
-  ## Example
-
-      iex> Moongate.Core.has_function?(Moongate.Core, "has_function?")
-      true
-
-      iex> Moongate.Core.has_function?(Moongate.Core, "non_existent_function")
-      false
-  """
-  def has_function?(module, func_name) do
-    :functions
-    |> module.__info__
-    |> Enum.any?(fn ({func, _arity}) ->
-      "#{func}" == func_name
-    end)
+  def project_module(module_prefix, module_name) do
+    [
+      (world_name()
+      |> String.capitalize
+      |> camelize
+      |> String.to_atom),
+      module_prefix,
+      module_name
+    ]
+    |> Module.safe_concat
   end
 
   @doc """
@@ -245,11 +233,11 @@ defmodule Moongate.Core do
       "foo/2 called with arguments lorem, ipsum
   """
   def world_apply(func) do
-    apply(world_module, func, [])
+    apply(world_module(), func, [])
   end
   def world_apply(args, func) do
     cond do
-      is_list(args) -> apply(world_module, func, args)
+      is_list(args) -> apply(world_module(), func, args)
       true -> world_apply([args], func)
     end
   end
@@ -266,7 +254,7 @@ defmodule Moongate.Core do
       "worlds/default"
   """
   def world_directory do
-    "worlds/#{world_name}"
+    "worlds/#{world_name()}"
   end
 
   @doc """
@@ -281,6 +269,10 @@ defmodule Moongate.Core do
       Default.World
   """
   def world_module do
-    Module.safe_concat(camelize(world_name), "World")
+    Module.safe_concat(camelize(world_name()), "World")
+  end
+
+  def zones do
+    Moongate.ZoneService.index
   end
 end

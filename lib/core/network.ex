@@ -45,7 +45,7 @@ defmodule Moongate.CoreNetwork do
   Performs a GenServer.start_link for the
   specified module.
   """
-  def establish(params, module), do: GenServer.start_link(module, params)
+  def establish(params, module), do: GenServer.start_link(module, params, [])
   def establish(params, name, module) do
     GenServer.start_link(module, params, [name: String.to_atom(name)])
   end

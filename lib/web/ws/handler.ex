@@ -57,7 +57,7 @@ defmodule Moongate.Web.WS.Handler do
     %Moongate.CoreOrigin{
       id: UUID.uuid4(:hex),
       ip: get_req_ip(req),
-      port: self,
+      port: self(),
       protocol: :web
     }
   end

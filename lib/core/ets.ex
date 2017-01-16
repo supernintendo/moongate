@@ -59,6 +59,13 @@ defmodule Moongate.CoreETS do
     :ets.match_object(table_key, pattern)
   end
 
+  def mutate({table_key, key, mutation_function}) do
+    case lookup({table_key, key}) do
+      [key, value] -> {:ok, insert({table_key, key, apply(mutation_function, [value])})}
+      _ -> {:error, "#{key} not found in #{table_key}."}
+    end
+  end
+
   # Initializes an ETS table.
   defp new_ets_table(key), do: new_ets_table(key, @default_opts)
   defp new_ets_table(key, opts) do
