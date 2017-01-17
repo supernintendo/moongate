@@ -5,13 +5,6 @@ mkdir -p _moongate/elixir/bin
 current_dir=`pwd`
 modified_path=$current_dir/_moongate/elixir/bin:$PATH
 
-# Detect architecture.
-if [ "$(uname -m)" == "x86_64" ]; then
-  arch="64"
-else
-  arch="32"
-fi
-
 # Get Elixir if needed.
 PATH=$modified_path ./scripts/elixir.erl unix
 has_elixir=$?

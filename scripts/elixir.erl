@@ -35,7 +35,7 @@ prompt_install(Required, Message, Os) ->
   io:format(Message),
   case get_input() of
     true -> install_elixir(Required, Os);
-    false -> terminate(message_cancel_no_elixir())
+    false -> terminate(message_cancel_no_elixir(Required))
   end.
 
 install_elixir(Version, Os) ->
@@ -116,16 +116,18 @@ get_installed_version() ->
 % Messages
 %
 
-message_cancel_no_elixir() ->
-  "\033[31mMoongate needs Elixir but can't find it. Quitting\n".
+message_cancel_no_elixir(Version) ->
+  "\033[31mERROR: Moongate needs Elixir version " ++ Version ++ " to run.\n" ++
+  "If you would like to download it manually, please\nvisit http://elixir-lang.org/\n\n".
 
 message_cant_download() ->
-  "\033[31mCan't find wget or curl to download Elixir. Check your PATH. Quitting\n".
+  "\033[31mERROR: Can't find wget or curl to download Elixir. Check your PATH.\n\n".
 
 message_not_found() ->
-  "Moongate requires Elixir but it doesn't appear to be installed "   ++
-  "(if you think this is wrong, check your PATH variable). Download " ++
-  "and install it?".
+  Message = "\n🔮\033[30m  Moongate requires Elixir but it doesn't appear " ++
+  "to\nbe installed (if you think this is wrong check your\nPATH variable)." ++
+  " Download and install it?\n\n",
+  unicode:characters_to_binary(Message).
 
 message_post_download(Version) ->
   {ok, WorkingDir} = file:get_cwd(),
@@ -134,8 +136,11 @@ message_post_download(Version) ->
   "/_moongate/elixir.\033[0m~n\n".
 
 message_wrong_version(Version, Required) ->
+  {ok, WorkingDir} = file:get_cwd(),
+
   Message = "\n🔮\033[30m  Moongate requires Elixir version \033[36m"           ++
-  Required ++ "\033[30m but you have version \033[36m" ++ Version ++ "\033[30m" ++
-  ". \nDownload and install it? This will not modify your existing install. "   ++
-  " \nMoongate will setup a local copy of Elixir for its own use.\033[0m~n\n",
+  Required ++ "\033[30m but you\nhave version \033[36m" ++ Version ++ "\033[30m" ++
+  ". Should Moongate download and\ninstall the correct version? This will not " ++
+  "modify\nyour existing installation - a copy will be setup\nin Moongate's own" ++
+  " directory:\n\n\033[33m" ++ WorkingDir ++ "/_moongate/elixir\033[0m~n\n",
   unicode:characters_to_binary(Message).
