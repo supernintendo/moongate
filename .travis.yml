@@ -4,11 +4,8 @@ env:
 language: elixir
 elixir:
   - 1.4.4
-
-addons:
-  postgresql: "9.4"
-services:
-  - postgresql
-
+otp_release:
+  - 19.3
 before_script:
+  - curl https://sh.rustup.rs -sSf | sh -y
   - mix test
