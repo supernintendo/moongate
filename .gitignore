@@ -39,6 +39,7 @@ games/*
 !games/orbs
 logs/*
 priv/temp/*
+!priv/web/moongate.js/dist*
 
 # ...but always keep .gitkeep.
 !.gitkeep
