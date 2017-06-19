@@ -314,7 +314,7 @@ message_post_install(Program, Version) ->
     Version,
     " installed in ",
     WorkingDir,
-    "/.moongate/elixir.\033[0m\n"
+    "/.moongate\033[0m\n"
   ].
 
 message_wrong_version(Program, Version, Required) ->
