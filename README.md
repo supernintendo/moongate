@@ -23,7 +23,7 @@ git clone https://github.com/supernintendo/moongate ~/Moongate && \
 Follow the prompt to fetch and setup dependencies, or download and install them manually:
 
 * [Elixir 1.4.4](https://elixir-lang.org/)
-* [Rust 1.4.4](https://elixir-lang.org/)
+* [Rust 1.17.0](https://elixir-lang.org/)
 * [Node.js >= 7.0.0](https://nodejs.org/en/)<sup>1</sup>
 
 <sup>1</sup> <small>(recommended; enables Moongate.js and bundled Electron client)</small>
