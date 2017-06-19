@@ -1,25 +1,23 @@
-#!/bin/sh
-source scripts/constants.sh
-source scripts/display.sh
-source scripts/steps.sh
-source scripts/utility.sh
-reset_wd
+#!/bin/bash
+set -e
 
-# Steps
-initialize
-fetch_elixir
-clean_moongate
-fetch_deps
-compile_moongate
+export a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; BASE_DIR=$(cd $a; pwd)
+cd ${BASE_DIR}
+source ${BASE_DIR}/scripts/set_env.sh
 
-message "${green} Moongate will spawn shortly. \n"
-message "${orange}"
-echo " "
-
-# Extend path temporarily
-pushd `dirname $0` > /dev/null
-current_path=`pwd`
-popd > /dev/null
-
-export PATH="${current_path}/_moongate":"${current_path}/_moongate/goon":$PATH
-exec scripts/run.sh $world
+case "$ARG1" in
+  load)
+    ${BASE_DIR}/scripts/load.sh
+    ;;
+  test)
+    ${BASE_DIR}/scripts/test.sh
+    ;;
+  install)
+    ${BASE_DIR}/scripts/install_deps.erl
+    ${BASE_DIR}/scripts/refresh.sh
+    ;;
+  *)
+    echo "Usage: moongate load|test|install"
+    exit 1
+    ;;
+esac

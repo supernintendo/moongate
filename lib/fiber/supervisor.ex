@@ -1,4 +1,4 @@
-defmodule Moongate.Fiber.Supervisor do
+defmodule Moongate.FiberSupervisor do
   use Supervisor
 
   def start_link do
@@ -6,7 +6,7 @@ defmodule Moongate.Fiber.Supervisor do
   end
 
   def init(_) do
-    [worker(Moongate.Fiber.GenServer, [], [])]
+    [worker(Moongate.Fiber, [], [])]
     |> supervise(strategy: :simple_one_for_one)
   end
 end

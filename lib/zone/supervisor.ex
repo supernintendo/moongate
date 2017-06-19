@@ -1,4 +1,4 @@
-defmodule Moongate.Zone.Supervisor do
+defmodule Moongate.ZoneSupervisor do
   use Supervisor
 
   def start_link do
@@ -6,7 +6,7 @@ defmodule Moongate.Zone.Supervisor do
   end
 
   def init(_) do
-    [worker(Moongate.Zone.GenServer, [], [])]
+    [worker(Moongate.Zone, [], [])]
     |> supervise(strategy: :simple_one_for_one)
   end
 end

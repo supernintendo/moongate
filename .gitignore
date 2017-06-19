@@ -19,32 +19,25 @@
 nbproject
 Thumbs.db
 
-# NPM packages folder.
-node_modules/
-
-# Brunch folder for temporary files.
-tmp/
-
-# Brunch output folder.
-public/
-
-# Bower stuff.
-bower_components/
-
-# Elixir stuff.
+# Elixir stuff
 _build/
 deps/
 doc/
 
-# JS stuff.
-.tern-port
+# Rust stuff
+priv/native/*
 
-# Moongate
-_moongate
-priv/worlds/*
-!priv/worlds/default
-!priv/worlds/test
-priv/logs/*
+# JS stuff
+.tern-port
+node_modules/
+dist/
+
+# Moongate stuff
+.moongate
+games/*
+!games/chat
+!games/orbs
+logs/*
 priv/temp/*
 
 # ...but always keep .gitkeep.

@@ -1,0 +1,17 @@
+{
+  "autoreload": false,
+  "client": {
+    "handler": "MoongateElectronClient"
+  },
+  "endpoints": {
+    "7778": {
+      "protocol": "web",
+      "public": "client"
+    }
+  },
+  "log": {
+    "console": {
+      "packet": false
+    }
+  }
+}

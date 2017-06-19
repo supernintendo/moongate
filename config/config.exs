@@ -1,12 +1,21 @@
 use Mix.Config
 
 config :moongate,
-  console: Moongate.Console,
+  dev: Moongate.Dev,
+  dsl: Moongate.DSL,
   file_watcher: "fswatch",
+  game: (fn ->
+    case Mix.env() do
+      :test -> "test"
+      _ -> System.get_env("MOONGATE_GAME") || "orbs"
+    end
+  end).(),
+  game_path: (fn ->
+    case Mix.env() do
+      :test -> "test/support/game"
+      _ -> System.get_env("MOONGATE_GAME_PATH") || "games/orbs"
+    end
+  end).(),
+  generator: Moongate.Generator,
   logger: Moongate.Logger,
-  packets: %{
-    encoder: Moongate.Packets.Encoder,
-    decoder: Moongate.Packets.Decoder
-  },
-  session: Moongate.Session,
-  world: System.get_env("MOONGATE_WORLD") || "default"
+  packet: Moongate.Packet

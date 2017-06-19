@@ -1,0 +1,34 @@
+{
+  "name": "moongate.js",
+  "version": "1.0.0",
+  "description": "Default client for Moongate, an Elixir-based multiplayer game server",
+  "main": "dist/Moongate",
+  "scripts": {
+    "build": "webpack",
+    "build:prod": "MOONGATE_JS_ENV=prod webpack --debug; webpack",
+    "watch": "webpack --progress --colors --watch"
+  },
+  "keywords": [
+    "moongate",
+    "game",
+    "server",
+    "server client",
+    "typescript",
+    "elixir"
+  ],
+  "author": "Michael Matyi <michael@matyi.net>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.4.2",
+    "ts-loader": "^2.1.0",
+    "tslint": "^3.5.0",
+    "tslint-loader": "^2.1.0",
+    "typescript": "^1.8.2",
+    "webpack": "^1.12.14",
+    "yargs": "^4.2.0"
+  },
+  "dependencies": {
+    "deepmerge": "^1.3.2"
+  }
+}
