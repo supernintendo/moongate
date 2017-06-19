@@ -1,19 +1,25 @@
 defmodule Moongate.Mixfile do
   use Mix.Project
+
   Code.compiler_options([ignore_module_conflict: true])
 
-  @codename File.read!("priv/metadata/codename") |> String.strip
-  @elixir_version File.read!("priv/metadata/elixir_version") |> String.strip
-  @version File.read!("priv/metadata/version") |> String.strip
+  # Prepare project using data from priv/project
+  @firmware elem(Code.eval_file("priv/firmware.exs"), 0)
 
   def project do
     [
       app: :moongate,
-      version: @version,
-      codename: @codename,
-      elixir: @elixir_version,
+      version: @firmware.version,
+      codename: @firmware.codename,
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      elixir: @firmware.elixir_version,
+      elixirc_paths: elixirc_paths(Mix.env),
       deps: deps(),
-      default_task: "run"
+      description: @firmware.description,
+      default_task: "run",
+      compilers: [:rustler] ++ Mix.compilers(),
+      rustler_crates: rustler_crates()
     ]
   end
 
@@ -22,13 +28,12 @@ defmodule Moongate.Mixfile do
       applications: [
         :bunt,
         :cowboy,
+        :deep_merge,
         :eon,
-        :hexate,
         :inflex,
         :logger,
-        :pbkdf2,
         :poison,
-        :uuid
+        :poolboy
       ],
       mod: {Moongate, []}
     ]
@@ -38,13 +43,37 @@ defmodule Moongate.Mixfile do
     [
       {:bunt, "~> 0.2.0"},
       {:cowboy, github: "ninenines/cowboy", tag: "2.0.0-pre.3"},
-      {:distillery, "~> 1.0"},
-      {:eon, "~> 3.0.1"},
-      {:inflex, "~> 1.7.0"},
-      {:hexate,  ">= 0.6.0"},
-      {:pbkdf2, ">= 2.0.0", github: "basho/erlang-pbkdf2"},
+      {:deep_merge, "~> 0.1.1"},
+      {:eon, "~> 4.1.0"},
+      {:exmorph, "~> 1.1.0"},
+      {:inflex, "~> 1.8.1"},
+      {:hashids, "~> 2.0"},
+      {:mock, "~> 0.2.0", only: :test},
       {:poison, "~> 3.0"},
-      {:uuid, "~> 1.1.0"}
+      {:poolboy, "~> 1.5.1"},
+      {:rustler, github: "hansihe/rustler", sparse: "rustler_mix"}
     ]
+  end
+
+  @game_path Path.expand(@firmware.game_path)
+  @base_paths ["lib", ".moongate/lib"]
+  defp elixirc_paths(:test), do: @base_paths ++ ["test/support"]
+  defp elixirc_paths(:dev), do: @base_paths ++ [@game_path, "priv/clients"]
+  defp elixirc_paths(_), do: @base_paths ++ [@game_path]
+
+  @rustler_crate_defaults [
+    cargo: :system,
+    default_features: false,
+    features: [],
+    mode: :release
+  ]
+  defp rustler_crates do
+    @firmware.rust_libs
+    |> Enum.filter(fn {_lib_name, lib_opts} -> is_map(lib_opts) end)
+    |> Enum.map(fn {lib_name, %{} = lib_opts} ->
+      {:"mg_#{lib_name}",
+        (Map.get(lib_opts, [:crate_opts], @rustler_crate_defaults))
+        ++ [path: "native/mg_#{lib_name}"]}
+    end)
   end
 end

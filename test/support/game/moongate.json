@@ -1,0 +1,22 @@
+{
+  "autoreload": false,
+  "endpoints": {
+    "7888": {
+      "protocol": "web",
+      "public": "client"
+    }
+  },
+  "log": {
+    "console": {
+      "error": true,
+      "fiber": false,
+      "info": false,
+      "packet": false,
+      "ring": false,
+      "session": false,
+      "socket": false,
+      "zone": false,
+      "warning": true
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "autoreload": true,
+  "log": {
+    "console": {
+      "error": true,
+      "fiber": true,
+      "info": true,
+      "packet": false,
+      "ring": false,
+      "session": true,
+      "socket": true,
+      "zone": true,
+      "warning": true
+    },
+    "default": {
+      "error": true,
+      "fiber": true,
+      "info": true,
+      "packet": false,
+      "ring": true,
+      "session": true,
+      "socket": true,
+      "warning": true,
+      "zone": true
+    }
+  },
+  "logger_mode": "console",
+  "endpoints": {}
+}

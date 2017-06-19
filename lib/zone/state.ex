@@ -4,15 +4,11 @@ defmodule Moongate.ZoneState do
   """
 
   defstruct(
-    __mutation_module: Moongate.ZoneMutations,
-    __pending_mutations: [],
     id: nil,
     members: %{},
     rings: [],
     name: "Untitled",
-    zone: nil
+    zone: nil,
+    zone_params: %{}
   )
-  defimpl Collectable do
-    defdelegate into(original), to: Moongate.CoreState, as: :into
-  end
 end

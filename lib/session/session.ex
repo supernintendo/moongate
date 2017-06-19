@@ -1,38 +1,58 @@
 defmodule Moongate.Session do
-  @decoder Application.get_env(:moongate, :packets).decoder
+  use GenServer
+  alias Moongate.{
+    Core,
+    CoreSession,
+    CoreNetwork
+  }
 
-  def mutations, do: Moongate.SessionMutations
+  @packet Application.get_env(:moongate, :packet)
 
-  def depart(state) do
-    origin = state.origin
-    Moongate.CoreNetwork.cascade({:depart, origin}, "zone")
-    Moongate.CoreNetwork.cascade({:unsubscribe, origin}, "ring")
-
-    :ok
+  def start_link(%CoreSession{} = state, _name) do
+    GenServer.start_link(__MODULE__, state)
   end
 
-  def handle_packet(%Moongate.CoreEvent{body: "init", domain: :request, origin: _origin} = event, _state) do
-    event
-    |> Moongate.Core.world_apply(:connected)
+  def handle_cast(:init, %CoreSession{} = state) do
+    Core.log({:session, "Session (#{state.origin.ip})"}, :up)
+    {:noreply, state}
   end
 
-  def handle_packet(%{domain: {_op, _}} = event, _state) do
-    case event do
-      %{zone: {_zone_name, _zone_id}, ring: _ring, deed: _deed} ->
-        deed_event(event)
-      _ ->
-        event
-    end
+  def handle_cast({:client_packet, packet}, %CoreSession{} = state) do
+    packet
+    |> packet_to_event(state)
+    |> @packet.handler.handle_packet(state)
+
+    {:noreply, state}
   end
 
-  defp deed_event(event) do
-    params = @decoder.split_body_params(event.body)
-    {zone_name, zone_id} = event.zone
+  def handle_cast({:grant_access, token}, %CoreSession{access: access} = state) do
+    access =
+      (access ++ [token])
+      |> Enum.uniq()
 
-    if event.ring do
-      process = Moongate.RingService.process_name({zone_name, zone_id, event.ring})
-      Moongate.CoreNetwork.cast({:deed_event, params, event}, "ring", process)
-      event
-    end
+    {:noreply, %{ state | access: access }}
+  end
+
+  def handle_cast({:revoke_access, token}, %CoreSession{access: access} = state) do
+    access =
+      access
+      |> Enum.filter(&(&1 != token))
+
+    {:noreply, %{ state | access: access }}
+  end
+
+  def handle_call(:terminated, _from, %CoreSession{} = state) do
+    CoreNetwork.cascade({:leave, state.origin}, :zone)
+    Core.log({:session, "Session (#{state.origin.ip})"}, :down)
+
+    {:reply, {:ok, self()}, state}
+  end
+
+  defp packet_to_event(packet, state) do
+    %Moongate.CoreEvent{
+      origin: state.origin,
+      targets: []
+    }
+    |> Map.merge(packet)
   end
 end

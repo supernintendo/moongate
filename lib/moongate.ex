@@ -2,19 +2,28 @@ defmodule Moongate do
   @moduledoc """
     The Moongate Application Platform.
   """
+  alias Moongate.{
+    Core,
+    CoreEvent,
+    CoreLoader,
+    CoreNetwork
+  }
+  require Moongate.CoreLoader
   use Application
 
-  def start(_type, _args) do
-    config = load_config()
+  @before_compile Moongate.CoreLoader
+  @packet Application.get_env(:moongate, :packet)
 
-    load_world()
-    supervisor = start_supervisor(config)
-    spawn_fibers(config)
-    spawn_endpoints(config)
-    GenServer.cast(:console, :refresh)
-    config
-    |> Map.get(:project, %{})
-    |> Moongate.Core.world_apply(:start)
+  def start(_type, _args) do
+    config = CoreLoader.load_config()
+    supervisor = CoreNetwork.spawn_supervisor(config)
+    :ok = CoreNetwork.spawn_fibers(config)
+    :ok = CoreNetwork.spawn_endpoints(config)
+    :ok = @packet.init()
+    GenServer.cast(:dev, :refresh)
+    %CoreEvent{}
+    |> Core.trigger(:start)
+    |> Core.dispatch()
 
     {:ok, supervisor}
   end
@@ -27,66 +36,5 @@ defmodule Moongate do
     {:ok, version} = :application.get_key(:moongate, :vsn)
 
     "#{version}"
-  end
-
-  # Load the server.json file for the world.
-  defp load_config, do: load_config(Moongate.Core.world_name)
-  defp load_config(world) do
-    if File.exists?("priv/worlds/#{world}/moongate.exs") do
-      {:ok, config} = EON.from_file("priv/worlds/#{world}/moongate.exs")
-
-      config
-    else
-      {:error, nil}
-    end
-  end
-
-  defp load_world, do: load_world(Moongate.Core.world_name, "#{Moongate.Core.world_name}/server")
-  defp load_world(world, path) do
-    dir = File.ls("priv/worlds/#{path}")
-    load_all_in_directory(dir, world, path)
-
-    world
-  end
-
-  defp load_all_in_directory({:ok, dir}, world, path) do
-    dir
-    |> Enum.filter(&(Regex.match?(~r/.ex\b/, &1)))
-    |> Enum.map(&("priv/worlds/#{path}/#{&1}"))
-    |> Enum.map(&Code.eval_file(&1))
-
-    dir
-    |> Enum.filter(&(File.dir?(Path.expand("priv/worlds/#{path}/#{&1}"))))
-    |> Enum.map(&(load_world(world, "#{path}/#{&1}")))
-  end
-
-  defp spawn_fibers(config) do
-    unless Map.has_key?(config, :autoreload) && config.autoreload == false do
-      {"world_watcher", %{
-        fiber_module: Moongate.Fibers.WorldWatcher
-      }}
-      |> Moongate.CoreNetwork.register(:fiber, "world_watcher")
-    end
-  end
-
-  defp spawn_endpoints(config) do
-    config.endpoints |> Enum.map(&spawn_endpoint(&1))
-  end
-
-  defp spawn_endpoint({name, {protocol, params}}) do
-    {name, params}
-    |> Moongate.CoreNetwork.register(protocol, "endpoint_#{name}")
-  end
-
-  defp start_supervisor(config) do
-    {:ok, supervisor} = Moongate.CoreSupervisor.start_link(config)
-
-    supervisor
-    |> Supervisor.which_children
-    |> Enum.map(fn({name, pid, _type, _params}) ->
-      Moongate.CoreETS.insert({:registry, "tree_#{name}", pid})
-    end)
-
-    supervisor
   end
 end

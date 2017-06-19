@@ -2,7 +2,6 @@ defmodule Moongate.CoreETS do
   @moduledoc """
   A basic wrapper for ETS.
   """
-
   use GenServer
 
   @default_opts [
@@ -13,12 +12,24 @@ defmodule Moongate.CoreETS do
   ]
 
   def start_link do
-    %{
+    GenServer.start_link(__MODULE__, %{
       cache: new_ets_table(:cache),
+      counters: new_ets_table(:counters),
+      packet: new_ets_table(:packet),
       registry: new_ets_table(:registry),
-      ring: new_ets_table(:ring)
-    }
-    |> Moongate.CoreNetwork.establish("ets", __MODULE__)
+      ring: new_ets_table(:ring),
+      session: new_ets_table(:session),
+      zone: new_ets_table(:zone)
+    }, [name: :ets])
+  end
+
+  def count(key) do
+    case lookup({:counters, key}) do
+      [{_key, value}] ->
+        value
+      _ ->
+        0
+    end
   end
 
   @doc """
@@ -33,6 +44,17 @@ defmodule Moongate.CoreETS do
   """
   def lookup({table_key, key}) do
     :ets.lookup(table_key, key)
+  end
+
+  def increment(key) do
+    case lookup({:counters, key}) do
+      [{key, value}] ->
+        :ets.insert(:counters, {key, value + 1})
+        value
+      _ ->
+        :ets.insert(:counters, {key, 1})
+        0
+    end
   end
 
   @doc """
@@ -59,9 +81,9 @@ defmodule Moongate.CoreETS do
     :ets.match_object(table_key, pattern)
   end
 
-  def mutate({table_key, key, mutation_function}) do
+  def mutate_state({table_key, key, function}) do
     case lookup({table_key, key}) do
-      [key, value] -> {:ok, insert({table_key, key, apply(mutation_function, [value])})}
+      [key, value] -> {:ok, insert({table_key, key, apply(function, [value])})}
       _ -> {:error, "#{key} not found in #{table_key}."}
     end
   end

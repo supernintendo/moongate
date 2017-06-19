@@ -1,59 +1,58 @@
-defmodule Moongate.Tests.Core do
-  use ExUnit.Case, async: true
+defmodule Moongate.CoreTest do
+  use ExUnit.Case
   alias Moongate.Core
+  doctest Moongate.Core
 
-  test "&atom_to_string/2" do
-    assert Core.atom_to_string(:foo) == "foo"
-    assert Core.atom_to_string(Foo) == "Foo"
-    assert Core.atom_to_string(Moongate.Core) == "Moongate.Core"
+  test "&atlas/0" do
+    atlas = Core.atlas()
+
+    assert atlas.ip
+    assert atlas.rings
+    assert atlas.rings["Entity"]
+    assert atlas.rings["Entity"].__index__ == "Integer"
+    assert atlas.rings["Entity"].__origin_id__ == "String"
+    assert atlas.rings["Entity"].float == "Float"
+    assert atlas.rings["Entity"].int == "Integer"
+    assert atlas.rings["Entity"].string == "String"
   end
 
-  test "&camelize/1" do
-    assert Core.camelize("foo_bar") == "FooBar"
-    assert Core.camelize("foo-bar") == "FooBar"
+  test "&dispatch/1" do
   end
 
-  test "&deed_module/1" do
-    assert Core.deed_module("TestDeed") == Test.Deed.TestDeed
+  test "&game/0" do
+    assert Core.game() == "Test"
   end
 
-  test "&handshake/0" do
-    handshake = Core.handshake
-
-    assert Map.has_key?(handshake, :ip)
-    assert Map.has_key?(handshake, :rings)
-    assert Map.has_key?(handshake.rings, "TestRing")
-    assert Map.has_key?(handshake.rings["TestRing"], :origin)
-    assert Map.has_key?(handshake.rings["TestRing"], :test_attr)
-    assert handshake.rings["TestRing"].origin == :origin
-    assert handshake.rings["TestRing"].test_attr == :float
+  test "&log/1" do
   end
 
-  test "&has_function/2" do
-    assert Core.has_function?(Core, "handshake")
-    refute Core.has_function?(Core, "nonexistent_function")
+  test "&log/2" do
   end
 
-  test "&world_apply/1" do
-    assert Core.world_apply(:world_apply_helper) == "It worked!"
+  test "&module/0" do
+    assert Core.module() == Test.Game
   end
 
-  test "&world_apply/2" do
-    arg = 42
-
-    assert Core.world_apply(arg, :world_apply_helper) == {"It worked!", arg}
-    assert Core.world_apply([arg], :world_apply_helper) == {"It worked!", arg}
+  test "&module/1" do
+    assert Core.module("Board") == Test.Board
+    assert Core.module("Entity") == Test.Entity
+    refute Core.module("foo")
   end
 
-  test "&world_directory/1" do
-    assert Core.world_directory == "worlds/test"
+  test "&pid/1" do
   end
 
-  test "&world_module/0" do
-    assert Core.world_module == Test.World
+  test "&trigger/2" do
   end
 
-  test "&world_name/0" do
-    assert Core.world_name == "test"
+  test "&trigger/3" do
+  end
+
+  test "&uuid/1" do
+    results =
+      0..1_000
+      |> Enum.map(fn _ -> Core.uuid("test") end)
+
+    assert results == Enum.uniq(results)
   end
 end

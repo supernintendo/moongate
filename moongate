@@ -1,22 +1,23 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
-# Update PATH to include binaries in _moongate/.
-mkdir -p _moongate/elixir/bin
-current_dir=`pwd`
-modified_path=$current_dir/_moongate/elixir/bin:$PATH
+export a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; BASE_DIR=$(cd $a; pwd)
+cd ${BASE_DIR}
+source ${BASE_DIR}/scripts/set_env.sh
 
-# Get Elixir if needed.
-PATH=$modified_path ./scripts/elixir.erl unix
-has_elixir=$?
-
-# Check world
-world=${1:-default}
-
-# Start the server.
-if [ $has_elixir -eq 0 ];then
-  MOONGATE_WORLD=$world PATH=$modified_path ./scripts/build.erl
-  MOONGATE_WORLD=$world PATH=$modified_path iex -S mix
-  PATH=$modified_path mix moongate.clean $world
-else
-  exit
-fi
+case "$ARG1" in
+  load)
+    ${BASE_DIR}/scripts/load.sh
+    ;;
+  test)
+    ${BASE_DIR}/scripts/test.sh
+    ;;
+  install)
+    ${BASE_DIR}/scripts/install_deps.erl
+    ${BASE_DIR}/scripts/refresh.sh
+    ;;
+  *)
+    echo "Usage: moongate load|test|install"
+    exit 1
+    ;;
+esac

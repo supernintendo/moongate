@@ -4,10 +4,8 @@ defmodule Moongate.FiberState do
   """
 
   defstruct(
-    command: nil,
+    fiber_module: nil,
     handler: nil,
-    name: nil,
-    params: nil,
-    parent: nil
+    params: %{}
   )
 end
