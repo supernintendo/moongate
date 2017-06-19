@@ -6,8 +6,10 @@ elixir:
   - 1.4.4
 otp_release:
   - 19.3
-before_script:
+before_install:
   - curl https://sh.rustup.rs -sSf > rustup.sh
   - chmod +x rustup.sh
   - sh rustup.sh -y
+before_script:
+  - echo $(which cargo)
   - mix test
