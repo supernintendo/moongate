@@ -1,3 +1,7 @@
+env:
+- MOONGATE_GAME=test
+- MOONGATE_GAME_PATH=test/support/game
+
 language: elixir
 elixir:
   - 1.4.4
@@ -8,4 +12,4 @@ services:
   - postgresql
 
 before_script:
-  - ./moongate test
+  - mix test
