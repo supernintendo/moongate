@@ -1,6 +1,5 @@
 env:
-- MOONGATE_GAME=test
-- MOONGATE_GAME_PATH=test/support/game
+- MOONGATE_GAME=test MOONGATE_GAME_PATH=test/support/game
 
 language: elixir
 elixir:
