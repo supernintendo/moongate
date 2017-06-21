@@ -5,7 +5,7 @@ export a="/$0"; a=${a%/*}; a=${a:-.}; a=${a#/}/; BASE_DIR=$(cd $a; pwd)
 cd ${BASE_DIR}
 source ${BASE_DIR}/scripts/set_env.sh
 
-case "$ARG1" in
+case "$1" in
   load)
     ${BASE_DIR}/scripts/load.sh
     ;;
@@ -13,8 +13,7 @@ case "$ARG1" in
     ${BASE_DIR}/scripts/test.sh
     ;;
   install)
-    ${BASE_DIR}/scripts/install_deps.erl
-    ${BASE_DIR}/scripts/refresh.sh
+    ${BASE_DIR}/scripts/install.erl
     ;;
   *)
     echo "Usage: moongate load|test|install"

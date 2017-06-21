@@ -11,17 +11,18 @@ main(_) ->
   mkdir(".moongate"),
   lists:map(fun(Dep) ->
     prompt_install_if_needed(Dep) end,
-  deps()).
+  deps()),
+  prepare_moongate().
 
-prompt_install_if_needed({Program, SkipVersionCheck, Link}) ->
+prompt_install_if_needed({Program, SkipVersionCheck, Optional, Link}) ->
   RequiredVersion = get_required_version(Program),
 
   case program_exists(Program) of
-    true -> check_version(Program, SkipVersionCheck, RequiredVersion, Link);
-    false -> prompt_install(Program, RequiredVersion, message_not_found(Program), Link)
+    true -> check_version(Program, SkipVersionCheck, RequiredVersion, Optional, Link);
+    false -> prompt_install(Program, RequiredVersion, Optional, message_not_found(Program), Link)
   end.
 
-check_version(Program, SkipVersionCheck, RequiredVersion, Link) ->
+check_version(Program, SkipVersionCheck, RequiredVersion, Optional, Link) ->
   Version = get_version(Program),
   VersionMatch = (string:str(Version, RequiredVersion) =/= 0),
 
@@ -29,15 +30,19 @@ check_version(Program, SkipVersionCheck, RequiredVersion, Link) ->
     true -> ok;
     false ->
       Message = message_wrong_version(Program, Version, RequiredVersion),
-      prompt_install(Program, RequiredVersion, Message, Link)
+      prompt_install(Program, RequiredVersion, Optional, Message, Link)
   end.
 
-prompt_install(Program, Version, Message, Link) ->
+prompt_install(Program, Version, Optional, Message, Link) ->
   io:format(Message),
 
   case get_input() of
     true -> install(Program, Version);
-    false -> terminate(message_cancel_refuse_install(Program, Version, Link))
+    false ->
+      case Optional of
+        true -> ok;
+        false -> terminate(message_cancel_refuse_install(Program, Version, Link))
+      end
   end.
 
 install(Program, Version) ->
@@ -108,15 +113,20 @@ get_data(P, D) ->
       end
   end.
 
+prepare_moongate() ->
+  external_cmd("elixir scripts/moongate_config.exs"),
+  external_cmd("mix do clean, deps.get"),
+  external_cmd("elixir scripts/gen_rustler_bridge.exs").
+
 % %%%
 % %%% Dependency resolution
 % %%%
 
 deps() ->
   [
-    {"elixir", false, "http://elixir-lang.org"},
-    {"rustc", true, "http://elixir-lang.org"},
-    {"node", false, "https://nodejs.org/en/"}
+    {"elixir", false, false, "http://elixir-lang.org"},
+    {"rustc", true, false, "http://elixir-lang.org"},
+    {"node", false, true, "https://nodejs.org/en/"}
   ].
 
 get_version(Program) ->
@@ -335,11 +345,11 @@ message_wrong_version(Program, Version, Required) ->
     "node" ->
       unicode:characters_to_binary([
         "\n🔮  Moongate uses NodeJS version \033[36m", Required,
-        "\e[0m for its web-based\nclient integrations, but you have \033[31m",
-        Version, "\e[0m. The installed\nversion will likely work fine if it is ",
-        "within the *\033[36m", major_version(Version), "\n\e[0mrange. ",
-        "(If you don't intend to connect to Moongate using\na web ",
-        "browser or the bundled Electron client, you can\nskip this step.)\n\n",
+        "\e[0m for its\nJavaScript-based client components, but you ",
+        "have\n\033[31m", Version, "\e[0m. The installed version will ",
+        "likely work\nfine if it is within the *\033[36m", major_version(Version),
+        "\e[0m range. (If you don't\nintend to develop Moongate.js or ",
+        "use the bundled\nElectron client, you can skip this step.)\n\n",
 
         "Should Moongate download and install the correct version?\n",
         "This will not modify your existing installation - a copy\n",

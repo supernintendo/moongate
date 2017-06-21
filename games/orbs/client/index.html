@@ -2,12 +2,28 @@
 <html>
   <head>
     <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
-    <link href="styles.css" type="text/css" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
     <title>Hello Moongate!</title>
     <script src="Moongate/moongate.js/dist/Moongate.js"></script>
     <script src="index.js"></script>
+    <style>
+      html, body {
+        background: #F8F8F8;
+        background-image: url('assets/bg.gif');
+        cursor: crosshair;
+      }
+      div.Player {
+        background-image: url('assets/orb.gif');
+        position: fixed;
+        transition: 300ms all ease-out;
+        height: 32px;
+        width: 32px;
+      }
+      div.Player:hover {
+        background-image: url('assets/orb-hover.gif');
+      }
+    </style>
   </head>
   <body>
     <div id="board"></div>

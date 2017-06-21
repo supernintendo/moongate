@@ -1,4 +1,4 @@
-defmodule EnsureMoongateConfig do
+defmodule MoongateConfig do
   require Logger
 
   def call do
@@ -8,7 +8,7 @@ defmodule EnsureMoongateConfig do
       {:ok, _contents} -> :ok
       {:error, :enoent} -> use_relative_directory_or_fail(path)
       {:error, :eacces} -> error("Missing permission to load moongate.json")
-      {:error, :enomem} -> error("Not enough memory to load file")
+      {:error, :enomem} -> error("Not enough memory")
       _ -> error("Unknown error")
     end
   end
@@ -60,4 +60,4 @@ defmodule EnsureMoongateConfig do
   end
 end
 
-EnsureMoongateConfig.call()
+MoongateConfig.call()
