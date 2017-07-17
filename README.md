@@ -26,7 +26,7 @@ Follow the prompt to fetch and setup dependencies, or download and install them 
 * [Rust 1.17.0](https://elixir-lang.org/)
 * [Node.js >= 7.0.0](https://nodejs.org/en/)<sup>1</sup>
 
-<sup>1</sup> <small>(optional, enables bundled Electron client)</small>
+<sup>1</sup> <small>(optional, for Moongate.js development)</small>
 
 Once Moongate is installed, run `./moongate test` to make sure everything was configured properly. ExUnit should complete with `0 failures`.
 
