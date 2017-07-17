@@ -1,7 +1,6 @@
 defmodule Moongate.DevCommands do
   alias Moongate.{
     Core,
-    CoreLoader,
     CoreNetwork,
     CoreUtility
   }
@@ -9,23 +8,22 @@ defmodule Moongate.DevCommands do
   @commands %{
     "Help" => "View this text",
     "About" => "View version and system information",
-    "Client" => "Launch a game client",
     "Quit" => "Terminate the server gracefully",
     "Zone, {:zone, :id}" => "Return information about a zone",
     "Zones" => "View list of zones"
   }
 
-  def init_message do
+  def init do
     [
       :reset,
       :inverse,
-      "IEx additions",
+      "Moongate IEx additions",
       :color240,
-      " loaded. Type '",
+      " loaded. Enter '",
       :color86,
       '`mg Help`',
       :color240,
-      "' and press return to see a list of commands.",
+      "' to see a list of commands.",
       :reset,
       "\n"
     ]
@@ -43,9 +41,8 @@ defmodule Moongate.DevCommands do
 
     case command do
       "about" -> Core.log({:banner, Moongate.DevArt.random})
-      "client" -> open_client()
       "help" -> Core.log({:info, commands()})
-      "quit" ->  GenServer.cast(:support, :quit)
+      "quit" ->  CoreNetwork.cast(:quit, Process.whereis(:support))
       "zone" -> zone_info(List.first(args))
       "zones" -> Moongate.Zone.index()
       _ -> unknown_command(command)
@@ -57,23 +54,6 @@ defmodule Moongate.DevCommands do
     @commands
     |> Enum.map(fn {key, value} -> {"mg #{key}", value} end)
     |> Enum.into(%{})
-  end
-
-  defp open_client do
-    client_config = Map.get(CoreLoader.load_config(), :client)
-
-    cond do
-      is_nil(client_config.handler) ->
-        raise "#{inspect __MODULE__}: No `\"handler\"` defined under `\"client\"`\ within this game's moongate.json"
-      !CoreUtility.module_defined?(client_config.handler) ->
-        raise "#{inspect __MODULE__}: #{inspect client_config.handler} is not compiled or not a module"
-      true ->
-        %{
-          fiber_module: Moongate.Fibers.Client,
-          params: client_config
-        }
-        |> CoreNetwork.register(:fiber)
-    end
   end
 
   defp unknown_command(command) when is_atom(command) do

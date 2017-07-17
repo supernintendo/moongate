@@ -1,7 +1,7 @@
 %{
-  codename: File.read!("priv/manifest/codename") |> String.strip(),
+  codename: File.read!("priv/manifest/codename") |> String.trim(),
   description: "Multiplayer game server and SDK",
-  elixir_version: File.read!("priv/manifest/elixir_version") |> String.strip(),
+  elixir_version: File.read!("priv/manifest/elixir_version") |> String.trim(),
   game_name: (fn ->
     case Mix.env() do
       :test -> "test"
@@ -20,8 +20,7 @@
     end
   end).(),
   rust_libs: %{
-    math: %{},
     packets: %{}
   },
-  version: File.read!("priv/manifest/version") |> String.strip()
+  version: File.read!("priv/manifest/version") |> String.trim()
 }

@@ -4,12 +4,12 @@ defmodule Orbs.Game do
   @doc "Called when the server is started."
   handle "start", ev do
     ev
-    |> zone({Level, "lobby"}, %{})
+    |> zone(Level, %{})
   end
 
   handle "begin", ev do
     ev
-    |> join(Level, "lobby")
+    |> join(Level)
   end
 
   handle "end", ev do

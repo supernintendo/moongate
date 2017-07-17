@@ -3,10 +3,8 @@ defmodule Orbs.Player do
 
   describe do
     %{
-      {:x, Integer} => 0,
-      {:y, Integer} => 0,
-      {:width, Integer} => 32,
-      {:height, Integer} => 32
+      {:x, Float} => :rand.uniform(),
+      {:y, Float} => :rand.uniform()
     }
   end
 

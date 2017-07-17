@@ -1,13 +1,13 @@
 defmodule Moongate.CoreConfig.LogSettings do
   defstruct(
     error: true,
-    fiber: true,
+    fiber: false,
     info: true,
     packet: false,
-    ring: true,
-    session: true,
+    ring: false,
+    session: false,
     socket: true,
-    zone: true,
+    zone: false,
     warning: true
   )
 end

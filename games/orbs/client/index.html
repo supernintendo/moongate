@@ -13,19 +13,23 @@
         background-image: url('assets/bg.gif');
         cursor: crosshair;
       }
-      div.Player {
+      ul#board {
+        list-style: none;
+        padding-left: 0;
+      }
+      ul#board > li {
         background-image: url('assets/orb.gif');
         position: fixed;
-        transition: 300ms all ease-out;
+        transition: 150ms all ease-out;
         height: 32px;
         width: 32px;
       }
-      div.Player:hover {
+      ul#board > li:hover {
         background-image: url('assets/orb-hover.gif');
       }
     </style>
   </head>
   <body>
-    <div id="board"></div>
+    <ul id="board"></ul>
   </body>
 </html>

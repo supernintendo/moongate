@@ -111,7 +111,9 @@ defmodule Moongate.PacketDecoder do
   defp typecast(""), do: nil
   defp typecast(value) when is_bitstring(value) do
     cond do
-      Regex.match?(~r/^-?\d+(\.\d+)?$/, value) ->
+      Regex.match?(~r/^[-+]?[0-9]*(\.[0-9]+)$/, value) ->
+        CoreTypes.cast(value, Float) || value
+      Regex.match?(~r/^-?[0-9]*$/, value) ->
         CoreTypes.cast(value, Integer) || value
       true ->
         CoreTypes.cast(value, String) || value

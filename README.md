@@ -10,7 +10,7 @@ Moongate is a multiplayer game server and software development kit. It provides 
 
 ### Minimum Requirements ###
 
-* [Erlang 19](https://www.erlang.org/)+
+* [OTP 20](https://www.erlang.org/)
 * [rebar3](https://www.rebar3.org/)
 
 ### Installation ###
@@ -22,7 +22,7 @@ git clone https://github.com/supernintendo/moongate ~/Moongate && \
 ```
 Follow the prompt to fetch and setup dependencies, or download and install them manually:
 
-* [Elixir 1.4.4](https://elixir-lang.org/)
+* [Elixir 1.4.5](https://elixir-lang.org/)
 * [Rust 1.17.0](https://elixir-lang.org/)
 * [Node.js >= 7.0.0](https://nodejs.org/en/)<sup>1</sup>
 
@@ -35,11 +35,11 @@ Once Moongate is installed, run `./moongate test` to make sure everything was co
 ### Example Project
 
 - Run `./moongate load orbs` to start the example project.
-- Navigate to [localhost:7778](http://localhost:7778/) in your browser or type `mg Client` in the IEx prompt.
-- Repeat the previous step to open a second session.
-- Click to move the orb. You should see it move on the other window.
+- Navigate to [localhost:7778](http://localhost:7778/) in your browser.
+- Open a second browser window to the same page.
+- Click to move the orb. You should see its position update on the other window.
 
-Check the `games/orbs` directory for an example of how to set up a new Moongate project.
+Check the `games` directory for examples of projects built with Moongate.
 
 ### License ###
 

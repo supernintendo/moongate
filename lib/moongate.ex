@@ -20,7 +20,7 @@ defmodule Moongate do
     :ok = CoreNetwork.spawn_fibers(config)
     :ok = CoreNetwork.spawn_endpoints(config)
     :ok = @packet.init()
-    GenServer.cast(:dev, :refresh)
+    CoreNetwork.cast(:refresh, Process.whereis(:dev))
     %CoreEvent{}
     |> Core.trigger(:start)
     |> Core.dispatch()

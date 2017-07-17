@@ -5,7 +5,7 @@ defmodule Moongate.CoreEnvTest do
   test "&codename/0" do
     expected_codename =
       File.read!("priv/manifest/codename")
-      |> String.strip()
+      |> String.trim()
 
     assert CoreFirmware.codename() == expected_codename
   end
@@ -17,7 +17,7 @@ defmodule Moongate.CoreEnvTest do
   test "&version/0" do
     expected_version =
       File.read!("priv/manifest/version")
-      |> String.strip()
+      |> String.trim()
 
     assert CoreFirmware.version() == expected_version
   end

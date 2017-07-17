@@ -14,7 +14,7 @@ defmodule Moongate.DSL.Terms.Peek do
         pid ->
           case CoreNetwork.call({:get_members, member_indices, opts}, pid) do
             {:ok, members} ->
-              %{ event | peek: {ring, members} }
+              struct(event, peek: {ring, members})
             _ ->
               event
           end

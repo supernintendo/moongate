@@ -93,11 +93,21 @@ defmodule Moongate.PacketFactory do
     end)
   end
 
-  def drop_members(scope, m_indices) do
+  def drop_morphs(scope, rule, key, member_indices) do
     %CorePacket{}
     |> scope_packet(scope)
     |> struct(%{
-      body: Enum.join(m_indices, ","),
+      body: ~s(#{key}:#{Enum.join(member_indices, ",")}),
+      handler: :drop_morphs,
+      rule: rule
+    })
+  end
+
+  def drop_members(scope, member_indices) do
+    %CorePacket{}
+    |> scope_packet(scope)
+    |> struct(%{
+      body: Enum.join(member_indices, ","),
       handler: :drop_members
     })
   end

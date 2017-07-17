@@ -9,7 +9,6 @@ defmodule Orbs.Level do
 
   handle "join", ev do
     ev
-    |> ping()
     |> echo("Welcome!")
     |> create(Player)
   end
@@ -17,9 +16,5 @@ defmodule Orbs.Level do
   handle "leave", ev do
     ev
     |> purge(Player, ev.origin)
-  end
-
-  handle "save", %{params: %{save_state: _save_state}} = ev do
-    ev
   end
 end

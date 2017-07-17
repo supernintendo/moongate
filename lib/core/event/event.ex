@@ -13,6 +13,7 @@ defmodule Moongate.CoreEvent do
     fetched: nil,
     handler: nil,
     origin: nil,
+    peek: nil,
     queue: [],
     ring: nil,
     selected: nil,

@@ -23,7 +23,7 @@ defmodule MoongateConfig do
         system_games = get_system_games()
         alert("#{IO.ANSI.red()}", "No moongate.json found at #{path}")
         alert("#{IO.ANSI.red()}", "No moongate.json found at #{system_games_path}")
-        if String.strip(system_games) != "" do
+        if String.trim(system_games) != "" do
           IO.puts ~s(
   #{IO.ANSI.black()}Try one of the following:
   #{IO.ANSI.green()}

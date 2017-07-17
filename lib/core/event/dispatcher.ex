@@ -6,7 +6,7 @@ defmodule Moongate.CoreDispatcher do
     GenServer.start_link(__MODULE__, nil)
   end
 
-  def handle_cast(%CoreEvent{} = event, state) do
+  def handle_info(%CoreEvent{} = event, state) do
     process_event(event)
     {:noreply, state}
   end

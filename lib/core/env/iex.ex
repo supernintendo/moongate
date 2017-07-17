@@ -5,6 +5,7 @@ defmodule Moongate.Core.Iex do
     if Code.ensure_loaded?(commands_module) do
       quote do
         import unquote(commands_module)
+        apply(unquote(commands_module), :init, [])
       end
     end
   end

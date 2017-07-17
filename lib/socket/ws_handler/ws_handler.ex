@@ -16,7 +16,7 @@ defmodule Moongate.Socket.WSHandler do
     }
     |> CoreNetwork.register(:session, origin.id)
 
-    {:cowboy_websocket, req, %{ origin_id: origin.id }}
+    {:cowboy_websocket, req, %{origin_id: origin.id}}
   end
 
   def terminate(_reason, _req, state) do

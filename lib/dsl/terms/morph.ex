@@ -5,6 +5,7 @@ defmodule Moongate.DSL.Terms.Morph do
     CoreNetwork,
     DSL.Queue
   }
+  import Exmorph
 
   defmodule Dispatcher do
     def call({Morph, key, callback}, %CoreEvent{
@@ -33,16 +34,40 @@ defmodule Moongate.DSL.Terms.Morph do
     def call({Morph, _changes}, event), do: event
   end
 
-  def morph(%CoreEvent{ring: nil} = event, _, _) do
+  def morph(%CoreEvent{ring: nil} = event, _, _, _) do
     Core.log({:warning, "Morph not queued (not within ring): #{inspect event}"})
     event
   end
-  def morph(%CoreEvent{rule: nil} = event, _, _) do
+  def morph(%CoreEvent{
+    ring: _ring,
+    zone: {_zone, _zone_id}
+  } = event, key, {operation, change}, {duration, time_unit}) do
+    case operation do
+      :sub ->
+        morph(event, key, ~t(from 0 add -#{change} every #{duration}#{time_unit} over infinity))
+      :add ->
+        morph(event, key, ~t(from 0 add #{change} every #{duration}#{time_unit} over infinity))
+      _ ->
+        Core.log({:warning, "Morph not queued (invalid operation): #{inspect operation}"})
+        event
+    end
+  end
+  def morph(%CoreEvent{rule: nil} = event, _, _, _) do
     Core.log({:warning, "Morph not queued (not within rule): #{inspect event}"})
     event
   end
-  def morph(%CoreEvent{ring: _ring, zone: {_zone, _zone_id}} = event, key, tween) do
+  def morph(%CoreEvent{
+    ring: _ring,
+    zone: {_zone, _zone_id}
+  } = event, key, %Exmorph.Tween{} = tween) do
     {Morph, key, tween}
+    |> Queue.push(event)
+  end
+  def morph(%CoreEvent{
+    ring: _ring,
+    zone: {_zone, _zone_id}
+  } = event, key, callback) when is_function(callback) do
+    {Morph, key, callback}
     |> Queue.push(event)
   end
 end

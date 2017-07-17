@@ -13,11 +13,14 @@ defmodule Moongate.DSL.Terms.Look do
 #{inspect event}
 
 )
-      |> String.strip()
+      |> String.trim()
       |> IO.puts()
       event
     end
-    def call(Look, %CoreEvent{} = event), do: inspect(event)
+    def call(Look, %CoreEvent{} = event) do
+      inspect(event)
+      event
+    end
   end
 
   def look(%CoreEvent{} = event, label) do

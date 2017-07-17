@@ -14,6 +14,7 @@ defmodule Moongate.CoreTerms do
     show_members
     show_morphs
     drop_members
+    drop_morphs
   )
   def terms, do: @terms
 end

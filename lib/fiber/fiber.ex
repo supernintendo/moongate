@@ -9,7 +9,7 @@ defmodule Moongate.Fiber do
     GenServer.start_link(__MODULE__, state)
   end
 
-  def handle_cast(:init, state) do
+  def handle_info(:init, state) do
     handler = spawn(state.fiber_module, :start, [state.params]++ [self()])
     Moongate.Core.log({:fiber, "Fiber (#{inspect state.fiber_module})"}, :up)
 

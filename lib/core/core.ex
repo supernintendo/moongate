@@ -48,7 +48,14 @@ defmodule Moongate.Core do
   def dispatch(message) when is_nil(message), do: nil
   def dispatch(message) do
     :poolboy.transaction(:dispatcher, fn(pid) ->
-      GenServer.cast(pid, message)
+      CoreNetwork.cast(message, pid)
+    end)
+  end
+
+  def dispatch_sync(message) when is_nil(message), do: nil
+  def dispatch_sync(message) do
+    :poolboy.transaction(:dispatcher, fn(pid) ->
+      CoreNetwork.cast(message, pid)
     end)
   end
 
@@ -64,10 +71,12 @@ defmodule Moongate.Core do
   change (up / down).
   """
   def log(message) do
-    GenServer.cast(:logger, {:log, message})
+    {:log, message}
+    |> CoreNetwork.cast(Process.whereis(:logger))
   end
   def log(message, status) do
-    GenServer.cast(:logger, {:log, message, status})
+    {:log, message, status}
+    |> CoreNetwork.cast(Process.whereis(:logger))
   end
 
   def module, do: module(Game)

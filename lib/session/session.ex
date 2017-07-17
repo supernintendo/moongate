@@ -12,12 +12,12 @@ defmodule Moongate.Session do
     GenServer.start_link(__MODULE__, state)
   end
 
-  def handle_cast(:init, %CoreSession{} = state) do
+  def handle_info(:init, %CoreSession{} = state) do
     Core.log({:session, "Session (#{state.origin.ip})"}, :up)
     {:noreply, state}
   end
 
-  def handle_cast({:client_packet, packet}, %CoreSession{} = state) do
+  def handle_info({:client_packet, packet}, %CoreSession{} = state) do
     packet
     |> packet_to_event(state)
     |> @packet.handler.handle_packet(state)
@@ -25,7 +25,7 @@ defmodule Moongate.Session do
     {:noreply, state}
   end
 
-  def handle_cast({:grant_access, token}, %CoreSession{access: access} = state) do
+  def handle_info({:grant_access, token}, %CoreSession{access: access} = state) do
     access =
       (access ++ [token])
       |> Enum.uniq()
@@ -33,7 +33,7 @@ defmodule Moongate.Session do
     {:noreply, %{ state | access: access }}
   end
 
-  def handle_cast({:revoke_access, token}, %CoreSession{access: access} = state) do
+  def handle_info({:revoke_access, token}, %CoreSession{access: access} = state) do
     access =
       access
       |> Enum.filter(&(&1 != token))

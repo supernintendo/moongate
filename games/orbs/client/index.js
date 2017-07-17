@@ -1,95 +1,104 @@
 (function() {
-  var Board = {},
-      Game = {
-        addEntity: function(ring, member) {
-          var el = document.createElement("DIV");
-          el.className = ring;
-          el.dataset.ring = ring;
-          el.dataset.index = member.index();
-          el.dataset.x = member.attributes.x;
-          el.dataset.y = member.attributes.y;
-          document.getElementById('board').appendChild(el);
-        },
-        applyBindings: function() {
-          document.onclick = function(e) {
-            Client.send({
-              body: [e.clientX - 24, e.clientY - 24],
-              handler: 'call',
-              rule: 'Movement',
-              ring: 'Player',
-              zone: ['Level', 'lobby']
-            });
-          }
-        },
-        dropEntities: function(params) {
-          return params.indices.map((index) => {
-            let entity = Game.getEntity(params.ring, index);
+  var Game = {
+    mouseDown: false,
+    players: {},
+    playerEls: {},
+    pos: {
+      x: 0,
+      y: 0
+    },
+    addPlayer: function(player) {
+      var index = player.__index__;
 
-            if (entity) {
-              entity.parentNode.removeChild(entity);
-              return true;
-            }
-            return false;
-          });
-        },
-        getEntity: function(key, index) {
-          var results = document.querySelectorAll(
-            '[data-ring="' + key +
-            '"][data-index="' + index + '"]'
-          );
-          return results[0];
-        },
-        getAllEntities: function() {
-          var results = document.querySelectorAll('[data-ring]');
+      Game.players[index] = player;
+      Game.playerEls[index] = document.createElement("LI");
+      Client.tether(player, this.players[index]);
 
-          return results;
-        },
-        updateEntity: function(entity, member) {
-          entity.dataset.x = member.attributes.x;
-          entity.dataset.y = member.attributes.y;
-        },
-        refreshBoard: function() {
-          var entities = Game.getAllEntities(),
-              l = entities.length,
-              entities;
+      document.getElementById('board').appendChild(Game.playerEls[index]);
+    },
+    allPlayers: function() {
+      var results = document.querySelectorAll('ul#board li');
 
-          while (l--) {
-            entity = entities[l];
-            entity.style.transform = (
-              "translateX(" + entity.dataset.x +
-              "px) translateY(" + entity.dataset.y + "px)"
-            );
-          }
-        },
-        updateEntities: function(members) {
-          members.forEach(function(member) {
-            var ring = member._.name,
-                entity = Game.getEntity(ring, member.index());
+      return results;
+    },
+    dropPlayers: function(payload) {
+      payload.indices.forEach(function(i) {
+        Game.removePlayer(i);
+      }.bind(this));
+    },
+    getPlayerEl: function(i) {
+      return Game.playerEls[i];
+    },
+    movePlayer: function(e) {
+      if (Game.mouseDown) {
+        Client.send('move', {
+          body: [
+            ((e.clientX - 24) / window.innerWidth),
+            ((e.clientY - 24) / window.innerHeight)
+          ]
+        });
+      }
+    },
+    refresh: function(players) {
+      players.forEach(function(player) {
+        var index = player.__index__;
 
-            if (entity) {
-              Game.updateEntity(entity, member);
-            } else {
-              Game.addEntity(ring, member);
-            }
-            Game.refreshBoard();
-          });
-        }
-      },
-      Client = new Moongate.Client({
-        callbacks: {
-          dropMembers: function(params) {
-            Game.dropEntities(params);
-          },
-          indexMembers: function(members) {
-            Game.updateEntities(members || []);
-          },
-          showMembers: function(members) {
-            Game.updateEntities(members || []);
-          }
-        },
-        directives: {},
-        onConnect: function() {
-          Game.applyBindings();
-        }
+        if (Client.meta(player, 'isNew')) {
+          Game.addPlayer(player);
+        };
+        Game.refreshPlayerPosition(Game.getPlayerEl(index), Game.players[index]);
       });
+    },
+    removePlayer: function(i) {
+      var playerEl = Game.getPlayerEl(i);
+
+      playerEl && playerEl.parentNode.removeChild(playerEl);
+    },
+    refreshPlayerPosition(el, player) {
+      el.style.transform =
+        'translateX(' +
+        ((player.x * window.innerWidth)) +
+        'px) translateY(' +
+        ((player.y * window.innerHeight)) +
+        'px)';
+    }
+  },
+  Client = new Moongate.Client({
+    callbacks: {
+      dropMembers: function(payload) {
+        Game.dropPlayers(payload);
+      },
+      indexMembers: function(players) {
+        Game.refresh(players || []);
+      },
+      showMembers: function(players) {
+        for (var i = 0, l = players.length; i !== l; i++) {
+          var index = players[i].__index__;
+
+          Game.refreshPlayerPosition(Game.getPlayerEl(index), Game.players[index]);
+        }
+      }
+    },
+    directives: {
+      move: {
+        handler: 'call',
+        rule: 'Movement',
+        ring: 'Player',
+        zone: 'Level'
+      }
+    }
+  });
+  document.onmousemove = Game.movePlayer.bind(Game);
+  document.onmousedown = function(e) {
+    Game.mouseDown = true;
+    Game.movePlayer(e);
+  }
+  document.onmouseup = function() {
+    Game.mouseDown = false;
+  }
+  window.onresize = function() {
+    Client.utils.loop(function(el) {
+      Game.refreshPlayerPosition(el);
+    }, Game.allPlayers());
+  }
 })();

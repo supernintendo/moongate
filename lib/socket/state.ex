@@ -4,12 +4,13 @@ defmodule Moongate.SocketState do
   """
 
   defstruct(
-    handler_pid: nil,
+    handler_module: nil,
     port: nil,
     public: "static",
-    protocol: nil
+    protocol: nil,
+    socket: nil
   )
-  @protocols ~w(web)a
+  @protocols ~w(udp web)a
   @types %{
     port: Integer,
     public: String,

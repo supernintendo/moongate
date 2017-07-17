@@ -20,19 +20,19 @@ defmodule Moongate.Zone do
     GenServer.start_link(__MODULE__, state)
   end
 
-  def handle_cast(:init, state) do
+  def handle_info(:init, state) do
     Core.log({:zone, "Zone {#{format_name({state.zone, state.id})}}"}, :up)
 
     {:noreply, zone_init(state)}
   end
 
-  def handle_cast({:broadcast, packet}, state) do
+  def handle_info({:broadcast, packet}, state) do
     {:noreply, broadcast(packet, state)}
   end
-  def handle_cast({:leave, origin}, state) do
+  def handle_info({:leave, origin}, state) do
     {:noreply, member_leave(state, origin)}
   end
-  def handle_cast({:trigger, handler_name, event}, state) do
+  def handle_info({:trigger, handler_name, event}, state) do
     {:noreply, trigger(state, handler_name, event)}
   end
 
@@ -180,7 +180,7 @@ defmodule Moongate.Zone do
 
   defp init_zone(state) do
     state
-    |> trigger(:start, %{params: state.zone_params})
+    |> trigger(:start, %{assigns: %{params: state.zone_params}})
   end
 
   defp origins(members) do

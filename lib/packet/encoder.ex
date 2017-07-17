@@ -59,17 +59,14 @@ defmodule Moongate.PacketEncoder do
   end
 
   def encode_tween(%Exmorph.Tween{} = tween) do
-    started_at_ms =
-      {tween.started_at, :nanosecond}
-      |> CoreTime.convert(:millisecond)
-      |> round()
     every_ms =
       {tween.every, :nanosecond}
       |> CoreTime.convert(:millisecond)
       |> round()
+
     delta = CoreTypes.cast({tween.add, Integer})
 
-    "~#{started_at_ms}d#{delta}~#{every_ms}"
+    "~#{CoreTime.convert({tween.started_at, :nanosecond}, :millisecond)}d#{delta}~#{every_ms}"
   end
 
   def encode_body(value, :json), do: Poison.encode!(value)

@@ -153,8 +153,4 @@ defmodule Moongate.CoreUtility do
     |> atom_to_string
     |> module_defined?
   end
-
-  def nano do
-    :os.system_time(:nanosecond)
-  end
 end

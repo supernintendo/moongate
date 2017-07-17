@@ -17,14 +17,14 @@ defmodule Moongate.Ring do
     GenServer.start_link(__MODULE__, state)
   end
 
-  def handle_cast(:init, %RingState{} = state) do
+  def handle_info(:init, %RingState{} = state) do
     zone_name = Zone.format_name({state.zone, state.zone_id})
     Core.log({:ring, "Ring {{#{zone_name}}, #{state.name}}"}, :up)
 
     {:noreply, init_ring(state)}
   end
 
-  def handle_cast({:trigger, handler_name, event}, %RingState{} = state) do
+  def handle_info({:trigger, handler_name, event}, %RingState{} = state) do
     trigger(state, handler_name, event)
 
     {:noreply, state}
@@ -93,24 +93,24 @@ defmodule Moongate.Ring do
 
   def handle_call({:set_on_members, member_indices, changes}, _from, %RingState{} = state) do
     state =
-      member_indices
-      |> set_on_members(changes, state)
+      state
+      |> set_on_members(member_indices, changes)
 
     {:reply, :ok, state}
   end
 
   def handle_call({:morph_members, member_indices, rule, key, tween}, _from, %RingState{} = state) do
     state =
-      member_indices
-      |> morph_members(rule, key, tween, state)
+      state
+      |> morph_members(member_indices, rule, key, tween)
 
     {:reply, :ok, state}
   end
 
   def handle_call({:cure_members, member_indices, rule, key}, _from, %RingState{} = state) do
     state =
-      member_indices
-      |> cure_members(rule, key, state)
+      state
+      |> cure_members(member_indices, rule, key)
 
     {:reply, :ok, state}
   end
@@ -166,7 +166,7 @@ defmodule Moongate.Ring do
     |> Enum.find(&(&1.__index__ == member_index))
   end
 
-  defp set_on_members(member_indices, changes, %RingState{} = state) do
+  defp set_on_members(%RingState{} = state, member_indices, changes) do
     schema =
       state.attributes
       |> Map.take(Map.keys(changes))
@@ -184,29 +184,73 @@ defmodule Moongate.Ring do
     |> broadcast(:show_members, [{updated_members, Map.put(schema, :__index__, Integer)}])
   end
 
-  defp morph_members(member_indices, rule, key, tween, %RingState{morphs: morphs} = state) do
-    updated_morphs =
-      get_in(morphs, [rule, key])
-      ++ (Enum.map(member_indices, &{&1, tween}))
-      |> Enum.uniq_by(fn {index, _tween} -> index end)
-
+  defp morph_members(%RingState{morphs: _morphs} = state, member_indices, rule, key, tween) do
     state
-    |> struct(morphs: %{morphs | rule => %{morphs[rule] | key => updated_morphs}})
-    |> broadcast(:show_morphs, [%{
-      rule => %{key => updated_morphs}
-    }])
+    |> freeze_morph(member_indices, rule, key)
+    |> add_morph(member_indices, rule, key, tween)
   end
 
-  defp cure_members(member_indices, rule, key, %RingState{morphs: morphs} = state) do
+  defp cure_members(%RingState{morphs: morphs} = state, member_indices, rule, key) do
     updated_morphs =
       get_in(morphs, [rule, key])
       |> Enum.filter(fn {index, _tween} -> !Enum.member?(member_indices, index) end)
 
     state
+    |> freeze_morph(member_indices, rule, key)
     |> struct(morphs: %{morphs | rule => %{morphs[rule] | key => updated_morphs}})
+    |> broadcast(:drop_morphs, [rule, key, member_indices])
+  end
+
+  defp add_morph(%RingState{morphs: morphs} = state, member_indices, rule, key, tween) do
+    updated_morphs =
+      ((get_in(morphs, [rule, key]) || [])
+      |> Enum.filter(fn {index, _tween} ->
+        !Enum.member?(member_indices, index)
+      end))
+      ++ (Enum.map(member_indices, &{&1, tween}))
+
+    state
+    |> freeze_morph(member_indices, rule, key)
     |> broadcast(:show_morphs, [%{
       rule => %{key => updated_morphs}
     }])
+    |> struct(morphs: %{morphs | rule => %{morphs[rule] | key => updated_morphs}})
+  end
+
+  defp freeze_morph(%RingState{morphs: morphs} = state, member_indices, rule, key) do
+    updated_morphs =
+      (get_in(morphs, [rule, key])
+      |> Enum.map(fn {index, tween} ->
+        {index, struct(tween, started_at: :os.system_time(:nanosecond))}
+      end))
+
+    state
+    |> struct(%{
+      morphs: %{morphs | rule => %{morphs[rule] | key => updated_morphs}},
+      members: (
+        state.members
+        |> Enum.filter(&(Enum.member?(member_indices, &1.__index__)))
+        |> Enum.map(fn member ->
+          tween = Enum.find(get_in(morphs, [rule, key]), fn {index, _tween} ->
+            index == member.__index__
+          end)
+          case tween do
+            {_index, %Exmorph.Tween{} = tween} ->
+              %{member | key => member[key] + Exmorph.tween_value(tween)}
+            _ -> member
+          end
+        end)
+      ) ++ Enum.filter(state.members, &(!Enum.member?(member_indices, &1.__index__)))
+    })
+    |> show_members_attr(member_indices, key)
+    |> broadcast(:show_morphs, [%{
+      rule => %{key => updated_morphs}
+    }])
+  end
+
+  def show_members_attr(%RingState{members: members} = state, _member_indices, key) do
+    state
+    |> broadcast(:show_members, [{members, Map.put(%{}, key, state.attributes[key])}])
   end
 
   defp remove_members(member_indices, %RingState{} = state) do

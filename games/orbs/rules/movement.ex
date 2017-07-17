@@ -3,9 +3,8 @@ defmodule Orbs.Movement do
 
   describe do
     %{
-      speed: Integer,
-      x: Integer,
-      y: Integer
+      x: Float,
+      y: Float
     }
   end
 

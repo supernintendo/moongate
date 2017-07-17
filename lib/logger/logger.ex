@@ -41,17 +41,17 @@ defmodule Moongate.Logger do
     GenServer.start_link(__MODULE__, state, [name: :logger])
   end
 
-  def handle_cast({:log, _message}, %LoggerState{logger_mode: :none} = state) do
+  def handle_info({:log, _message}, %LoggerState{logger_mode: :none} = state) do
     {:noreply, state}
   end
 
-  def handle_cast({:log, message}, %LoggerState{} = state) do
+  def handle_info({:log, message}, %LoggerState{} = state) do
     log(message, state)
 
     {:noreply, state}
   end
 
-  def handle_cast({:log, message, status}, %LoggerState{} = state) do
+  def handle_info({:log, message, status}, %LoggerState{} = state) do
     log({message, status}, state)
 
     {:noreply, state}

@@ -132,7 +132,8 @@ deps() ->
 get_version(Program) ->
   case Program of
     "elixir" ->
-      [Version | _] = lists:reverse(string:tokens(os:cmd("elixir -v"), " ")),
+      [_, _, VersionString, _] = string:split(os:cmd("elixir -v"), "\n", all),
+      Version = hd(tl(string:split(VersionString, " ", all))),
       clean_string(Version);
     "rustc" ->
       [_, Version | _] = string:tokens(os:cmd("rustc --version"), " "),
@@ -328,45 +329,30 @@ message_post_install(Program, Version) ->
   ].
 
 message_wrong_version(Program, Version, Required) ->
-  {ok, WorkingDir} = file:get_cwd(),
-
   case Program of
     "elixir" ->
       unicode:characters_to_binary([
-        "\n🔮  Moongate requires Elixir version \033[36m",
-        Required, "\e[0m but you\nhave version \033[31m",
-        Version, "\e[0m. Should Moongate download and\n",
-        "install the correct version? This will not modify\n",
-        "your existing installation - a copy will be setup\n",
-        "in Moongate's own directory:\n",
-        "\n\033[33m", WorkingDir, "/.moongate/", Program,
-        "\033[0m\n"
+        "\n🔮  Elixir \033[33m", Version, "\e[0m is installed but \033[36m",
+        Required, "\e[0m is required.\n",
+        "Would you like to download and install the correct version?\n",
+        "(This will not override your existing install)",
+        "\033[0m\n\n"
       ]);
     "node" ->
       unicode:characters_to_binary([
-        "\n🔮  Moongate uses NodeJS version \033[36m", Required,
-        "\e[0m for its\nJavaScript-based client components, but you ",
-        "have\n\033[31m", Version, "\e[0m. The installed version will ",
-        "likely work\nfine if it is within the *\033[36m", major_version(Version),
-        "\e[0m range. (If you don't\nintend to develop Moongate.js or ",
-        "use the bundled\nElectron client, you can skip this step.)\n\n",
-
-        "Should Moongate download and install the correct version?\n",
-        "This will not modify your existing installation - a copy\n",
-        "will be setup in Moongate's own directory:\n",
-        "\n\033[33m", WorkingDir, "/.moongate/", Program,
-        "\033[0m\n"
+        "\n🔮  NodeJS \033[33m", Version, "\e[0m is installed but "
+        "Moongate uses \033[36m", Required, "\e[0m.\n"
+        "Would you like to download and install the correct version?\n",
+        "(*\033[36m", major_version(Version), "\e[0m versions generally suffice)\n",
+        "(This will not override your existing install)",
+        "\033[0m\n\n"
       ]);
     _ ->
       unicode:characters_to_binary([
-        "\n🔮  Moongate requires", Program,
-        "version \033[36m", Required, "\e[0m but you\n",
-        "have version \033[36m", Version, "\e[0m. Should",
-        "Moongate download and\ninstall the correct version?",
-        "This will not modify\nyour existing installation - ",
-        "a copy will be setup in Moongate's own directory:\n",
-        "\n\033[33m", WorkingDir, "/.moongate/", Program,
-        "\033[0m\n"
+        "\n🔮  ", Program, " \033[33m", Version, "\e[0m is installed but \033[36m",
+        Required, "\e[0m is required.\n",
+        "Would you like to download and install the correct version?\n",
+        "\033[0m\n\n"
       ])
   end.
 

@@ -32,6 +32,7 @@ defmodule Moongate.Mixfile do
         :eon,
         :inflex,
         :logger,
+        :manifold,
         :poison,
         :poolboy
       ],
@@ -41,13 +42,17 @@ defmodule Moongate.Mixfile do
 
   defp deps do
     [
+      {:benchee, "~> 0.9", only: :dev},
+      {:benchee_html, "~> 0.3", only: :dev},
       {:bunt, "~> 0.2.0"},
       {:cowboy, github: "ninenines/cowboy", tag: "2.0.0-pre.3"},
       {:deep_merge, "~> 0.1.1"},
       {:eon, "~> 4.1.0"},
-      {:exmorph, "~> 1.1.0"},
+      {:exmorph, "~> 1.1.1"},
+      {:fastglobal, "1.0.0"},
       {:inflex, "~> 1.8.1"},
       {:hashids, "~> 2.0"},
+      {:manifold, "~> 1.0"},
       {:mock, "~> 0.2.0", only: :test},
       {:poison, "~> 3.0"},
       {:poolboy, "~> 1.5.1"},
@@ -58,7 +63,6 @@ defmodule Moongate.Mixfile do
   @game_path Path.expand(@firmware.game_path)
   @base_paths ["lib", ".moongate/lib"]
   defp elixirc_paths(:test), do: @base_paths ++ ["test/support"]
-  defp elixirc_paths(:dev), do: @base_paths ++ [@game_path, "priv/clients"]
   defp elixirc_paths(_), do: @base_paths ++ [@game_path]
 
   @rustler_crate_defaults [

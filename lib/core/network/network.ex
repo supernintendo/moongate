@@ -7,7 +7,7 @@ defmodule Moongate.CoreNetwork do
   }
 
   @doc """
-  Performs a GenServer.cast to every GenServer
+  Performs a CoreNetwork.send to every GenServer
   under a given supervisor.
   """
   def cascade(message, supervisor_name) do
@@ -33,11 +33,11 @@ defmodule Moongate.CoreNetwork do
   end
 
   @doc """
-  Performs a GenServer.cast to a GenServer by pid
+  Performs a CoreNetwork.send to a GenServer by pid
   or name within the registry ETS table.
   """
   def cast(message, pid) when is_pid(pid) do
-    GenServer.cast(pid, message)
+    Manifold.send(pid, message)
   end
   def cast(message, name) do
     pid = pid_for_name(name)
@@ -67,7 +67,7 @@ defmodule Moongate.CoreNetwork do
   process registry's ETS table.
   """
   def kill_process(pid) when is_pid(pid) do
-    results = CoreETS.match_object({:registry, {:_, pid}})
+    results = CoreETS.match_object({:registry, pid})
 
     results
     |> Enum.map(fn({key, _}) ->
@@ -129,7 +129,7 @@ defmodule Moongate.CoreNetwork do
       [{^supervisor_name, supervisor}] ->
         {:ok, child} = Supervisor.start_child(supervisor, [params, name])
         CoreETS.insert({:registry, "#{namespace}_#{name}", child})
-        GenServer.cast(child, :init)
+        Manifold.send(child, :init)
         child
       [] -> nil
     end
@@ -143,7 +143,9 @@ defmodule Moongate.CoreNetwork do
     for packet <- packets, do: send_packet(packet, target_or_targets)
   end
   def send_packet(packet, targets) when is_list(targets) do
-    for target <- targets, do: send_packet(packet, target)
+    targets
+    |> Enum.map(&(&1.port))
+    |> Manifold.send({:write, packet})
   end
   def send_packet(packet, %CoreOrigin{} = target) do
     send(target.port, {:write, packet})

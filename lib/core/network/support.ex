@@ -24,7 +24,7 @@ defmodule Moongate.CoreSupport do
   effectively calls :init.stop, causing any processes
   which are trapping exits to receive exit signals.
   """
-  def handle_cast(:quit, state) do
+  def handle_info(:quit, state) do
     Core.log({:info, "Moongate will terminate shortly..."})
     :init.stop
 
@@ -35,7 +35,7 @@ defmodule Moongate.CoreSupport do
   Indicates that a file on the local filesystem has
   been modified.
   """
-  def handle_cast({:file_changed, filename}, state) do
+  def handle_info({:file_changed, filename}, state) do
     filename
     |> String.split("\n")
     |> List.first

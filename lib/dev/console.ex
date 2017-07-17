@@ -2,10 +2,10 @@ defmodule Moongate.Dev do
   use GenServer
 
   def start_link(_config) do
-    GenServer.start_link(__MODULE__, %{ context: :game }, [name: :dev])
+    GenServer.start_link(__MODULE__, %{context: :game}, [name: :dev])
   end
 
-  def handle_cast(:refresh, state) do
+  def handle_info(:refresh, state) do
     set_prompt(state)
 
     {:noreply, state}

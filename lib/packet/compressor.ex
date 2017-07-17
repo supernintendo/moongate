@@ -10,7 +10,6 @@ defmodule Moongate.PacketCompressor do
     "Dispatcher",
     "Moongate"
   ]
-  @collection_buffer 8
   @dsl_event_handler_regex ~r/handle_(.*)_event/
 
   def bootstrap do
@@ -50,7 +49,7 @@ defmodule Moongate.PacketCompressor do
   def buffer(collection) do
     collection
     |> Enum.with_index()
-    |> Enum.group_by(&(rem(elem(&1, 1) + 1, @collection_buffer)), &(elem(&1, 0)))
+    |> Enum.group_by(&(rem(elem(&1, 1) + 1, round(length(collection) / 2))), &(elem(&1, 0)))
     |> Enum.map(&(elem(&1, 1)))
   end
 
@@ -102,8 +101,8 @@ defmodule Moongate.PacketCompressor do
   end
 
   def expand(token) when is_integer(token) do
-    case CoreETS.match_object({:packet, {:"$1", token}}) do
-      [{word, _token}] -> word
+    case CoreETS.match_object({:packet, token}) do
+      {word, _token} -> word
       _ -> nil
     end
   end
