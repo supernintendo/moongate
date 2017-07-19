@@ -16,6 +16,7 @@ defmodule Orbs.Movement do
     ev
     |> select(ev.origin)
     |> set(%{
+      speed: Enum.random(150..350),
       x: x,
       y: y
     })

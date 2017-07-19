@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Echo do
     CoreEvent,
     CoreNetwork,
     CoreTypes,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -27,6 +27,6 @@ defmodule Moongate.DSL.Terms.Echo do
   when is_bitstring(message)
   or is_function(message) do
     {Echo, message}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

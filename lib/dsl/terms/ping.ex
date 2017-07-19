@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Ping do
   alias Moongate.{
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -17,6 +17,6 @@ defmodule Moongate.DSL.Terms.Ping do
 
   def ping(%CoreEvent{} = event) do
     Ping
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

@@ -10,7 +10,7 @@ defmodule Moongate.Socket.WSHandler do
   @packet Application.get_env(:moongate, :packet)
 
   def init(req, %SocketState{}) do
-    origin = new_origin(req)
+    origin = CoreNetwork.new_origin(self(), get_req_ip(req), :web)
     %CoreSession{
       origin: origin
     }
@@ -28,8 +28,8 @@ defmodule Moongate.Socket.WSHandler do
     {:reply, {:text, @packet.encoder.encode(packet)}, req, state}
   end
 
-  def websocket_handle({:text, content}, req, state) do
-    {:client_packet, @packet.decoder.decode(content)}
+  def websocket_handle({:text, data}, req, state) do
+    {:client_packet, @packet.decoder.decode(data)}
     |> CoreNetwork.cast("session_#{state.origin_id}")
 
     {:ok, req, state}
@@ -37,15 +37,6 @@ defmodule Moongate.Socket.WSHandler do
 
   def websocket_handle(_frame, _req, state) do
     {:ok, state}
-  end
-
-  defp new_origin(req) do
-    %Moongate.CoreOrigin{
-      id: Core.uuid(:origin),
-      ip: get_req_ip(req),
-      port: self(),
-      protocol: :web
-    }
   end
 
   defp get_req_ip(req) do

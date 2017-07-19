@@ -4,21 +4,21 @@ defmodule Moongate.DSL.Terms.Purge do
     CoreNetwork,
     CoreOrigin,
     CoreUtility,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
     def call({Purge, ring, condition}, %CoreEvent{zone: {zone, zone_id}} = event) do
       ring = CoreUtility.atom_to_string(ring)
       zone = CoreUtility.atom_to_string(zone)
-      CoreNetwork.call({:remove_members, condition}, "ring_#{ring}@#{zone}_#{zone_id}")
+      CoreNetwork.call({:remove_members, condition}, "ring_#{ring}__#{zone}_#{zone_id}")
       event
     end
   end
 
   def purge(%CoreEvent{zone: {_zone, _zone_id}} = event, ring, condition) when is_atom(ring) and is_function(condition) do
     {Purge, ring, condition}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def purge(%CoreEvent{} = event, ring, condition) when is_atom(ring) and is_function(condition) do
     event

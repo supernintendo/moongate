@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Peek do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -25,10 +25,10 @@ defmodule Moongate.DSL.Terms.Peek do
 
   def peek(%CoreEvent{} = event, :raw) do
     {Peek, %{ raw: true }}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def peek(%CoreEvent{} = event) do
     {Peek, %{}}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

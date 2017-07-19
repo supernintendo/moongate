@@ -1,5 +1,5 @@
 defmodule Moongate.Socket.StaticHandler do
-  alias Moongate.CoreFirmware
+  alias Moongate.CoreBootstrap
 
   @default_prefix ~r/^(Moongate)\//
   @error_headers [{"Content-Type", "text/html"}]
@@ -7,7 +7,7 @@ defmodule Moongate.Socket.StaticHandler do
     "404" => File.read!("priv/web/404.html"),
     "500" => File.read!("priv/web/500.html")
   }
-  @game_path CoreFirmware.game_path()
+  @game_path CoreBootstrap.game_path()
   @headers []
   @mime_types Poison.decode!(File.read!("priv/web/mime_types.json"))
 

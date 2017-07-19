@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Command do
   alias Moongate.{
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -20,7 +20,7 @@ defmodule Moongate.DSL.Terms.Command do
   end
   def command(%CoreEvent{} = event, command_name, args) when is_list(args) do
     {Command, command_name, args}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def command(%CoreEvent{} = event, command_name, arg) do
     command(event, command_name, [arg])

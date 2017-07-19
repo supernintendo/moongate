@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Join do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -13,7 +13,7 @@ defmodule Moongate.DSL.Terms.Join do
       pid_name = Core.process_name({zone_module, zone_name})
 
       for target <- event.targets do
-        case CoreNetwork.call({:join, target}, pid_name) do
+        case CoreNetwork.call({:join, target, event.assigns}, pid_name) do
           :ok ->
             {:grant_access, {:zone, {zone_module, zone_name}}}
             |> CoreNetwork.cast("session_#{target.id}")
@@ -29,7 +29,7 @@ defmodule Moongate.DSL.Terms.Join do
   def join(%CoreEvent{} = event, zone_module), do: join(event, zone_module, "$")
   def join(%CoreEvent{} = event, zone_module, zone_name) do
     {Join, zone_module, zone_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end
 

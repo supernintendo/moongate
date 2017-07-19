@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Set do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -29,11 +29,11 @@ defmodule Moongate.DSL.Terms.Set do
 
   def set(%CoreEvent{ring: _ring, zone: {_zone, _zone_id}} = event, callback) when is_function(callback) do
     {Set, callback}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def set(%CoreEvent{ring: _ring, zone: {_zone, _zone_id}} = event, changeset) when is_map(changeset) do
     {Set, changeset}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def set(%CoreEvent{ring: _ring, zone: {_zone, _zone_id}} = event, key, value) do
     set(event, %{key => value})

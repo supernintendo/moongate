@@ -7,6 +7,10 @@
 
       li.appendChild(text);
       logEl.appendChild(li);
+    },
+    tick() {
+      Client.processBatch();
+      requestAnimationFrame(Game.tick.bind(Game));
     }
   },
   Client = new Moongate.Client({
@@ -33,4 +37,5 @@
     },
     directives: {},
   });
+  Game.tick();
 })();

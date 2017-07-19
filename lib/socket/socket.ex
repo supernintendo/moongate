@@ -30,13 +30,16 @@ defmodule Moongate.Socket do
     Application.ensure_all_started(:cowboy)
     {:ok, _} =
       :cowboy.start_http(
-        :http,
-        100,
+        :http, 100,
         [{:port, state.port}],
-        [{:env, [{:dispatch, build_web_dispatch(state)}]}]
-      )
-
+        [{:env, [{:dispatch, build_web_dispatch(state)}]}])
     state
+  end
+
+  defp listen(%SocketState{protocol: :udp} = state) do
+    state
+    |> struct(handler_module: Moongate.Socket.UDPHandler)
+    |> init_on_handler_module()
   end
 
   defp build_web_dispatch(%SocketState{} = state) do
@@ -50,5 +53,9 @@ defmodule Moongate.Socket do
         ]
       }
     ])
+  end
+
+  defp init_on_handler_module(%SocketState{handler_module: handler_module} = state) do
+    apply(handler_module, :init, [state])
   end
 end

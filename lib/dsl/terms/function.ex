@@ -1,7 +1,7 @@
 defmodule Moongate.DSL.Terms.Function do
   alias Moongate.{
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -15,6 +15,6 @@ defmodule Moongate.DSL.Terms.Function do
   end
   def function(%CoreEvent{} = event, function, args) when is_function(function) do
     {Function, function, args}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

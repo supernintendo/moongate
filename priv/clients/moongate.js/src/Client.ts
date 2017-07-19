@@ -19,6 +19,7 @@ import { HTTPRequest } from "./network/HTTPRequest";
 import { MessageEvent } from "./network/MessageEvent";
 import { Module } from "./common/Module";
 import { Meta } from "./common/Meta";
+import { Packet } from "./network/Packet";
 import { Packets } from "./network/Packets";
 import { Tether } from "./client/Tether";
 import { Utility } from "./common/Utility";
@@ -31,6 +32,8 @@ export class Client extends Module {
   batch: Array<BatchEvent>
   config: Config
   handler: EventHandler
+  packetBatchSize: number
+  packets: Array<any>
   ping: number
   statusCode: number
   tethers: Array<Tether>
@@ -39,8 +42,13 @@ export class Client extends Module {
   zones: any
   constructor(config: Object) {
     super();
-    this.batch = [];
+    this.batch = [{
+      callback: this.processPackets.bind(this),
+      uuid: Utility.uuid()
+    }];
+    this.packets = [];
     this.statusCode = ClientStatus.Initializing;
+    this.packetBatchSize = 256;
     this.config = config;
 
     // Reflect endpoint if one is not provided
@@ -74,7 +82,10 @@ export class Client extends Module {
   handlePacket(body: string) {
     let packet = Packets.decode(body, this.atlas);
 
-    return this.handler.callback(this, packet.handler, packet);
+    this.packets.push({
+      packet: packet,
+      queuedAt: performance.now()
+    });
   }
   handleWorkerMessage(e: MessageEvent) {
     (e.data[0] === "#" && this.handlePacket(e.data)) ||
@@ -104,6 +115,19 @@ export class Client extends Module {
     for (let i = 0, l = batch.length; i !== l; i++) {
       batch[i].callback();
     }
+  }
+  processPackets() {
+    let packets = this.packets;
+
+    for (let i = 0, l = this.packets.length; i !== l; i++) {
+      this.processPacket(packets[i]);
+    }
+    this.packets = [];
+  }
+  processPacket(packetFields: any) {
+    let packet = packetFields.packet;
+
+    return this.handler.callback(this, packet.handler, packet);
   }
   send(payload: any, additionalFields: any) {
     let packet: any = {};

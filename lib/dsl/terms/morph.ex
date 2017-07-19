@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Morph do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
   import Exmorph
 
@@ -61,13 +61,13 @@ defmodule Moongate.DSL.Terms.Morph do
     zone: {_zone, _zone_id}
   } = event, key, %Exmorph.Tween{} = tween) do
     {Morph, key, tween}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def morph(%CoreEvent{
     ring: _ring,
     zone: {_zone, _zone_id}
   } = event, key, callback) when is_function(callback) do
     {Morph, key, callback}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

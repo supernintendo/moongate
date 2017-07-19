@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Cure do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -34,6 +34,6 @@ defmodule Moongate.DSL.Terms.Cure do
   end
   def cure(%CoreEvent{ring: _ring, zone: {_zone, _zone_id}} = event, key) do
     {Cure, key}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

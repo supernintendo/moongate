@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Attach do
   alias Moongate.{
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -17,6 +17,6 @@ defmodule Moongate.DSL.Terms.Attach do
 
   def attach(%CoreEvent{} = event, key, value) do
     {Attach, key, value}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

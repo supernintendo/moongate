@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Leave do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -29,7 +29,7 @@ defmodule Moongate.DSL.Terms.Leave do
   def leave(%CoreEvent{} = event, zone_module), do: leave(event, zone_module, "$")
   def leave(%CoreEvent{} = event, zone_module, zone_name) do
     {Leave, zone_module, zone_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def leave(%CoreEvent{zone: {zone_module, zone_name}} = event) do
     leave(event, zone_module, zone_name)

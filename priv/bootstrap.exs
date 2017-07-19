@@ -19,8 +19,5 @@
         "orbs"
     end
   end).(),
-  rust_libs: %{
-    packets: %{}
-  },
   version: File.read!("priv/manifest/version") |> String.trim()
 }

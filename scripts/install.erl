@@ -14,22 +14,22 @@ main(_) ->
   deps()),
   prepare_moongate().
 
-prompt_install_if_needed({Program, SkipVersionCheck, Optional, Link}) ->
+prompt_install_if_needed({Program, SkipVersionCheck, Optional, LocalInstall, Link}) ->
   RequiredVersion = get_required_version(Program),
 
   case program_exists(Program) of
-    true -> check_version(Program, SkipVersionCheck, RequiredVersion, Optional, Link);
+    true -> check_version(Program, SkipVersionCheck, RequiredVersion, Optional, LocalInstall, Link);
     false -> prompt_install(Program, RequiredVersion, Optional, message_not_found(Program), Link)
   end.
 
-check_version(Program, SkipVersionCheck, RequiredVersion, Optional, Link) ->
+check_version(Program, SkipVersionCheck, RequiredVersion, Optional, LocalInstall, Link) ->
   Version = get_version(Program),
   VersionMatch = (string:str(Version, RequiredVersion) =/= 0),
 
   case (SkipVersionCheck orelse VersionMatch) of
     true -> ok;
     false ->
-      Message = message_wrong_version(Program, Version, RequiredVersion),
+      Message = message_wrong_version(Program, Version, RequiredVersion, LocalInstall),
       prompt_install(Program, RequiredVersion, Optional, Message, Link)
   end.
 
@@ -70,6 +70,7 @@ download(Downloader, DownloadPath, Filename) ->
   end.
 
 uncompress_archive(Path, Destination, ArchiveType) ->
+  mkdir(Destination),
   case {os:type(), ArchiveType} of
     {{win32, nt}, ".zip"} ->
       % TODO - support win32
@@ -124,16 +125,21 @@ prepare_moongate() ->
 
 deps() ->
   [
-    {"elixir", false, false, "http://elixir-lang.org"},
-    {"rustc", true, false, "http://elixir-lang.org"},
-    {"node", false, true, "https://nodejs.org/en/"}
+    {"elixir", false, false, true, "https://elixir-lang.org"},
+    {"redis-server", true, false, true, "https://redis.io"},
+    {"rustc", true, false, false, "https://www.rust-lang.org"},
+    {"node", false, true, true, "https://nodejs.org"}
   ].
 
 get_version(Program) ->
   case Program of
     "elixir" ->
-      [_, _, VersionString, _] = string:split(os:cmd("elixir -v"), "\n", all),
+      [_, _, VersionString | _] = string:split(os:cmd("elixir -v"), "\n", all),
       Version = hd(tl(string:split(VersionString, " ", all))),
+      clean_string(Version);
+    "redis-server" ->
+      [_, _, VersionString | _] = string:split(os:cmd("redis-server -v"), " ", all),
+      [_, Version | _] = string:split(VersionString, "=", all),
       clean_string(Version);
     "rustc" ->
       [_, Version | _] = string:tokens(os:cmd("rustc --version"), " "),
@@ -151,6 +157,8 @@ download_args(Program, Version) ->
     "elixir" ->
       {[ "https://github.com/elixir-lang/elixir/releases/download/v",
         Version, "/Precompiled.zip" ], "elixir.zip"};
+    "redis-server" ->
+      {[ "http://download.redis.io/releases/redis-", Version, ".tar.gz" ], ["redis-", Version, ".tar.gz"]};
     "rustc" ->
       {"https://sh.rustup.rs", "rustup.rs"};
     "node" ->
@@ -179,6 +187,9 @@ node_download_link(ArchiveFilename, Version) ->
   [BaseLink, Version, "/"] ++ ArchiveFilename.
 
 setup(Program, ArchiveFile) ->
+  Extension = filename:extension(ArchiveFile),
+  TargetDir = [".moongate/"] ++ lists:droplast(ArchiveFile),
+
   case Program of
     "elixir" ->
       uncompress_archive(
@@ -188,9 +199,15 @@ setup(Program, ArchiveFile) ->
       );
     "rustc" ->
       external_cmd(["sh ", root_dir(), ".moongate/rustup.rs -y"]);
+    "redis-server" ->
+      uncompress_archive(
+        [".moongate/", ArchiveFile],
+        [".moongate"],
+        Extension
+      ),
+      mv(TargetDir, ".moongate/redis"),
+      external_cmd(["make -C " , root_dir(), ".moongate/redis"]);
     "node" ->
-      Extension = filename:extension(ArchiveFile),
-      TargetDir = [".moongate/"] ++ lists:droplast(ArchiveFile),
       uncompress_archive(
         [".moongate/", ArchiveFile],
         [".moongate"],
@@ -328,31 +345,35 @@ message_post_install(Program, Version) ->
     "/.moongate\033[0m\n"
   ].
 
-message_wrong_version(Program, Version, Required) ->
+message_wrong_version(Program, Version, Required, LocalInstall) ->
+  ExtraText = case LocalInstall of
+    true ->
+      "\n\n(This will not modify your existing installation)\n\n";
+    false ->
+      "\n\n"
+  end,
   case Program of
     "elixir" ->
       unicode:characters_to_binary([
         "\n🔮  Elixir \033[33m", Version, "\e[0m is installed but \033[36m",
         Required, "\e[0m is required.\n",
-        "Would you like to download and install the correct version?\n",
-        "(This will not override your existing install)",
-        "\033[0m\n\n"
+        "Would you like to download and install the correct version?",
+        ExtraText
       ]);
     "node" ->
       unicode:characters_to_binary([
         "\n🔮  NodeJS \033[33m", Version, "\e[0m is installed but "
         "Moongate uses \033[36m", Required, "\e[0m.\n"
         "Would you like to download and install the correct version?\n",
-        "(*\033[36m", major_version(Version), "\e[0m versions generally suffice)\n",
-        "(This will not override your existing install)",
-        "\033[0m\n\n"
+        "(*\033[36m", major_version(Version), "\e[0m versions generally suffice)",
+        ExtraText
       ]);
     _ ->
       unicode:characters_to_binary([
         "\n🔮  ", Program, " \033[33m", Version, "\e[0m is installed but \033[36m",
         Required, "\e[0m is required.\n",
-        "Would you like to download and install the correct version?\n",
-        "\033[0m\n\n"
+        "Would you like to download and install the correct version?",
+        ExtraText
       ])
   end.
 

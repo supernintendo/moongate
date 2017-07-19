@@ -1,7 +1,7 @@
 defmodule Moongate.DSL.Terms.Assign do
   alias Moongate.{
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -22,10 +22,10 @@ defmodule Moongate.DSL.Terms.Assign do
   def assign(%CoreEvent{} = event, changes)
   when is_map(changes) or is_list(changes) do
     {Assign, changes}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def assign(%CoreEvent{} = event, key, value) do
     {Assign, key, value}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

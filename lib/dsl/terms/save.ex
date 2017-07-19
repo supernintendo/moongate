@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Save do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -18,7 +18,7 @@ defmodule Moongate.DSL.Terms.Save do
   def save(%CoreEvent{} = event, zone_module), do: save(event, zone_module, "$")
   def save(%CoreEvent{} = event, zone_module, zone_name) do
     {Save, zone_module, zone_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def save(%CoreEvent{zone: {zone_module, zone_name}} = event) do
     save(event, zone_module, zone_name)

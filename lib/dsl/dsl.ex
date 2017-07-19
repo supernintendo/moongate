@@ -49,6 +49,7 @@ defmodule Moongate.DSL do
     quote do
       unquote(common())
       import Terms.{
+        Fibers,
         Join,
         Leave,
         Zone
@@ -60,6 +61,7 @@ defmodule Moongate.DSL do
     quote do
       unquote(entities())
       import Terms.{
+        Fibers,
         Join,
         Leave,
         Rings,
@@ -73,6 +75,7 @@ defmodule Moongate.DSL do
       unquote(entities())
       import Terms.{
         Describe,
+        Fibers,
         Morph,
         Rules
       }

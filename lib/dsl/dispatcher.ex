@@ -1,4 +1,4 @@
-defmodule Moongate.CoreDispatcher do
+defmodule Moongate.DSLDispatcher do
   alias Moongate.CoreEvent
   use GenServer
 

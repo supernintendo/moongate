@@ -98,8 +98,22 @@ defmodule Moongate.CoreNetwork do
     parts
     |> hd
     |> elem(0)
+    |> ip_string()
+  end
+
+  def ip_string(ip) when is_tuple(ip) do
+    ip
     |> Tuple.to_list
     |> Enum.join(".")
+  end
+
+  def new_origin(port, ip, protocol) do
+    %Moongate.CoreOrigin{
+      id: Core.uuid(:origin),
+      ip: ip,
+      port: port,
+      protocol: protocol
+    }
   end
 
   @doc """
@@ -155,7 +169,7 @@ defmodule Moongate.CoreNetwork do
   def spawn_endpoints(%CoreConfig{endpoints: endpoints}) do
     endpoints
     |> Enum.map(fn {port, params} ->
-      register({port, params}, :socket, "socket_#{port}")
+      register({port, params}, :socket, "#{port}")
     end)
     :ok
   end

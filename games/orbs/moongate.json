@@ -1,5 +1,5 @@
 {
-  "autoreload": false,
+  "autoreload": true,
   "endpoints": {
     "7778": {
       "protocol": "web",

@@ -1,7 +1,7 @@
 defmodule Moongate.DSL.Terms.Look do
   alias Moongate.{
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -18,17 +18,17 @@ defmodule Moongate.DSL.Terms.Look do
       event
     end
     def call(Look, %CoreEvent{} = event) do
-      inspect(event)
+      IO.puts "#{inspect event}"
       event
     end
   end
 
   def look(%CoreEvent{} = event, label) do
     {Look, label}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def look(%CoreEvent{} = event) do
     Look
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

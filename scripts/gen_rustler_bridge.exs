@@ -1,6 +1,8 @@
 defmodule GenRustlerBridge do
   require Logger
 
+  @nif_pattern ~r/rustler_export_nifs![ \t]*+\{.*?([^}]+)/
+
   def call do
     IO.puts ("#{inspect __MODULE__}: Regenerating Rust bindings")
     if File.exists?(".moongate/lib/native") do
@@ -15,12 +17,15 @@ defmodule GenRustlerBridge do
       end
     end)
     |> Enum.filter(&(&1))
+    |> Enum.filter(fn {_crate_name, contents} ->
+      Regex.match?(@nif_pattern, contents)
+    end)
     |> Enum.map(&gen_elixir_module/1)
   end
 
   defp gen_elixir_module({crate_name, source_code}) do
     [elixir_module | exports] =
-      Regex.run(~r/rustler_export_nifs![ \t]*+\{.*?([^}]+)/, source_code)
+      Regex.run(@nif_pattern, source_code)
       |> List.last()
       |> String.replace("[", "")
       |> String.replace("(", "")

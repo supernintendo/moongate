@@ -18,7 +18,8 @@ defmodule Moongate.CoreSupervisor do
     [
       worker(Moongate.CoreETS, [], [id: :ets]),
       worker(Moongate.CoreSupport, [], [id: :support]),
-      supervisor(Moongate.CorePool, [], [id: :pool]),
+      supervisor(Moongate.CoreTable, [], [id: :table]),
+      supervisor(Moongate.CoreDispatcher, [], [id: :dispatcher]),
       supervisor(Moongate.FiberSupervisor, [], [id: :fiber]),
       supervisor(Moongate.RingSupervisor, [], [id: :ring]),
       supervisor(Moongate.SessionSupervisor, [], [id: :session]),

@@ -1,7 +1,7 @@
 defmodule Moongate.Logger do
   alias Moongate.{
     CoreConfig,
-    CoreFirmware,
+    CoreBootstrap,
     CoreTypes,
     LoggerState
   }
@@ -61,7 +61,7 @@ defmodule Moongate.Logger do
     contents
     |> print_with_emphasis(palette, state)
 
-    "Version #{CoreFirmware.version()} (#{CoreFirmware.codename()})"
+    "Version #{CoreBootstrap.version()} (#{CoreBootstrap.codename()})"
     |> print_with_emphasis(:cool, state)
   end
   defp log({{type, message}, status}, %LoggerState{logger_mode: :console} = state) do

@@ -4,7 +4,7 @@ defmodule Moongate.DSL.Terms.Select do
     CoreEvent,
     CoreOrigin,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -31,13 +31,13 @@ defmodule Moongate.DSL.Terms.Select do
     end
   end
 
-  def select(event, :void), do: Queue.push({Select, :void}, event)
+  def select(event, :void), do: DSLQueue.push({Select, :void}, event)
   def select(%CoreEvent{zone: {_zone, _zone_id}, ring: ring} = event, condition) do
     select(event, ring, condition)
   end
   def select(%CoreEvent{zone: {_zone, _zone_id}} = event, ring, condition) when is_function(condition) do
     {Select, ring, condition}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def select(%CoreEvent{zone: {_zone, _zone_id}} = event, ring, %CoreOrigin{} = origin) do
     select(event, ring, &(&1[:__origin_id__] && &1[:__origin_id__] == origin.id))

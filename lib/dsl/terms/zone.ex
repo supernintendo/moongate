@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Zone do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -26,6 +26,6 @@ defmodule Moongate.DSL.Terms.Zone do
   end
   def zone(%CoreEvent{} = event, {zone_module, zone_name}, zone_params) do
     {Zone, zone_module, zone_name, zone_params}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

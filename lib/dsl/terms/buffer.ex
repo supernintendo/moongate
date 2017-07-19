@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Buffer do
   alias Moongate.{
     CoreEvent,
     CoreTime,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -23,6 +23,6 @@ defmodule Moongate.DSL.Terms.Buffer do
   when is_number(interval)
   when is_atom(unit) do
     {Buffer, {interval, unit}}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

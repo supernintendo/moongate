@@ -61,6 +61,11 @@
         'px) translateY(' +
         ((player.y * window.innerHeight)) +
         'px)';
+      el.style.transitionDuration = player.speed + 'ms';
+    },
+    tick() {
+      Client.processBatch();
+      requestAnimationFrame(Game.tick.bind(Game));
     }
   },
   Client = new Moongate.Client({
@@ -101,4 +106,5 @@
       Game.refreshPlayerPosition(el);
     }, Game.allPlayers());
   }
+  Game.tick();
 })();

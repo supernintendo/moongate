@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Trigger do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -30,7 +30,7 @@ defmodule Moongate.DSL.Terms.Trigger do
       when is_atom(rule)
       when is_bitstring(handler_name) do
     {Trigger, {{zone, zone_id}, {ring, rule}}, handler_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def trigger(%CoreEvent{} = event, {{zone, zone_id}, {ring, rule}}, handler_name)
       when is_atom(zone)
@@ -39,7 +39,7 @@ defmodule Moongate.DSL.Terms.Trigger do
       when is_atom(rule)
       when is_bitstring(handler_name) do
     {Trigger, {{zone, zone_id}, {ring, rule}}, handler_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def trigger(%CoreEvent{} = event, {{zone, zone_id}, ring}, handler_name)
       when is_atom(zone)
@@ -47,14 +47,14 @@ defmodule Moongate.DSL.Terms.Trigger do
       when is_atom(ring)
       when is_bitstring(handler_name) do
     {Trigger, {{zone, zone_id}, ring}, handler_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def trigger(%CoreEvent{} = event, {zone, zone_id}, handler_name)
       when is_atom(zone)
       when is_bitstring(zone_id)
       when is_bitstring(handler_name) do
     {Trigger, {zone, zone_id}, handler_name}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def trigger(%CoreEvent{} = event, zone, handler_name)
       when is_atom(zone)

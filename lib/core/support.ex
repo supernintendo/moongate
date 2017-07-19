@@ -1,15 +1,11 @@
 defmodule Moongate.CoreSupport do
   alias Moongate.{
     Core,
-    CoreFirmware
+    CoreTable
   }
   use GenServer
 
-  @session_file "priv/temp/#{CoreFirmware.game_name}.session.exs"
-
   def start_link do
-    clear_trapped_pids()
-
     GenServer.start_link(__MODULE__, %{}, [name: :support])
   end
 
@@ -38,8 +34,8 @@ defmodule Moongate.CoreSupport do
   def handle_info({:file_changed, filename}, state) do
     filename
     |> String.split("\n")
-    |> List.first
-    |> handle_path
+    |> List.first()
+    |> handle_path()
 
     {:noreply, state}
   end
@@ -56,23 +52,21 @@ defmodule Moongate.CoreSupport do
   Trapped OS pids will only be terminated if Moongate
   has been started using the `moongate` shell script.
   """
-  def trap_os_pid(os_pid) do
-    {:ok, session} = Eon.read(@session_file)
+  def trap_os_pid(name, os_pid) do
+    CoreTable.map_put("#{CoreTable.base_name()}-pids", name, os_pid)
 
-    Eon.write(%{pids: session.pids ++ [os_pid]}, @session_file)
     :ok
   end
 
-  def untrap_os_pid(os_pid) do
-    {:ok, session} = Eon.read(@session_file)
+  def untrap_os_pid(name) do
+    CoreTable.map_delete("#{CoreTable.base_name()}-pids", name)
 
-    Eon.write(%{pids: session.pids -- [os_pid]}, @session_file)
     :ok
   end
 
   # Clear the trapped pids file for the current game.
   defp clear_trapped_pids do
-    Eon.write(%{pids: []}, @session_file)
+    CoreTable.delete("#{CoreTable.base_name()}-pids")
   end
 
   # Handle a file change. For .ex files, this will cause
@@ -81,7 +75,8 @@ defmodule Moongate.CoreSupport do
     cond do
       Regex.match?(~r/\.ex/, path) ->
         IEx.Helpers.recompile
-      true -> nil
+      true ->
+        nil
     end
   end
 end

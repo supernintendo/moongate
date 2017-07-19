@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Error do
   alias Moongate.{
     Core,
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -17,6 +17,6 @@ defmodule Moongate.DSL.Terms.Error do
 
   def error(%CoreEvent{} = event, message) do
     {Error, message}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

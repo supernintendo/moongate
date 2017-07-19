@@ -4,19 +4,19 @@ defmodule Moongate.Mixfile do
   Code.compiler_options([ignore_module_conflict: true])
 
   # Prepare project using data from priv/project
-  @firmware elem(Code.eval_file("priv/firmware.exs"), 0)
+  @bootstrap elem(Code.eval_file("priv/bootstrap.exs"), 0)
 
   def project do
     [
       app: :moongate,
-      version: @firmware.version,
-      codename: @firmware.codename,
+      version: @bootstrap.version,
+      codename: @bootstrap.codename,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      elixir: @firmware.elixir_version,
+      elixir: @bootstrap.elixir_version,
       elixirc_paths: elixirc_paths(Mix.env),
       deps: deps(),
-      description: @firmware.description,
+      description: @bootstrap.description,
       default_task: "run",
       compilers: [:rustler] ++ Mix.compilers(),
       rustler_crates: rustler_crates()
@@ -34,7 +34,9 @@ defmodule Moongate.Mixfile do
         :logger,
         :manifold,
         :poison,
-        :poolboy
+        :poolboy,
+        :redix,
+        :redix_pubsub
       ],
       mod: {Moongate, []}
     ]
@@ -49,6 +51,8 @@ defmodule Moongate.Mixfile do
       {:deep_merge, "~> 0.1.1"},
       {:eon, "~> 4.1.0"},
       {:exmorph, "~> 1.1.1"},
+      {:redix, ">= 0.0.0"},
+      {:redix_pubsub, ">= 0.0.0"},
       {:fastglobal, "1.0.0"},
       {:inflex, "~> 1.8.1"},
       {:hashids, "~> 2.0"},
@@ -60,10 +64,16 @@ defmodule Moongate.Mixfile do
     ]
   end
 
-  @game_path Path.expand(@firmware.game_path)
+  @game_path Path.expand(@bootstrap.game_path)
   @base_paths ["lib", ".moongate/lib"]
-  defp elixirc_paths(:test), do: @base_paths ++ ["test/support"]
-  defp elixirc_paths(_), do: @base_paths ++ [@game_path]
+  defp elixirc_paths(:test), do: @base_paths ++ fiber_entry_modules() ++ ["test/support"]
+  defp elixirc_paths(_), do: @base_paths ++ fiber_entry_modules() ++ [@game_path]
+
+  defp fiber_entry_modules do
+    File.ls!("native")
+    |> Enum.filter(&(File.exists?("native/#{&1}/#{&1}.ex")))
+    |> Enum.map(&("native/#{&1}"))
+  end
 
   @rustler_crate_defaults [
     cargo: :system,
@@ -72,12 +82,20 @@ defmodule Moongate.Mixfile do
     mode: :release
   ]
   defp rustler_crates do
-    @firmware.rust_libs
-    |> Enum.filter(fn {_lib_name, lib_opts} -> is_map(lib_opts) end)
-    |> Enum.map(fn {lib_name, %{} = lib_opts} ->
-      {:"mg_#{lib_name}",
-        (Map.get(lib_opts, [:crate_opts], @rustler_crate_defaults))
-        ++ [path: "native/mg_#{lib_name}"]}
+    File.ls!("native")
+    |> Enum.filter(fn filename ->
+      with true <- File.exists?("native/#{filename}/src/lib.rs"),
+           true <- File.exists?("native/#{filename}/Cargo.toml") do
+        case File.read("native/#{filename}/Cargo.toml") do
+          {:ok, contents} ->
+            String.contains?(contents, "rustler = ")
+          _ ->
+            false
+        end
+      end
+    end)
+    |> Enum.map(fn filename ->
+      {:"#{filename}", @rustler_crate_defaults ++ [path: "native/#{filename}"]}
     end)
   end
 end

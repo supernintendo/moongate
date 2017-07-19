@@ -2,20 +2,20 @@ use Mix.Config
 
 config :moongate,
   dev: Moongate.Dev,
+  dispatcher: Moongate.DSLDispatcher,
   dsl: Moongate.DSL,
   file_watcher: "fswatch",
-  game: (fn ->
-    case Mix.env() do
-      :test -> "test"
-      _ -> System.get_env("MOONGATE_GAME") || "orbs"
-    end
-  end).(),
-  game_path: (fn ->
-    case Mix.env() do
-      :test -> "test/support/game"
-      _ -> System.get_env("MOONGATE_GAME_PATH") || "games/orbs"
-    end
-  end).(),
+  game: (
+    (Mix.env() == :test && "test")
+    || System.get_env("MOONGATE_GAME")
+    || "orbs"
+  ),
+  game_path: (
+    Mix.env() == :test && "test/support/game"
+    || System.get_env("MOONGATE_GAME_PATH")
+    || "games/orbs"
+  ),
   generator: Moongate.Generator,
   logger: Moongate.Logger,
-  packet: Moongate.Packet
+  packet: Moongate.Packet,
+  table: Moongate.Redis

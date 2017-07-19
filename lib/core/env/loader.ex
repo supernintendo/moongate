@@ -1,10 +1,10 @@
 defmodule Moongate.CoreLoader do
   alias Moongate.{
     CoreConfig,
-    CoreFirmware
+    CoreBootstrap
   }
 
-  @game_path CoreFirmware.game_path()
+  @game_path CoreBootstrap.game_path()
 
   def load_config do
     case File.read("#{@game_path}/moongate.json") do

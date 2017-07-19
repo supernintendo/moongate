@@ -13,9 +13,9 @@ defmodule Moongate.DSL.Terms.LookTest do
       Terms.Look.Dispatcher.call({Look, "label"}, ev)
       assert called IO.puts(:_)
     end
-    with_mock Kernel, [inspect: fn _ -> nil end] do
+    with_mock IO, [puts: fn _ -> nil end] do
       Terms.Look.Dispatcher.call(Look, ev)
-      assert called Kernel.inspect(:_)
+      assert called IO.puts(:_)
     end
   end
 

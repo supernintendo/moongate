@@ -2,7 +2,7 @@ defmodule Moongate.DSL.Terms.Log do
   alias Moongate.{
     Core,
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -16,6 +16,6 @@ defmodule Moongate.DSL.Terms.Log do
 
   def log(%CoreEvent{} = event, message) do
     {Log, message}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

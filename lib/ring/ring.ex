@@ -5,6 +5,7 @@ defmodule Moongate.Ring do
     CoreETS,
     CoreEvent,
     CoreNetwork,
+    CoreTable,
     CoreTypes,
     CoreUtility,
     RingState,
@@ -35,15 +36,15 @@ defmodule Moongate.Ring do
       new_member(state, params)
       |> add_member(state)
 
-    {:reply, :ok, %{state | index: state.index + 1}}
+    {:reply, {:ok, state.index}, %{state | index: state.index + 1}}
   end
 
   def handle_call({:establish, origin}, _from, %RingState{zone: zone, zone_id: zone_id, name: ring_name} = state) do
     @factory.show_morphs({zone, zone_id, ring_name}, state.morphs)
     |> CoreNetwork.send_packet(origin)
 
-    if length(state.members) > 0 do
-      @factory.index_members({zone, zone_id, ring_name}, {state.members, state.attributes})
+    if member_count(state) > 0 do
+      @factory.index_members({zone, zone_id, ring_name}, {get_members(state), state.attributes})
       |> CoreNetwork.send_packet(origin)
     end
 
@@ -51,12 +52,13 @@ defmodule Moongate.Ring do
   end
 
   def handle_call(:get_count, _from, %RingState{} = state) do
-    {:reply, {:ok, length(state.members)}, state}
+    {:reply, {:ok, member_count(state)}, state}
   end
 
   def handle_call({:get_member_indices, condition}, _from, %RingState{} = state) do
     results =
-      Enum.filter(state.members, condition)
+      get_members(state)
+      |> Enum.filter(condition)
       |> Enum.map(&(&1[:__index__]))
 
     {:reply, {:ok, results}, state}
@@ -76,7 +78,8 @@ defmodule Moongate.Ring do
 
   def handle_call({:remove_members, condition}, _from, %RingState{} = state) when is_function(condition) do
     state =
-      Enum.filter(state.members, condition)
+      get_members(state)
+      |> Enum.filter(condition)
       |> Enum.map(&(&1.__index__))
       |> remove_members(state)
 
@@ -97,6 +100,14 @@ defmodule Moongate.Ring do
       |> set_on_members(member_indices, changes)
 
     {:reply, :ok, state}
+  end
+
+  def handle_info({:set_on_members, member_indices, changes}, %RingState{} = state) do
+    state =
+      state
+      |> set_on_members(member_indices, changes)
+
+    {:noreply, state}
   end
 
   def handle_call({:morph_members, member_indices, rule, key, tween}, _from, %RingState{} = state) do
@@ -149,39 +160,79 @@ defmodule Moongate.Ring do
     |> Enum.into(%{})
   end
 
-  def init_ring(%RingState{} = state) do
+  def init_ring(%RingState{zone: zone, zone_id: zone_id, ring: ring} = state) do
+    process_name = Core.process_name({{zone, zone_id}, ring})
+    namespace = "#{CoreTable.base_name()}_#{process_name}"
+    CoreTable.clear_namespace(namespace)
+
     state
     |> define_ring()
-    |> struct(morphs: init_morphs(state))
+    |> struct(%{
+      channels: %{},
+      events_channel_name: "#{Core.process_name({zone, zone_id})}-events",
+      morphs: init_morphs(state),
+      members_table_name: "#{namespace}-members",
+      morphs_table_name: "#{namespace}-morphs"
+    })
   end
 
-  defp add_member(member, %RingState{} = state) do
+  defp add_member(member, %RingState{events_channel_name: channel_name} = state) do
+    CoreTable.map_merge("#{state.members_table_name}:#{member.__index__}", member)
+    CoreTable.async_publish(channel_name, ["add", "#{inspect state.ring}", member.__index__])
+
     state
-    |> Map.put(:members, state.members ++ [member])
+    |> Map.put(:members, get_members(state) ++ [member])
     |> broadcast(:index_members, [{[member], state.attributes}])
   end
 
-  defp get_member(member_index, %RingState{} = state) do
+  defp get_members(%RingState{} = state) do
     state.members
+  end
+
+  defp get_member(member_index, %RingState{} = state) do
+    get_members(state)
     |> Enum.find(&(&1.__index__ == member_index))
   end
 
-  defp set_on_members(%RingState{} = state, member_indices, changes) do
+  defp represent_member(fields, schema) do
+    whitelist = Map.keys(schema)
+    fields
+    |> Enum.chunk(2)
+    |> Enum.map(fn [key, value] ->
+      case CoreTypes.cast(key, Atom, whitelist) do
+        nil -> nil
+        key -> {key, CoreTypes.cast(value, Map.get(schema, key))}
+      end
+    end)
+    |> Enum.into(%{})
+  end
+
+  defp set_on_members(%RingState{members_table_name: members_table_name} = state, member_indices, changes) do
     schema =
       state.attributes
       |> Map.take(Map.keys(changes))
       |> Map.drop([:__index__, :__morphs__])
 
+    member_indices
+    |> Enum.map(&{:map_merge, ["#{members_table_name}:#{&1}", changes]})
+    |> CoreTable.async_pipeline()
+
+    CoreTable.async_publish(state.events_channel_name, ["update", "#{inspect state.ring}"] ++ member_indices)
+
     updated_members =
-      only_indices(state.members, member_indices)
+      only_indices(get_members(state), member_indices)
       |> Enum.map(fn member ->
         member
         |> Map.merge(member_changes(member, changes, schema, state))
       end)
 
     state
-    |> Map.put(:members, exclude_indices(state.members, member_indices) ++ updated_members)
+    |> Map.put(:members, exclude_indices(get_members(state), member_indices) ++ updated_members)
     |> broadcast(:show_members, [{updated_members, Map.put(schema, :__index__, Integer)}])
+  end
+
+  defp member_count(%RingState{members: members}) do
+    length(members)
   end
 
   defp morph_members(%RingState{morphs: _morphs} = state, member_indices, rule, key, tween) do
@@ -228,7 +279,7 @@ defmodule Moongate.Ring do
     |> struct(%{
       morphs: %{morphs | rule => %{morphs[rule] | key => updated_morphs}},
       members: (
-        state.members
+        get_members(state)
         |> Enum.filter(&(Enum.member?(member_indices, &1.__index__)))
         |> Enum.map(fn member ->
           tween = Enum.find(get_in(morphs, [rule, key]), fn {index, _tween} ->
@@ -240,7 +291,7 @@ defmodule Moongate.Ring do
             _ -> member
           end
         end)
-      ) ++ Enum.filter(state.members, &(!Enum.member?(member_indices, &1.__index__)))
+      ) ++ Enum.filter(get_members(state), &(!Enum.member?(member_indices, &1.__index__)))
     })
     |> show_members_attr(member_indices, key)
     |> broadcast(:show_morphs, [%{
@@ -254,8 +305,14 @@ defmodule Moongate.Ring do
   end
 
   defp remove_members(member_indices, %RingState{} = state) do
+    member_indices
+    |> Enum.map(&{:delete, ["#{state.members_table_name}:#{&1}"]})
+    |> CoreTable.pipeline()
+
+    CoreTable.async_publish(state.events_channel_name, ["drop", "#{inspect state.ring}"] ++ member_indices)
+
     state
-    |> Map.put(:members, exclude_indices(state.members, member_indices))
+    |> Map.put(:members, exclude_indices(get_members(state), member_indices))
     |> broadcast(:drop_members, [member_indices])
   end
 

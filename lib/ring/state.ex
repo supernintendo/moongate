@@ -5,11 +5,16 @@ defmodule Moongate.RingState do
 
   defstruct(
     attributes: %{},
+    channels: %{},
+    events_channel_name: nil,
     index: 0,
     rules: %{},
     members: [],
+    members_table_name: nil,
     morphs: %{},
+    morphs_table_name: nil,
     name: nil,
+    pubsub: nil,
     ring: nil,
     ring_module: nil,
     zone: nil,

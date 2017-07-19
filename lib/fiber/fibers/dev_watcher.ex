@@ -1,16 +1,16 @@
 defmodule Moongate.Fibers.DevWatcher do
   alias Moongate.{
-    CoreFirmware,
+    CoreBootstrap,
     CoreSupport
   }
 
-  @game_path CoreFirmware.game_path()
+  @game_path CoreBootstrap.game_path()
   @watch_command Application.get_env(:moongate, :file_watcher)
 
   def start(_params, parent) do
     proc = Port.open({:spawn, "#{@watch_command} #{@game_path}"}, [])
     os_pid = Port.info(proc)[:os_pid]
-    CoreSupport.trap_os_pid(os_pid)
+    CoreSupport.trap_os_pid("dev_watcher", os_pid)
 
     wait(%{
       parent: parent,
@@ -31,7 +31,7 @@ defmodule Moongate.Fibers.DevWatcher do
 
   defp parse_filename(filename) do
     parsed_filename =
-      filename
+      "#{filename}"
       |> String.split("\n")
       |> List.first
 

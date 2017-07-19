@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Target do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -37,6 +37,6 @@ defmodule Moongate.DSL.Terms.Target do
   end
   def target(%CoreEvent{} = event, target_or_targets) do
     {Target, target_or_targets}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

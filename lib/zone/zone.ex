@@ -48,8 +48,8 @@ defmodule Moongate.Zone do
   def handle_call(:info, _from, state) do
     {:reply, {:ok, zone_info(state)}, state}
   end
-  def handle_call({:join, origin}, _from, state) do
-    {:reply, :ok, member_join(state, origin)}
+  def handle_call({:join, origin, assigns}, _from, state) do
+    {:reply, :ok, member_join(state, origin, assigns)}
   end
   def handle_call({:save, event}, _from, state) do
     {:reply, :ok, zone_save(state, event)}
@@ -88,11 +88,11 @@ defmodule Moongate.Zone do
     |> Enum.filter(condition)
   end
 
-  def member_join(%ZoneState{} = state, %CoreOrigin{} = origin) do
+  def member_join(%ZoneState{} = state, %CoreOrigin{} = origin, assigns) do
     state
     |> Map.put(:members, Map.put(state.members, origin.id, origin))
     |> establish_rings_state(origin)
-    |> trigger(:join, %{origin: origin, targets: [origin]})
+    |> trigger(:join, %{origin: origin, targets: [origin], assigns: assigns})
   end
 
   def member_leave(%ZoneState{} = state, %CoreOrigin{} = origin) do
@@ -118,10 +118,10 @@ defmodule Moongate.Zone do
     |> trigger(:save, struct(event, assigns: Map.put(assigns, :save_state, ring_state)))
   end
 
-  defp broadcast(packets, state) when is_list(packets) do
-    Enum.map(packets, &(CoreNetwork.send_packet(&1, origins(state.members))))
-    state
-  end
+  # defp broadcast(packets, state) when is_list(packets) do
+  #   Enum.map(packets, &(CoreNetwork.send_packet(&1, origins(state.members))))
+  #   state
+  # end
   defp broadcast(packet, state) do
     CoreNetwork.send_packet(packet, origins(state.members))
     state

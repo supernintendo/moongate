@@ -1,7 +1,7 @@
 defmodule Moongate.DSL.Terms.Void do
   alias Moongate.{
     CoreEvent,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -13,6 +13,6 @@ defmodule Moongate.DSL.Terms.Void do
 
   def void(%CoreEvent{} = event) do
     Void
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
 end

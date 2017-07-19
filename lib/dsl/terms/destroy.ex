@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Destroy do
     Core,
     CoreEvent,
     CoreNetwork,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -22,7 +22,7 @@ defmodule Moongate.DSL.Terms.Destroy do
 
   def destroy(%CoreEvent{zone: {_zone, _zone_id}} = event) do
     Destroy
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def destroy(%CoreEvent{zone: nil} = event) do
     Core.log({:warning, "Destroy not queued (not within zone): #{inspect event}"}).

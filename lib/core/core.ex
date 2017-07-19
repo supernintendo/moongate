@@ -4,7 +4,7 @@ defmodule Moongate.Core do
   application server.
   """
   alias Moongate.{
-    CoreFirmware,
+    CoreBootstrap,
     CoreEvent,
     CoreETS,
     CoreNetwork,
@@ -27,7 +27,8 @@ defmodule Moongate.Core do
         |> String.downcase()
     end
   end).()
-  @game CoreFirmware.game_name()
+  @env Mix.env()
+  @game CoreBootstrap.game_name()
 
   @doc """
   Returns a map which is used by Moongate clients to establish
@@ -47,21 +48,14 @@ defmodule Moongate.Core do
 
   def dispatch(message) when is_nil(message), do: nil
   def dispatch(message) do
-    :poolboy.transaction(:dispatcher, fn(pid) ->
+    :poolboy.transaction(:dispatcher_pool, fn(pid) ->
       CoreNetwork.cast(message, pid)
     end)
   end
 
-  def dispatch_sync(message) when is_nil(message), do: nil
-  def dispatch_sync(message) do
-    :poolboy.transaction(:dispatcher, fn(pid) ->
-      CoreNetwork.cast(message, pid)
-    end)
-  end
+  def env, do: @env
 
-  def game do
-    CoreUtility.camelize(@game)
-  end
+  def game, do: CoreUtility.camelize(@game)
 
   @doc """
   Passes a message string to the logger GenServer, causing
@@ -102,7 +96,7 @@ defmodule Moongate.Core do
     zone = CoreTypes.cast({zone, String})
     ring = CoreTypes.cast({ring, String})
 
-    Enum.reduce(params, "#{ring}@#{zone}_#{zone_id}", fn param, acc ->
+    Enum.reduce(params, "#{ring}__#{zone}_#{zone_id}", fn param, acc ->
       case param do
         {:prefix, true} -> "ring_#{acc}"
         _ -> acc

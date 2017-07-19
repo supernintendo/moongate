@@ -3,7 +3,7 @@ defmodule Moongate.DSL.Terms.Create do
     CoreEvent,
     CoreNetwork,
     CoreUtility,
-    DSL.Queue
+    DSLQueue
   }
 
   defmodule Dispatcher do
@@ -20,22 +20,28 @@ defmodule Moongate.DSL.Terms.Create do
       zone = CoreUtility.atom_to_string(zone)
 
       if length(targets) > 0 do
-        for target <- targets do
-          {:add_member, Map.merge(%{__origin_id__: target.id}, params)}
-          |> CoreNetwork.call("ring_#{ring}@#{zone}_#{zone_id}")
-        end
-      else
-        {:add_member, params}
-        |> CoreNetwork.call("ring_#{ring}@#{zone}_#{zone_id}")
-      end
+        results =
+          targets
+          |> Enum.map(&{:add_member, Map.merge(%{__origin_id__: &1.id}, params)})
+          |> Enum.map(&(CoreNetwork.call(&1, "ring_#{ring}__#{zone}_#{zone_id}")))
+          |> Enum.map(&(elem(&1, 1)))
+          |> Enum.filter(&(&1))
 
-      event
+        struct(event, selected: {ring, results})
+      else
+        case CoreNetwork.call({:add_member, params}, "ring_#{ring}__#{zone}_#{zone_id}") do
+          {:ok, index} ->
+            struct(event, selected: {ring, [index]})
+          _ ->
+            event
+        end
+      end
     end
   end
 
   def create(%CoreEvent{zone: {_zone, _zone_id}} = event, ring, params) when is_atom(ring) do
     {Create, ring, params}
-    |> Queue.push(event)
+    |> DSLQueue.push(event)
   end
   def create(%CoreEvent{} = event, ring, params) when is_atom(ring) do
     event

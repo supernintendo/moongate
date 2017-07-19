@@ -1,4 +1,4 @@
-defmodule Moongate.DSL.Queue do
+defmodule Moongate.DSLQueue do
   alias Moongate.CoreEvent
 
   def push(term, %CoreEvent{queue: queue} = event) do
