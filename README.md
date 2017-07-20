@@ -1,6 +1,6 @@
 # Moongate
 
-Moongate is a multiplayer game server and software development kit. It provides a framework for building synchronized experiences using [Elixir](http://elixir-lang.org/).
+Moongate is a multiplayer game server and software development kit in early development. It provides a framework for building synchronized experiences using [Elixir](http://elixir-lang.org/).
 
 1. [Overview](#overview)
 2. [Setup](#installation)
@@ -10,8 +10,7 @@ Moongate is a multiplayer game server and software development kit. It provides 
 
 ### Minimum Requirements ###
 
-* [OTP 20](https://www.erlang.org/)
-* [rebar3](https://www.rebar3.org/)
+* [Erlang/OTP 20](https://www.erlang.org/)
 
 ### Installation ###
 
@@ -23,6 +22,7 @@ git clone https://github.com/supernintendo/moongate ~/Moongate && \
 Follow the prompt to fetch and setup dependencies, or download and install them manually:
 
 * [Elixir 1.4.5](https://elixir-lang.org/)
+* [Redis 4.0.0](https://redis.io/)
 * [Rust 1.17.0](https://elixir-lang.org/)
 * [Node.js >= 7.0.0](https://nodejs.org/en/)<sup>1</sup>
 
