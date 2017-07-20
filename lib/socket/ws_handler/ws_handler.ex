@@ -1,6 +1,5 @@
 defmodule Moongate.Socket.WSHandler do
   alias Moongate.{
-    Core,
     CoreNetwork,
     CoreSession,
     SocketState

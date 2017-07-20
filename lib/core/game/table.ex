@@ -47,7 +47,7 @@ defmodule Moongate.CoreTable do
 
   def base_name, do: @base_name
 
-  def async_command({command_name, params} = message) when is_list(params) do
+  def async_command({_command_name, params} = message) when is_list(params) do
     :poolboy.transaction(:table_pool, fn(pid) ->
       CoreNetwork.cast({:command, message}, pid)
     end)
@@ -71,7 +71,7 @@ defmodule Moongate.CoreTable do
     end)
   end
 
-  def command({command_name, params} = message) when is_list(params) do
+  def command({_command_name, params} = message) when is_list(params) do
     :poolboy.transaction(:table_pool, fn(pid) ->
       CoreNetwork.call({:command, message}, pid)
     end)

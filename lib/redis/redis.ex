@@ -1,12 +1,7 @@
 defmodule Moongate.Redis do
-  alias Moongate.{
-    Core,
-    CoreEvent,
-    CoreTable
-  }
+  alias Moongate.CoreTable
   use GenServer
 
-  @base_name CoreTable.base_name()
   @commands %CoreTable.Commands{
     delete: "DEL",
     get: "GET",

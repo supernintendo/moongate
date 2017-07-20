@@ -1,10 +1,8 @@
 defmodule Moongate.Fibers.Generic do
   alias Moongate.{
-    CoreBootstrap,
+    Core,
     CoreSupport
   }
-
-  @game_path CoreBootstrap.game_path()
 
   def start(params, parent) do
     proc = Port.open({:spawn, "#{params.command}"}, [])

@@ -13,7 +13,7 @@ defmodule Moongate.Socket.UDPHandler do
     struct(state, socket: udp_port)
   end
 
-  def handle({:udp, socket, ip, port, data}, %SocketState{} = state) do
+  def handle({:udp, _socket, ip, port, data}, %SocketState{} = state) do
     process_name = udp_process_name(ip, port)
 
     case CoreNetwork.pid_for_name("session_#{process_name}") do
@@ -23,7 +23,7 @@ defmodule Moongate.Socket.UDPHandler do
           origin: origin
         }
         |> CoreNetwork.register(:session, process_name)
-      process ->
+      _process ->
         {:client_packet, @packet.decoder.decode("#{data}")}
         |> CoreNetwork.cast("session_#{process_name}")
     end

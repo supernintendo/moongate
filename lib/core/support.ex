@@ -64,11 +64,6 @@ defmodule Moongate.CoreSupport do
     :ok
   end
 
-  # Clear the trapped pids file for the current game.
-  defp clear_trapped_pids do
-    CoreTable.delete("#{CoreTable.base_name()}-pids")
-  end
-
   # Handle a file change. For .ex files, this will cause
   # the module to be recompiled.
   defp handle_path(path) do

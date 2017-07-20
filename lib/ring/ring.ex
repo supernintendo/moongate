@@ -31,6 +31,14 @@ defmodule Moongate.Ring do
     {:noreply, state}
   end
 
+ def handle_info({:set_on_members, member_indices, changes}, %RingState{} = state) do
+    state =
+      state
+      |> set_on_members(member_indices, changes)
+
+    {:noreply, state}
+  end
+
   def handle_call({:add_member, params}, _from, %RingState{} = state) do
     state =
       new_member(state, params)
@@ -100,14 +108,6 @@ defmodule Moongate.Ring do
       |> set_on_members(member_indices, changes)
 
     {:reply, :ok, state}
-  end
-
-  def handle_info({:set_on_members, member_indices, changes}, %RingState{} = state) do
-    state =
-      state
-      |> set_on_members(member_indices, changes)
-
-    {:noreply, state}
   end
 
   def handle_call({:morph_members, member_indices, rule, key, tween}, _from, %RingState{} = state) do
@@ -192,19 +192,6 @@ defmodule Moongate.Ring do
   defp get_member(member_index, %RingState{} = state) do
     get_members(state)
     |> Enum.find(&(&1.__index__ == member_index))
-  end
-
-  defp represent_member(fields, schema) do
-    whitelist = Map.keys(schema)
-    fields
-    |> Enum.chunk(2)
-    |> Enum.map(fn [key, value] ->
-      case CoreTypes.cast(key, Atom, whitelist) do
-        nil -> nil
-        key -> {key, CoreTypes.cast(value, Map.get(schema, key))}
-      end
-    end)
-    |> Enum.into(%{})
   end
 
   defp set_on_members(%RingState{members_table_name: members_table_name} = state, member_indices, changes) do
